@@ -84,14 +84,17 @@ const termToSeason = (term: number): string => {
 };
 
 export default function CourseBrowser() {
+    const sections_per_page = 50;
+
     const [semesters, setSemesters] = useState<SemestersResponse | null>(null);
     const [subjects, setSubjects] = useState<string[]>([]);
     const [sections, setSections] = useState<SectionsResponse | null>(null);
     const [searchParams, setSearchParams] = useState<SearchParams>({
         page: 1,
-        sections_per_page: 50
+        sections_per_page: sections_per_page
     });
     const [loading, setLoading] = useState(false);
+
 
     // Fetch initial data
     useEffect(() => {
@@ -142,6 +145,7 @@ export default function CourseBrowser() {
 
     const handleInputChange = (key: keyof SearchParams, value: string | boolean) => {
         setSearchParams(prev => ({ ...prev, [key]: value }));
+        setSearchParams(prev => ({ ...prev, [key]: value, page: 1 }));
     };
 
     // Transform semesters for dropdown
@@ -178,34 +182,46 @@ export default function CourseBrowser() {
                         </select>
                     </div>
                     <div className='flex flex-row gap-4'>
-                    {/* Subject Dropdown */}
-                    <div className="flex flex-col w-[50%]">
-                        <label htmlFor="subject" className="mb-1 text-sm font-medium">Subject</label>
-                        <select
-                            id="subject"
-                            className="border rounded p-[0.68rem]"
-                            onChange={e => handleInputChange('subject', e.target.value)}
-                        >
-                            <option value="">All Subjects</option>
-                            {subjects.map(subject => (
-                                <option key={subject} value={subject}>
-                                    {subject}
-                                </option>
-                            ))}
-                        </select>
+                        {/* Subject Dropdown */}
+                        <div className="flex flex-col w-[50%]">
+                            <label htmlFor="subject" className="mb-1 text-sm font-medium">Subject</label>
+                            <select
+                                id="subject"
+                                className="border rounded p-[0.68rem]"
+                                onChange={e => handleInputChange('subject', e.target.value)}
+                            >
+                                <option value="">All Subjects</option>
+                                {subjects.map(subject => (
+                                    <option key={subject} value={subject}>
+                                        {subject}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Course Code */}
+                        <div className="flex flex-col w-[50%]">
+                            <label htmlFor="course_code" className="mb-1 text-sm font-medium">Course Code</label>
+                            <input
+                                type="text"
+                                id="course_code"
+                                className="border rounded p-2"
+                                onChange={e => handleInputChange('course_code', e.target.value)}
+                                placeholder="e.g. 1181"
+                            />
+                        </div>
                     </div>
 
-                    {/* Course Code */}
-                    <div className="flex flex-col w-[50%]">
-                        <label htmlFor="course_code" className="mb-1 text-sm font-medium">Course Code</label>
+                    {/* Title Search */}
+                    <div className="flex flex-col">
+                        <label htmlFor="title" className="mb-1 text-sm font-medium">Search by title</label>
                         <input
                             type="text"
-                            id="course_code"
+                            id="title"
                             className="border rounded p-2"
-                            onChange={e => handleInputChange('course_code', e.target.value)}
-                            placeholder="e.g. 1181"
+                            onChange={e => handleInputChange('title_search', e.target.value)}
+                            placeholder="Introduction to..."
                         />
-                    </div>
                     </div>
 
                     {/* Instructor Search */}
@@ -217,18 +233,6 @@ export default function CourseBrowser() {
                             className="border rounded p-2"
                             onChange={e => handleInputChange('instructor_search', e.target.value)}
                             placeholder="Search by instructor..."
-                        />
-                    </div>
-                    
-                    {/* Title Search */}
-                    <div className="flex flex-col">
-                        <label htmlFor="title" className="mb-1 text-sm font-medium">Search by title</label>
-                        <input
-                            type="text"
-                            id="title"
-                            className="border rounded p-2"
-                            onChange={e => handleInputChange('title_search', e.target.value)}
-                            placeholder="Introduction to..."
                         />
                     </div>
 
@@ -293,18 +297,6 @@ export default function CourseBrowser() {
                                 />
                                 <span>University Transferable (UT)</span>
                             </label>
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    checked={searchParams.online || false}
-                                    onChange={(e) => setSearchParams({
-                                        ...searchParams,
-                                        online: e.target.checked
-                                    })}
-                                    className="form-checkbox h-4 w-4 text-blue-600"
-                                />
-                                <span>Online Only</span>
-                            </label>
                         </div>
                     </div>
 
@@ -329,6 +321,18 @@ export default function CourseBrowser() {
                 </form>
             </div>
 
+            {sections && (
+                <>
+                    <div className="text-sm text-gray-600 my-4 text-center">
+                        Showing {((Number(searchParams.page) || 1) - 1) * sections_per_page + 1} to{' '}
+                        {Math.min((Number(searchParams.page) || 1) * sections_per_page, sections.total_sections)}{' '}
+                        of {sections.total_sections.toLocaleString()} course sections.
+                    </div>
+
+                    {/* Existing table and pagination */}
+                </>
+            )}
+
             {/* Results Table */}
             <div className="mt-4">
                 {loading ? (
@@ -349,7 +353,7 @@ export default function CourseBrowser() {
                         </thead>
                         <tbody>
                             {sections?.sections.map(section => (
-                                <tr key={section.id}   className="even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors">
+                                <tr key={section.id} className="even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors">
                                     <td className="p-2">{`${termToSeason(section.term)} ${section.year}`}</td>
                                     <td className="p-2"><Link target='_blank' href={`https://planner.langaracs.ca/courses/${section.subject}/${section.course_code}`}>{section.subject} {section.course_code}</Link></td>
                                     <td className="p-2">{section.section}</td>
@@ -380,16 +384,57 @@ export default function CourseBrowser() {
             {/* Pagination */}
             {sections && (
                 <div className="mt-4 flex justify-center gap-2">
-                    {Array.from({ length: sections.total_pages }, (_, i) => (
-                        <button
-                            key={i}
-                            className={`px-3 py-1 border ${searchParams.page === i + 1 ? 'bg-blue-500 text-white' : ''
-                                }`}
-                            onClick={() => handleInputChange('page', (i + 1).toString())}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
+                    {(() => {
+                        const totalPages = sections.total_pages;
+                        const currentPage = Number(searchParams.page) || 1;
+                        const pages: (number | string)[] = [];
+
+                        // Always add page 1
+                        pages.push(1);
+
+                        // Add first ellipsis
+                        if (currentPage > 4) {
+                            pages.push('...');
+                        }
+
+                        // Add pages around current page
+                        const start = Math.max(2, currentPage - 2);
+                        const end = Math.min(totalPages - 1, currentPage + 2);
+
+                        for (let i = start; i <= end; i++) {
+                            if (i !== 1 && i !== totalPages) { // Prevent duplicates
+                                pages.push(i);
+                            }
+                        }
+
+                        // Add second ellipsis
+                        if (currentPage < totalPages - 3) {
+                            pages.push('...');
+                        }
+
+                        // Add last page
+                        if (totalPages > 1) {
+                            pages.push(totalPages);
+                        }
+
+                        return pages.map((pageNum, i) => (
+                            <button
+                                key={i}
+                                onClick={() => typeof pageNum === 'number' &&
+                                    handleInputChange('page', pageNum.toString())}
+                                className={`px-3 py-1 border rounded
+                        ${typeof pageNum === 'number'
+                                        ? pageNum === currentPage
+                                            ? 'bg-blue-500 text-white'
+                                            : 'hover:bg-gray-100'
+                                        : 'cursor-default pointer-events-none text-gray-500'
+                                    }`}
+                                disabled={typeof pageNum === 'string'}
+                            >
+                                {pageNum}
+                            </button>
+                        ));
+                    })()}
                 </div>
             )}
         </div>
