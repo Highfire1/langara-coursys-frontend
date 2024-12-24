@@ -65,6 +65,8 @@ interface SearchParams {
     attr_soc?: boolean;
     attr_ut?: boolean;
     online?: boolean;
+    no_waitlist?: boolean;
+    open_seats?: boolean;
     page?: number;
     sections_per_page?: number;
 }
@@ -145,7 +147,7 @@ export default function CourseBrowser() {
 
     const handleInputChange = (key: keyof SearchParams, value: string | boolean) => {
         setSearchParams(prev => ({ ...prev, [key]: value }));
-        
+
         if (key === 'page') return;
         setSearchParams(prev => ({ ...prev, [key]: value, page: 1 }));
     };
@@ -304,7 +306,7 @@ export default function CourseBrowser() {
 
                     {/* Attributes Section */}
                     <div className="col-span-full">
-                        <p className="mb-2 text-sm font-medium">Other</p>
+                        <p className="mb-2 text-sm font-medium">Filtering</p>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             <label className="flex items-center space-x-2">
                                 <input
@@ -317,6 +319,24 @@ export default function CourseBrowser() {
                                     className="form-checkbox h-4 w-4 text-blue-600"
                                 />
                                 <span>Online Only</span>
+                            </label>
+
+                            <label className="flex items-center space-x-2">
+                            <input
+                                    type="checkbox"
+                                    onChange={e => handleInputChange('open_seats', e.target.checked)}
+                                    className="rounded"
+                                />
+                                <span>Has open seats.</span>
+                            </label>
+
+                            <label className="flex items-center space-x-2">
+                            <input
+                                    type="checkbox"
+                                    onChange={e => handleInputChange('no_waitlist', e.target.checked)}
+                                    className="rounded"
+                                />
+                                <span>No waitlist.</span>
                             </label>
                         </div>
                     </div>
