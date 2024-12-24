@@ -145,7 +145,7 @@ export default function CourseBrowser() {
 
     const handleInputChange = (key: keyof SearchParams, value: string | boolean) => {
         setSearchParams(prev => ({ ...prev, [key]: value }));
-        setSearchParams(prev => ({ ...prev, [key]: value, page: 1 }));
+        // setSearchParams(prev => ({ ...prev, [key]: value, page: 1 }));
     };
 
     // Transform semesters for dropdown
