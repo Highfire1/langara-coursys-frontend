@@ -356,7 +356,7 @@ export default function CourseBrowser() {
             )}
 
             {/* Results Table */}
-            <div className="mt-4">
+            <div className="mt-4 overflow-x-scroll">
                 {loading ? (
                     <p>Loading...</p>
                 ) : (

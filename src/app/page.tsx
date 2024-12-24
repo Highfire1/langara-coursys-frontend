@@ -12,7 +12,7 @@ export default function Home() {
         {/* <p>Data last updated ...</p> */}
       </header>
 
-      <div className="px-10">
+      <div className="md:px-10">
         <CourseBrowser/>
       </div>
       
