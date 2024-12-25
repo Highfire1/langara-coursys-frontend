@@ -65,8 +65,9 @@ interface SearchParams {
     attr_soc?: boolean;
     attr_ut?: boolean;
     online?: boolean;
-    no_waitlist?: boolean;
-    open_seats?: boolean;
+    filter_no_waitlist?: boolean;
+    filter_open_seats?: boolean;
+    filter_not_cancelled?: boolean;
     page?: number;
     sections_per_page?: number;
 }
@@ -324,7 +325,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
-                                    onChange={e => handleInputChange('open_seats', e.target.checked)}
+                                    onChange={e => handleInputChange('filter_open_seats', e.target.checked)}
                                     className="rounded"
                                 />
                                 <span>Has open seats.</span>
@@ -333,10 +334,19 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
-                                    onChange={e => handleInputChange('no_waitlist', e.target.checked)}
+                                    onChange={e => handleInputChange('filter_no_waitlist', e.target.checked)}
                                     className="rounded"
                                 />
-                                <span>No waitlist.</span>
+                                <span>None on waitlist.</span>
+                            </label>
+
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    onChange={e => handleInputChange('filter_not_cancelled', e.target.checked)}
+                                    className="rounded"
+                                />
+                                <span>Not cancelled.</span>
                             </label>
                         </div>
                     </div>
@@ -364,9 +374,11 @@ export default function CourseBrowser() {
 
                         {/* Results counter */}
                         <div className="flex-1 text-right md:text-center">
+                            <span>
                             Showing {((Number(searchParams.page) || 1) - 1) * Number(searchParams.sections_per_page) + 1} to{' '}
                             {Math.min((Number(searchParams.page) || 1) * Number(searchParams.sections_per_page), sections.total_sections)}{' '}
                             of {sections.total_sections.toLocaleString()} course sections.
+                            </span>
                         </div>
 
                         <div className="flex-1 hidden md:block"></div>
