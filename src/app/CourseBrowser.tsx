@@ -174,12 +174,12 @@ export default function CourseBrowser() {
     return (
         <div className="p-4">
             <div className="bg-white shadow-md rounded-lg p-4 mb-4">
-                
+
                 <form className="flex flex-col gap-4" onSubmit={e => e.preventDefault()}>
 
                     <div className='flex flex-row'>
                         <div className='flex flex-wrap gap-4'>
-                            
+
                             {/* Semester Selection */}
                             <div className="flex flex-col ">
                                 <label htmlFor="semester" className="mb-1 text-sm font-medium w-fit">Semester</label>
@@ -203,33 +203,58 @@ export default function CourseBrowser() {
 
                             {/* Subject Dropdown */}
                             <div className='col-span-full flex flex-row gap-4'>
-                            <div className="flex flex-col flex-2 w-min">
-                                <label htmlFor="subject" className="mb-1 text-sm font-medium w-fit">Subject</label>
-                                <select
-                                    id="subject"
-                                    className="border rounded p-[0.68rem] sm:w-fit w-[150px]"
-                                    onChange={e => handleInputChange('subject', e.target.value)}
-                                >
-                                    <option value="">All Subjects</option>
-                                    {subjects.map(subject => (
-                                        <option key={subject} value={subject}>
-                                            {subject}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                                <div className="flex flex-col flex-2 w-min">
+                                    <label htmlFor="subject" className="mb-1 text-sm font-medium w-fit">Subject</label>
+                                    <select
+                                        id="subject"
+                                        className="border rounded p-[0.68rem] sm:w-fit w-[150px]"
+                                        onChange={e => handleInputChange('subject', e.target.value)}
+                                    >
+                                        <option value="">All Subjects</option>
+                                        {subjects.map(subject => (
+                                            <option key={subject} value={subject}>
+                                                {subject}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                            {/* Course Code */}
-                            <div className="flex flex-col flex-1 w-fit">
-                                <label htmlFor="course_code" className="mb-1 text-sm font-medium w-fit text-nowrap">Course Code</label>
-                                <input
-                                    type="text"
-                                    id="course_code"
-                                    className="border rounded p-2 w-[100px]"
-                                    onChange={e => handleInputChange('course_code', e.target.value)}
-                                    placeholder="e.g. 1181"
-                                />
-                            </div>
+                                {/* Course Code */}
+                                <div className="flex flex-col flex-1 w-fit">
+                                    <label htmlFor="course_code" className="mb-1 text-sm font-medium w-fit text-nowrap">Course Code</label>
+                                    <input
+                                        type="text"
+                                        id="course_code"
+                                        className="border rounded p-2 w-[100px]"
+                                        pattern="[0-9]*"
+                                        maxLength={4}
+                                        // ..... I can see why components are good now.... this is awful
+                                        onKeyDown={(e) => {
+                                            // Allow if:
+                                            // - Is a number
+                                            // - Is a navigation key
+                                            // - Is a control/command combination
+                                            if (
+                                                /[0-9]/.test(e.key) ||
+                                                e.key === 'Backspace' ||
+                                                e.key === 'Delete' ||
+                                                e.key === 'ArrowLeft' ||
+                                                e.key === 'ArrowRight' ||
+                                                e.key === 'Tab' ||
+                                                e.ctrlKey ||
+                                                e.metaKey
+                                            ) {
+                                                return;
+                                            }
+                                            e.preventDefault();
+                                        }}
+                                        onChange={e => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            handleInputChange('course_code', value);
+                                        }}
+                                        placeholder="e.g. 1181"
+                                    />
+                                </div>
                             </div>
 
                             <div className='col-span-full flex flex-row gap-4'>
@@ -400,7 +425,7 @@ export default function CourseBrowser() {
                         </div>
 
                         <div className="flex-1 hidden md:block text-right">
-                            {loading ? ' loading...' : requestInfo.cached ? `query fulfilled in ${requestInfo.time}ms (cached)` : requestInfo.time ? ` query fulfilled in ${requestInfo.time}ms` : ''}
+                            {loading ? ' loading...' : (requestInfo.cached || (requestInfo.time && requestInfo.time < 50)) ? `query fulfilled in ${requestInfo.time}ms (cached)` : requestInfo.time ? ` query fulfilled in ${requestInfo.time}ms` : ''}
                         </div>
                     </div>
                 </>
