@@ -425,6 +425,9 @@ export default function CourseBrowser() {
                         </div>
 
                         <div className="flex-1 hidden md:block text-right">
+                            {/* yes, this is technically incorrect */}
+                            {/* However, there is no way that our server responds in less than 50ms */}
+                            {/* so it must be local caching */}
                             {loading ? ' loading...' : (requestInfo.cached || (requestInfo.time && requestInfo.time < 50)) ? `query fulfilled in ${requestInfo.time}ms (cached)` : requestInfo.time ? ` query fulfilled in ${requestInfo.time}ms` : ''}
                         </div>
                     </div>
