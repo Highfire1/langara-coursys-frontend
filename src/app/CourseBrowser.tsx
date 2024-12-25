@@ -86,14 +86,14 @@ const termToSeason = (term: number): string => {
 };
 
 export default function CourseBrowser() {
-    const sections_per_page = 50;
+    const initial_sections_per_page = 50;
 
     const [semesters, setSemesters] = useState<SemestersResponse | null>(null);
     const [subjects, setSubjects] = useState<string[]>([]);
     const [sections, setSections] = useState<SectionsResponse | null>(null);
     const [searchParams, setSearchParams] = useState<SearchParams>({
         page: 1,
-        sections_per_page: sections_per_page
+        sections_per_page: initial_sections_per_page
     });
     const [loading, setLoading] = useState(false);
 
@@ -322,7 +322,7 @@ export default function CourseBrowser() {
                             </label>
 
                             <label className="flex items-center space-x-2">
-                            <input
+                                <input
                                     type="checkbox"
                                     onChange={e => handleInputChange('open_seats', e.target.checked)}
                                     className="rounded"
@@ -331,7 +331,7 @@ export default function CourseBrowser() {
                             </label>
 
                             <label className="flex items-center space-x-2">
-                            <input
+                                <input
                                     type="checkbox"
                                     onChange={e => handleInputChange('no_waitlist', e.target.checked)}
                                     className="rounded"
@@ -345,13 +345,32 @@ export default function CourseBrowser() {
 
             {sections && (
                 <>
-                    <div className="text-sm text-gray-600 my-4 text-center">
-                        Showing {((Number(searchParams.page) || 1) - 1) * sections_per_page + 1} to{' '}
-                        {Math.min((Number(searchParams.page) || 1) * sections_per_page, sections.total_sections)}{' '}
-                        of {sections.total_sections.toLocaleString()} course sections.
-                    </div>
+                    <div className="flex justify-between items-center text-sm text-gray-600 my-4">
+                        {/* Entries selector */}
+                        <div className="flex items-center gap-1 font-medium flex-1">
+                            <span>Show</span>
+                            <select
+                                id="subject"
+                                className="border rounded p-[1px] w-min"
+                                onChange={e => handleInputChange('sections_per_page', e.target.value)}
+                            >
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="250">250</option>
+                                <option value="1000">1000</option>
+                            </select>
+                            <span>entries</span>
+                        </div>
 
-                    {/* Existing table and pagination */}
+                        {/* Results counter */}
+                        <div className="flex-1 text-right md:text-center">
+                            Showing {((Number(searchParams.page) || 1) - 1) * Number(searchParams.sections_per_page) + 1} to{' '}
+                            {Math.min((Number(searchParams.page) || 1) * Number(searchParams.sections_per_page), sections.total_sections)}{' '}
+                            of {sections.total_sections.toLocaleString()} course sections.
+                        </div>
+
+                        <div className="flex-1 hidden md:block"></div>
+                    </div>
                 </>
             )}
 
