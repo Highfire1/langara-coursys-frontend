@@ -97,6 +97,7 @@ export default function CourseBrowser() {
         sections_per_page: initial_sections_per_page
     });
     const [loading, setLoading] = useState(false);
+    const [requestInfo, setRequestInfo] = useState<{ time?: number, cached?: boolean }>({});
 
 
     // Fetch initial data
@@ -131,10 +132,18 @@ export default function CourseBrowser() {
                     }
                 });
 
+                const start = performance.now();
                 const response = await fetch(
                     `https://coursesapi.langaracs.ca/v2/search/sections?${queryParams}`
                 );
                 const data = await response.json();
+
+                // Check if response was cached
+                // note: some headers are dropped on localhost due to CORS, they should work correctly when hosted on the server.
+                const cached = response.headers.get('x-fastapi-cache') === 'HIT';
+                const time = Math.round(performance.now() - start);
+
+                setRequestInfo({ time, cached });
                 setSections(data);
                 setLoading(false);
             }, 200),
@@ -165,86 +174,91 @@ export default function CourseBrowser() {
     return (
         <div className="p-4">
             <div className="bg-white shadow-md rounded-lg p-4 mb-4">
-                <form className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" onSubmit={e => e.preventDefault()}>
+                
+                <form className="flex flex-col gap-4" onSubmit={e => e.preventDefault()}>
 
-                    {/* Semester Selection */}
-                    <div className="flex flex-col">
-                        <label htmlFor="semester" className="mb-1 text-sm font-medium">Semester</label>
-                        <select
-                            id="semester"
-                            className="border rounded p-[0.68rem]"
-                            onChange={e => {
-                                const [year, term] = e.target.value.split('-');
-                                handleInputChange('year', year);
-                                handleInputChange('term', term);
-                            }}
-                        >
-                            <option value="">All Semesters</option>
-                            {semesterOptions.map(opt => (
-                                <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                </option>
-                            ))}
-                        </select>
+                    <div className='flex flex-row'>
+                        <div className='flex flex-wrap gap-4'>
+                            
+                            {/* Semester Selection */}
+                            <div className="flex flex-col ">
+                                <label htmlFor="semester" className="mb-1 text-sm font-medium w-fit">Semester</label>
+                                <select
+                                    id="semester"
+                                    className="border rounded p-[0.68rem] w-fit"
+                                    onChange={e => {
+                                        const [year, term] = e.target.value.split('-');
+                                        handleInputChange('year', year);
+                                        handleInputChange('term', term);
+                                    }}
+                                >
+                                    <option value="">All Semesters</option>
+                                    {semesterOptions.map(opt => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Subject Dropdown */}
+                            <div className='col-span-full flex flex-row gap-4'>
+                            <div className="flex flex-col flex-2 w-min">
+                                <label htmlFor="subject" className="mb-1 text-sm font-medium w-fit">Subject</label>
+                                <select
+                                    id="subject"
+                                    className="border rounded p-[0.68rem] sm:w-fit w-[150px]"
+                                    onChange={e => handleInputChange('subject', e.target.value)}
+                                >
+                                    <option value="">All Subjects</option>
+                                    {subjects.map(subject => (
+                                        <option key={subject} value={subject}>
+                                            {subject}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Course Code */}
+                            <div className="flex flex-col flex-1 w-fit">
+                                <label htmlFor="course_code" className="mb-1 text-sm font-medium w-fit text-nowrap">Course Code</label>
+                                <input
+                                    type="text"
+                                    id="course_code"
+                                    className="border rounded p-2 w-[100px]"
+                                    onChange={e => handleInputChange('course_code', e.target.value)}
+                                    placeholder="e.g. 1181"
+                                />
+                            </div>
+                            </div>
+
+                            <div className='col-span-full flex flex-row gap-4'>
+                                {/* Title Search */}
+                                <div className="flex flex-col w-min">
+                                    <label htmlFor="title" className="mb-1 text-sm font-medium">Search by title</label>
+                                    <input
+                                        type="text"
+                                        id="title"
+                                        className="border rounded p-2 sm:w-fit w-[150px]"
+                                        onChange={e => handleInputChange('title_search', e.target.value)}
+                                        placeholder="Introduction to..."
+                                    />
+                                </div>
+
+                                {/* Instructor Search */}
+                                <div className="flex flex-col w-min">
+                                    <label htmlFor="instructor" className="mb-1 text-sm font-medium">Instructor</label>
+                                    <input
+                                        type="text"
+                                        id="instructor"
+                                        className="border rounded p-2 sm:w-fit w-[170px]"
+                                        onChange={e => handleInputChange('instructor_search', e.target.value)}
+                                        placeholder="Search by instructor..."
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    {/* Subject Dropdown */}
-                    <div className='flex flex-row gap-4 w-fit'>
-                        <div className="flex flex-col flex-1">
-                            <label htmlFor="subject" className="mb-1 text-sm font-medium">Subject</label>
-                            <select
-                                id="subject"
-                                className="border rounded p-[0.68rem]"
-                                onChange={e => handleInputChange('subject', e.target.value)}
-                            >
-                                <option value="">All Subjects</option>
-                                {subjects.map(subject => (
-                                    <option key={subject} value={subject}>
-                                        {subject}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Course Code */}
-                        <div className="flex flex-col flex-1 w-fit">
-                            <label htmlFor="course_code" className="mb-1 text-sm font-medium w-fit text-nowrap">Course Code</label>
-                            <input
-                                type="text"
-                                id="course_code"
-                                className="border rounded p-2 w-[100px]"
-                                onChange={e => handleInputChange('course_code', e.target.value)}
-                                placeholder="e.g. 1181"
-                            />
-                        </div>
-                    </div>
-
-                    {/* <div className='col-span-full flex flex-row gap-4'> */}
-                        {/* Title Search */}
-                        <div className="flex flex-col w-min">
-                            <label htmlFor="title" className="mb-1 text-sm font-medium">Search by title</label>
-                            <input
-                                type="text"
-                                id="title"
-                                className="border rounded p-2"
-                                onChange={e => handleInputChange('title_search', e.target.value)}
-                                placeholder="Introduction to..."
-                            />
-                        </div>
-
-                        {/* Instructor Search */}
-                        <div className="flex flex-col w-min">
-                            <label htmlFor="instructor" className="mb-1 text-sm font-medium">Instructor</label>
-                            <input
-                                type="text"
-                                id="instructor"
-                                className="border rounded p-2"
-                                onChange={e => handleInputChange('instructor_search', e.target.value)}
-                                placeholder="Search by instructor..."
-                            />
-                        </div>
-                    {/* </div> */}
-
 
                     {/* Attributes Section */}
                     <div className="col-span-full">
@@ -378,39 +392,45 @@ export default function CourseBrowser() {
 
                         {/* Results counter */}
                         <div className="flex-1 text-right md:text-center">
-                            <span>
+                            <span className='md:text-nowrap'>
                                 Showing {((Number(searchParams.page) || 1) - 1) * Number(searchParams.sections_per_page) + 1} to{' '}
                                 {Math.min((Number(searchParams.page) || 1) * Number(searchParams.sections_per_page), sections.total_sections)}{' '}
-                                of {sections.total_sections.toLocaleString()} course sections.
+                                of <span className='font-semibold'>{sections.total_sections.toLocaleString()}</span> course sections
                             </span>
                         </div>
 
-                        <div className="flex-1 hidden md:block"></div>
+                        <div className="flex-1 hidden md:block text-right">
+                            {loading ? ' loading...' : requestInfo.cached ? `query fulfilled in ${requestInfo.time}ms (cached)` : requestInfo.time ? ` query fulfilled in ${requestInfo.time}ms` : ''}
+                        </div>
                     </div>
                 </>
             )}
 
             {/* Results Table */}
             <div className="mt-4 overflow-x-scroll">
-                {loading ? (
-                    <p>Loading...</p>
-                ) : (
-                    <table className="min-w-full">
-                        <thead>
-                            <tr className="bg-gray-100 text-left">
-                                <th className="p-2">Semester</th>
-                                <th className="p-2">Course</th>
-                                <th className="p-2">Section</th>
-                                <th className="p-2">Title</th>
-                                <th className="p-2">Instructor(s)</th>
-                                <th className="p-2">Seats</th>
-                                <th className="p-2 whitespace-nowrap">On Waitlist</th>
-                                {/* <th className="p-2">Room</th> */}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sections?.sections.map(section => (
-                                <tr key={section.id} className="even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors">
+                <table className="min-w-full">
+                    <thead>
+                        <tr className="bg-gray-100 text-left">
+                            <th className="p-2 w-1/12">Semester</th>
+                            <th className="p-2 w-1/12">Course</th>
+                            <th className="p-2 w-1/12">Section</th>
+                            <th className="p-2 w-3/12">Title</th>
+                            <th className="p-2 w-2/12">Instructor(s)</th>
+                            <th className="p-2 w-1/12">Seats</th>
+                            <th className="p-2 w-1/12 whitespace-nowrap">On Waitlist</th>
+                            <th className="p-2 w-1/12 whitespace-nowrap">Room</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading && false ? (
+                            Array.from({ length: 10 }).map((_, index) => (
+                                <tr key={index} className="even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors">
+                                    <td className="p-2" colSpan={8}>Loading...</td>
+                                </tr>
+                            ))
+                        ) : (
+                            sections?.sections.map(section => (
+                                <tr key={section.id} className={` even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors`}>
                                     <td className="p-2">{`${termToSeason(section.term)} ${section.year}`}</td>
                                     <td className="p-2"><Link target='_blank' href={`https://planner.langaracs.ca/courses/${section.subject}/${section.course_code}`}>{section.subject} {section.course_code}</Link></td>
                                     <td className="p-2">{section.section}</td>
@@ -422,20 +442,20 @@ export default function CourseBrowser() {
                                             .filter((instructor, index, self) => self.indexOf(instructor) === index) // Remove duplicates
                                             .join(", ") || "TBA"}
                                     </td>
-                                    <td className="p-2">{section.seats}</td>
-                                    <td className="p-2">{section.waitlist}</td>
-                                    {/* <td className="p-2">
+                                    <td className="p-2 w-1/12">{section.seats}</td>
+                                    <td className="p-2 w-1/12">{section.waitlist}</td>
+                                    <td className="p-2 w-1/12">
                                         {section.schedule
                                             .filter(schedule => schedule.type !== "Exam")
                                             .map(schedule => schedule.room)
-                                            .filter((instructor, index, self) => self.indexOf(instructor) === index) // Remove duplicates
-                                            .join(", ") || "TBA"}
-                                    </td> */}
+                                            .filter((room, index, self) => self.indexOf(room) === index) // Remove duplicates
+                                            .join(", ") || "Unknown"}
+                                    </td>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
 
             {/* Pagination */}
