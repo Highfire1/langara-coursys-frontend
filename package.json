@@ -12,6 +12,7 @@
     "@types/sql.js": "^1.4.9",
     "lodash": "^4.17.21",
     "next": "15.1.2",
+    "next-plausible": "^3.12.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
