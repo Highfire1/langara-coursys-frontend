@@ -1,4 +1,7 @@
-// import Image from "next/image";
+export const metadata = {
+  title: "Langara Course Offerings Search",
+  description: "A web application to search and explore Langara College course offerings",
+};
 
 import CourseBrowser from "./CourseBrowser";
 
