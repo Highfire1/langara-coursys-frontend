@@ -166,6 +166,7 @@ export default function CourseBrowser() {
         <div className="p-4">
             <div className="bg-white shadow-md rounded-lg p-4 mb-4">
                 <form className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" onSubmit={e => e.preventDefault()}>
+
                     {/* Semester Selection */}
                     <div className="flex flex-col">
                         <label htmlFor="semester" className="mb-1 text-sm font-medium">Semester</label>
@@ -186,9 +187,10 @@ export default function CourseBrowser() {
                             ))}
                         </select>
                     </div>
-                    <div className='flex flex-row gap-4'>
-                        {/* Subject Dropdown */}
-                        <div className="flex flex-col w-[50%]">
+
+                    {/* Subject Dropdown */}
+                    <div className='flex flex-row gap-4 w-fit'>
+                        <div className="flex flex-col flex-1">
                             <label htmlFor="subject" className="mb-1 text-sm font-medium">Subject</label>
                             <select
                                 id="subject"
@@ -205,41 +207,43 @@ export default function CourseBrowser() {
                         </div>
 
                         {/* Course Code */}
-                        <div className="flex flex-col w-[50%]">
-                            <label htmlFor="course_code" className="mb-1 text-sm font-medium">Course Code</label>
+                        <div className="flex flex-col flex-1 w-fit">
+                            <label htmlFor="course_code" className="mb-1 text-sm font-medium w-fit text-nowrap">Course Code</label>
                             <input
                                 type="text"
                                 id="course_code"
-                                className="border rounded p-2"
+                                className="border rounded p-2 w-[100px]"
                                 onChange={e => handleInputChange('course_code', e.target.value)}
                                 placeholder="e.g. 1181"
                             />
                         </div>
                     </div>
 
-                    {/* Title Search */}
-                    <div className="flex flex-col">
-                        <label htmlFor="title" className="mb-1 text-sm font-medium">Search by title</label>
-                        <input
-                            type="text"
-                            id="title"
-                            className="border rounded p-2"
-                            onChange={e => handleInputChange('title_search', e.target.value)}
-                            placeholder="Introduction to..."
-                        />
-                    </div>
+                    {/* <div className='col-span-full flex flex-row gap-4'> */}
+                        {/* Title Search */}
+                        <div className="flex flex-col w-min">
+                            <label htmlFor="title" className="mb-1 text-sm font-medium">Search by title</label>
+                            <input
+                                type="text"
+                                id="title"
+                                className="border rounded p-2"
+                                onChange={e => handleInputChange('title_search', e.target.value)}
+                                placeholder="Introduction to..."
+                            />
+                        </div>
 
-                    {/* Instructor Search */}
-                    <div className="flex flex-col">
-                        <label htmlFor="instructor" className="mb-1 text-sm font-medium">Instructor</label>
-                        <input
-                            type="text"
-                            id="instructor"
-                            className="border rounded p-2"
-                            onChange={e => handleInputChange('instructor_search', e.target.value)}
-                            placeholder="Search by instructor..."
-                        />
-                    </div>
+                        {/* Instructor Search */}
+                        <div className="flex flex-col w-min">
+                            <label htmlFor="instructor" className="mb-1 text-sm font-medium">Instructor</label>
+                            <input
+                                type="text"
+                                id="instructor"
+                                className="border rounded p-2"
+                                onChange={e => handleInputChange('instructor_search', e.target.value)}
+                                placeholder="Search by instructor..."
+                            />
+                        </div>
+                    {/* </div> */}
 
 
                     {/* Attributes Section */}
@@ -375,9 +379,9 @@ export default function CourseBrowser() {
                         {/* Results counter */}
                         <div className="flex-1 text-right md:text-center">
                             <span>
-                            Showing {((Number(searchParams.page) || 1) - 1) * Number(searchParams.sections_per_page) + 1} to{' '}
-                            {Math.min((Number(searchParams.page) || 1) * Number(searchParams.sections_per_page), sections.total_sections)}{' '}
-                            of {sections.total_sections.toLocaleString()} course sections.
+                                Showing {((Number(searchParams.page) || 1) - 1) * Number(searchParams.sections_per_page) + 1} to{' '}
+                                {Math.min((Number(searchParams.page) || 1) * Number(searchParams.sections_per_page), sections.total_sections)}{' '}
+                                of {sections.total_sections.toLocaleString()} course sections.
                             </span>
                         </div>
 
