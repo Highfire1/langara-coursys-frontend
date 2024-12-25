@@ -337,7 +337,7 @@ export default function CourseBrowser() {
                                     })}
                                     className="form-checkbox h-4 w-4 text-blue-600"
                                 />
-                                <span>Online Only</span>
+                                <span>Online.</span>
                             </label>
 
                             <label className="flex items-center space-x-2">
@@ -414,7 +414,8 @@ export default function CourseBrowser() {
                             <th className="p-2 w-1/12">Semester</th>
                             <th className="p-2 w-1/12">Course</th>
                             <th className="p-2 w-1/12">Section</th>
-                            <th className="p-2 w-3/12">Title</th>
+                            <th className="p-2 w-1/12">crn</th>
+                            <th className="p-2 w-2/12">Title</th>
                             <th className="p-2 w-2/12">Instructor(s)</th>
                             <th className="p-2 w-1/12">Seats</th>
                             <th className="p-2 w-1/12 whitespace-nowrap">On Waitlist</th>
@@ -434,6 +435,7 @@ export default function CourseBrowser() {
                                     <td className="p-2">{`${termToSeason(section.term)} ${section.year}`}</td>
                                     <td className="p-2"><Link target='_blank' href={`https://planner.langaracs.ca/courses/${section.subject}/${section.course_code}`}>{section.subject} {section.course_code}</Link></td>
                                     <td className="p-2">{section.section}</td>
+                                    <td className="p-2">{section.crn}</td>
                                     <td className="p-2">{section.abbreviated_title}</td>
                                     <td className="p-2">
                                         {section.schedule
