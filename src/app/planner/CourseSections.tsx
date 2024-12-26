@@ -1,24 +1,37 @@
 import { Course } from "../../types/Course";
 
-const CourseSections: React.FC<{ index: number; courses: Course[] }> = ({ index, courses }) => (
-    <div className="p-2 border-b overflow-hidden">
-        <h3 className="font-bold">{courses[index].subject} {courses[index].course_code}</h3>
-        <p>{courses[index].attributes.desc_prerequisite}</p>
-        <br></br>
-        <p>{courses[index].sections.length} sections available.</p>
+
+const CourseSections = ({ courses, index }: { courses: Course[]; index: number }) => {
+
+    return (
+        <div className="p-2 border-b overflow-hidden">
+            <h3 className="font-bold">
+                {courses[index].subject} {courses[index].course_code}
+            </h3>
+            
 
 
-        {courses[index].sections.map((section, sectionIndex) => (
-            <div key={sectionIndex} className="p-2 border rounded">
-                <span>Section {section.section}</span> (<span>{section.crn}</span>)
-                <br></br>
-                <span>{section.seats} seats available</span> - <span>{section.waitlist} waitlisted</span>
-                <br></br>
-                
+            <p>{courses[index].attributes.desc_prerequisite}</p>
+
+            <p className="mt-4">
+                {courses[index].sections.length} sections available.
+            </p>
+
+            <div className="space-y-2 mt-4">
+                {courses[index].sections.map((section, sectionIndex) => (
+                    <div
+                        key={sectionIndex}
+                        className="p-2 border rounded hover:bg-gray-50"
+                    >
+                        <div>Section {section.section} ({section.crn})</div>
+                        <div>
+                            {section.seats} seats available - {section.waitlist} waitlisted
+                        </div>
+                    </div>
+                ))}
             </div>
-        ))}
-        
-    </div>
-);
+        </div>
+    );
+};
 
 export default CourseSections;
