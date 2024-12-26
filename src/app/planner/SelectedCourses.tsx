@@ -6,9 +6,8 @@ import React, { useState } from 'react';
 import { Course } from '../../types/Course';
 
 
-import { Check, ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -25,17 +24,20 @@ import {
 } from "@/components/ui/popover"
 
 
+// interface CoursesProps {
+//   courses: Course[];
+// }
+
 interface CoursesProps {
   courses: Course[];
+  selectedCourses: Course[];
+  setSelectedCourses: React.Dispatch<React.SetStateAction<Course[]>>;
 }
 
 
-
-
-export default function SelectedCourses({ courses }: CoursesProps) {
+export default function SelectedCourses({ courses, selectedCourses, setSelectedCourses }: CoursesProps) {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("");
-  const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
 
   const onCourseSelect = (courseId: string) => {
     const selectedCourse = courses.find(course => course.id === courseId)
@@ -128,7 +130,7 @@ export default function SelectedCourses({ courses }: CoursesProps) {
                   {`${course.subject} ${course.course_code}`}
                 </p>
 
-                <p>{course.attributes.title} ({course.attributes.credits} credits)</p>
+                <p className='text-sm'>{course.attributes.title} ({course.attributes.credits} credits)</p>
 
                 <button
                   onClick={() => setSelectedCourses(selectedCourses.filter(c => c.id !== course.id))}

@@ -1,31 +1,46 @@
 'use client'
 
 import FullCalendar from '@fullcalendar/react';
-// import dayGridPlugin from '@fullcalendar/daygrid'; 
 import timeGridPlugin from '@fullcalendar/timegrid';
+import { Section } from '../../types/Section';
+import { convertScheduleToEvents } from '@/utils/calendarHelper';
 
-const Calendar = () => {
+interface CalendarProps {
+  currentTimetable: Section[];
+}
+
+const Calendar = ({ currentTimetable }: CalendarProps) => {
+  const events = convertScheduleToEvents(currentTimetable);
+
   return (
     <FullCalendar
-      plugins={[ timeGridPlugin ]}
-    //   schedulerLicenseKey='CC-Attribution-NonCommercial-NoDerivatives'
+      plugins={[timeGridPlugin]}
       rerenderDelay={5}
       height={"100%"}
       timeZone='America/Vancouver'
       initialView="timeGridWeek"
       slotMinTime="07:00"
-      slotMaxTime="19:00"
-      displayEventTime={false}
-      hiddenDays={[ 0, 6 ]}
+      slotMaxTime="22:00"
+      displayEventTime={true}
+      hiddenDays={[0, 6]}
       allDaySlot={false}
-      events={[
-        { title: 'event 1', date: '2024-12-11' },
-        { title: 'event 2', date: '2024-12-14' }
-      ]}
+      events={events}
+      eventContent={(eventInfo) => {
+        return (
+          <>
+            <div className="fc-event-main-frame">
+              <div className="fc-event-title-container">
+                <div className="fc-event-title">{eventInfo.event.title}</div>
+                <div className="text-xs">
+                  {eventInfo.event.extendedProps.instructor}
+                </div>
+              </div>
+            </div>
+          </>
+        )
+      }}
     />
   );
 }
 
 export default Calendar;
-
-
