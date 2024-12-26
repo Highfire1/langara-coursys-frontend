@@ -24,7 +24,7 @@ export default function Home() {
 
 
         <div className="w-min h-min">
-          <Link href="https://planner.langaracs.ca">
+          <Link href="/planner">
             <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center">
               Langara Course Planner
             </div>
