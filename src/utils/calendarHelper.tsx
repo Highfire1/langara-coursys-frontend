@@ -1,4 +1,4 @@
-import { Schedule, Section } from '../../types/Section';
+import { Schedule, Section } from '../types/Section';
 
 const DAYS_MAP: { [key: string]: number } = {
   'M': 1, // Monday
@@ -16,7 +16,19 @@ const TYPE_COLORS: { [key: string]: string } = {
 };
 
 export function convertScheduleToEvents(sections: Section[]) {
-  const events: any[] = [];
+  const events: {
+    title: string;
+    startTime: string;
+    endTime: string;
+    daysOfWeek: number[];
+    backgroundColor: string;
+    borderColor: string;
+    extendedProps: {
+      instructor: string;
+      type: string;
+      section: string;
+    };
+  }[] = [];
 
   sections.forEach(section => {
     section.schedule.forEach(schedule => {
@@ -29,11 +41,23 @@ export function convertScheduleToEvents(sections: Section[]) {
 }
 
 function createEventsFromSchedule(schedule: Schedule, section: Section) {
-  const events: any[] = [];
+  const events: {
+    title: string;
+    startTime: string;
+    endTime: string;
+    daysOfWeek: number[];
+    backgroundColor: string;
+    borderColor: string;
+    extendedProps: {
+      instructor: string;
+      type: string;
+      section: string;
+    };
+  }[] = [];
   const days = schedule.days.split('');
   const [startTime, endTime] = schedule.time.split('-');
 
-  days.forEach((day, index) => {
+  days.forEach((day) => {
     if (day !== '-' && DAYS_MAP[day]) {
       events.push({
         title: `${section.subject} ${section.course_code}\n${schedule.type}`,

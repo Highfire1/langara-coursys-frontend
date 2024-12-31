@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React from 'react';
 // import { VariableSizeList as List } from 'react-window';
 // import AutoSizer from "react-virtualized-auto-sizer";
 import { Course } from '../../types/Course';
@@ -37,7 +37,8 @@ interface CoursesProps {
 
 export default function SelectedCourses({ courses, selectedCourses, setSelectedCourses }: CoursesProps) {
   const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("");
+  // const [value, setValue] = React.useState("");
+  const value = ""
 
   const onCourseSelect = (courseId: string) => {
     const selectedCourse = courses.find(course => course.id === courseId)

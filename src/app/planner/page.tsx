@@ -5,7 +5,7 @@ import SelectedCourses from './SelectedCourses';
 import TimetableSections from './TimetableSections';
 import Calendar from './Calendar';
 import { Course, CoursesResponse } from '../../types/Course';
-import { SectionsResponse } from '../../types/Section';
+import { SectionsResponse, Section } from '../../types/Section';
 
 export default function Page() {
   const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
