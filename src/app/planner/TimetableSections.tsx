@@ -1,12 +1,12 @@
 'use client'
 import * as React from "react"
 import { useState, useEffect } from "react"
-import { Course } from '../../types/Course';
+import { CourseInternal } from '../../types/Course';
 import { Section } from '../../types/Section';
 import { generateTimetables } from '@/utils/timetableGenerator';
 
 interface CoursesProp {
-  courses: Course[];
+  courses: CourseInternal[];
   setCurrentTimetable: (sections: Section[]) => void;
 }
 

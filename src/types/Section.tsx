@@ -26,7 +26,14 @@ export interface Section {
     subject: string;
     term: number;
     year: number;
+    course_id: string;
   }
+
+export interface SectionInternal extends Section {
+    hidden: boolean;
+    pinned: boolean;
+    hidden_by_pin: boolean;
+}
   
   export interface SectionsResponse {
     sections: Section[];

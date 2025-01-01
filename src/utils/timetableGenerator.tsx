@@ -1,4 +1,4 @@
-import { Course } from '../types/Course';
+import { CourseInternal } from '../types/Course';
 import { Section, Schedule } from '../types/Section';
 
 
@@ -53,18 +53,28 @@ function sectionConflicts(section: Section, selectedSections: Section[]): boolea
   return false;
 }
 
-export function generateTimetables(courses: Course[], maxTimetables: number = 999): Section[][] {
+export function generateTimetables(courses: CourseInternal[], maxTimetables: number = 999): Section[][] {
   const timetables: Section[][] = [];
+  // Filter out hidden courses and sections
+  const visibleCourses: CourseInternal[] = JSON.parse(JSON.stringify(courses.filter(course => !course.hidden)));
+  visibleCourses.forEach(course => {
+    course.sections_enhanced = course.sections_enhanced.filter(
+      section => !section.hidden && !section.hidden_by_pin && !(section.seats === "Cancel")
+    );
+  });
+  // Remove the filtering here (leave this empty)
+  
+  if (visibleCourses.length === 0) return timetables;
   
   function backtrack(courseIndex: number, currentTimetable: Section[]) {
     if (timetables.length >= maxTimetables) return;
-    if (courseIndex === courses.length) {
+    if (courseIndex === visibleCourses.length) {
       timetables.push([...currentTimetable]);
       return;
     }
 
-    const course = courses[courseIndex];
-    for (const section of course.sections) {
+    const course = visibleCourses[courseIndex];
+    for (const section of course.sections_enhanced) {
       if (!sectionConflicts(section, currentTimetable)) {
         currentTimetable.push(section);
         backtrack(courseIndex + 1, currentTimetable);

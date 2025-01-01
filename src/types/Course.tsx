@@ -63,6 +63,11 @@ export interface CourseAttributes {
     transfers: Transfer[]; // Updated to include transfers
     outlines: Outline[]; // Adjust type if you have specific structure for outlines
   }
+
+  export interface CourseInternal extends Course {
+    hidden: boolean;
+    sections_enhanced: import("./Section").SectionInternal[];
+  }
   
   export interface CoursesResponse {
     courses: Course[];

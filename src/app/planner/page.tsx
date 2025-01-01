@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import SelectedCourses from './SelectedCourses';
 import TimetableSections from './TimetableSections';
 import Calendar from './Calendar';
-import { Course, CoursesResponse } from '../../types/Course';
+import { Course, CourseInternal, CoursesResponse } from '../../types/Course';
 import { SectionsResponse, Section } from '../../types/Section';
 
 export default function Page() {
-  const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
+  const [selectedCourses, setSelectedCourses] = useState<CourseInternal[]>([]);
   const [currentTimetable, setCurrentTimetable] = useState<Section[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
