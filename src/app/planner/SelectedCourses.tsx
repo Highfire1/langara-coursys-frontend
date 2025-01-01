@@ -43,10 +43,11 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
   const value = ""
 
   const onCourseSelect = (courseId: string) => {
-    const selectedCourse = courses.find(course => course.id === courseId)
+    const c_id = courseId.split(' ')[0]
+    const selectedCourse = courses.find(course => course.id === c_id)
 
     // convert Course to CourseInternal so we can add additional properties and easily pass it around 
-    if (selectedCourse && !selectedCourses.some(c => c.id === courseId)) {
+    if (selectedCourse && !selectedCourses.some(c => c.id === c_id)) {
       const courseInternal: CourseInternal = {
         ...selectedCourse,
         hidden: false,
@@ -85,12 +86,12 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
           <Command>
             <CommandInput placeholder="Search for a course..." />
             <CommandList>
-              <CommandEmpty>No course found.</CommandEmpty>
+              <CommandEmpty><span className='p-2'>Couldn&apos;t find a course with that query. Check if its offered this semester or if you have already added it.</span></CommandEmpty>
               <CommandGroup>
                 {courses.map((course) => (
                   <CommandItem
                     key={course.id}
-                    value={course.id}
+                    value={`${course.id} ${course.attributes.title}`}
                     onSelect={onCourseSelect} // Replace the existing onSelect with onCourseSelect
                     className={!selectedCourses.some(selectedCourse => selectedCourse.id === course.id) ? "" : "hidden"}
 
@@ -112,7 +113,8 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
       <div>
         <p className='text-sm'>
-          {selectedCourses.length} course{selectedCourses.length > 1 ? 's' : ''} selected ({selectedCourses.reduce<number>((acc, course) => acc + parseFloat(String(course.attributes.credits)), 0)} credits)
+          {(selectedCourses.length==0) ? "Nothing here. Try adding a course with the search bar." : ""} 
+          {/* `${selectedCourses.length} course${selectedCourses.length == 1 ? '' : 's'} selected (${selectedCourses.reduce<number>((acc, course) => acc + parseFloat(String(course.attributes.credits)), 0)} credits)`} */}
         </p>
       </div>
 
