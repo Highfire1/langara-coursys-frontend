@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className="w-full h-full">
 
-      <header className="p-5 bg-[#ff926a]">
+      <header className="p-5 bg-[#F15A22]">
         <h1 className="font-bold text-xl">Langara College Course Tools</h1>
         <p>Note: this website is a student project and not affiliated with Langara College.</p>
         <p>Utilities built by Anderson Tseng and hosted by the Langara Computer Science Club.</p>
@@ -24,18 +24,18 @@ export default function Home() {
 
 
         <div className="w-min h-min">
-          <Link href="/planner">
-            <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center">
-              Langara Course Planner
-            </div>
+          <Link href="/timetable">
+        <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center text-center">
+          Langara<br></br>Time Table<br></br>Generator
+        </div>
           </Link>
         </div>
 
         <div className="w-min h-min">
           <Link href="/browse">
-            <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center">
-              Langara Course Search
-            </div>
+        <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center text-center">
+          Langara<br></br>Course Offerings<br></br>Search
+        </div>
           </Link>
         </div>
       </div>

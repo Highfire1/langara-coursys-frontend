@@ -33,10 +33,12 @@ interface CoursesProps {
   courses: Course[];
   selectedCourses: CourseInternal[];
   setSelectedCourses: React.Dispatch<React.SetStateAction<CourseInternal[]>>;
+  year: string;
+  term: string;
 }
 
 
-export default function SelectedCourses({ courses, selectedCourses, setSelectedCourses }: CoursesProps) {
+export default function SelectedCourses({ courses, selectedCourses, setSelectedCourses, year, term}: CoursesProps) {
   const [open, setOpen] = React.useState(false)
 
   // const [value, setValue] = React.useState("");
@@ -65,7 +67,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
   return (
     <div className='flex flex-col gap-2 h-full w-full p-2 rounded border overflow-hidden'>
-      <h2 className='font-bold text-lg'>Selected Courses</h2>
+      <h2 className='font-bold text-lg'>Selected Courses ({term === "10" ? "Spring" : term === "20" ? "Summer" : term === "30" ? "Fall" : ""} {year})</h2>
 
       {/* Combobox to select courses to add to our selected courses list */}
       <Popover open={open} onOpenChange={setOpen}>
