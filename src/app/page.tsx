@@ -18,24 +18,32 @@ export default function Home() {
       </header>
 
       <div className="md:px-10 pt-10 flex flex-row gap-4">
-        
+
         {/* <h1>Welcome to the Langara Course Tools Hub</h1>
         <p>You can find some tools below:</p> */}
 
 
         <div className="w-min h-min">
           <Link href="/timetable">
-        <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center text-center">
-          Langara<br></br>Time Table<br></br>Generator
-        </div>
+            <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center text-center">
+              Langara<br></br>Time Table<br></br>Generator
+            </div>
           </Link>
         </div>
 
         <div className="w-min h-min">
           <Link href="/browse">
-        <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center text-center">
-          Langara<br></br>Course Offerings<br></br>Search
+            <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center text-center">
+              Langara<br></br>Course Offerings<br></br>Search
+            </div>
+          </Link>
         </div>
+
+        <div className="w-min h-min">
+          <Link href="/courses">
+            <div className="w-[400px] h-[400px] bg-slate-300 flex items-center justify-center text-center">
+              Langara<br></br>Courses<br></br>Search
+            </div>
           </Link>
         </div>
       </div>

@@ -4,19 +4,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import Link from 'next/link';
 
-import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
+// import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
+    // DropdownMenuLabel,
+    // DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-type Checked = DropdownMenuCheckboxItemProps["checked"]
+// type Checked = DropdownMenuCheckboxItemProps["checked"]
 
 interface CourseMax {
     credits: number;
@@ -101,9 +101,9 @@ const termToSeason = (term: number): string => {
 };
 
 export default function CourseBrowser() {
-    const [showStatusBar, setShowStatusBar] = React.useState<Checked>(true)
-    const [showActivityBar, setShowActivityBar] = React.useState<Checked>(false)
-    const [showPanel, setShowPanel] = React.useState<Checked>(false)
+    // const [showStatusBar, setShowStatusBar] = React.useState<Checked>(true)
+    // const [showActivityBar, setShowActivityBar] = React.useState<Checked>(false)
+    // const [showPanel, setShowPanel] = React.useState<Checked>(false)
 
 
     const initial_courses_per_page = 50;
