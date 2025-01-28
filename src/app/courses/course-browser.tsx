@@ -72,6 +72,7 @@ interface SearchParams {
     attr_soc?: boolean;
     attr_ut?: boolean;
     credits?: number;
+    on_langara_website?: boolean;
     transfer_destinations?: string[];
     page?: number | string;
     courses_per_page?: number | string;
@@ -406,7 +407,18 @@ export default function CourseBrowser() {
                                         </DropdownMenuCheckboxItem> */}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
+
                             </div>
+
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    defaultChecked
+                                    type="checkbox"
+                                    onChange={e => handleInputChange('on_langara_website', e.target.checked)}
+                                    className="rounded"
+                                />
+                                <span>On Langara Website</span>
+                            </label>
 
                             {/* <label className="flex items-center space-x-2">
                                 <input
@@ -514,7 +526,7 @@ export default function CourseBrowser() {
                         ) : (
                             courses?.courses.map(course => (
                                 <tr key={course.id} className="border-b">
-                                    <td className="p-2 break-words"><Link target="_blank" href={`https://planner.langaracs.ca/courses/${course.subject}/${course.course_code}`}>{course.subject} {course.course_code}</Link></td>
+                                    <td className="p-2 break-words"><Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" target="_blank" href={`https://planner.langaracs.ca/courses/${course.subject}/${course.course_code}`}>{course.subject} {course.course_code}</Link></td>
                                     <td className="p-2 break-words">{course.title}</td>
                                     <td className="p-2 break-words">{course.credits ? course.credits.toFixed(1) : ""}</td>
 
