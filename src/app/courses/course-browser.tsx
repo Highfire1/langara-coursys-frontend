@@ -421,7 +421,7 @@ export default function CourseBrowser() {
                                     onChange={e => handleInputChange('on_langara_website', e.target.checked)}
                                     className="rounded"
                                 />
-                                <span>On Langara Website</span>
+                                <span>On Langara website.</span>
                             </label>
 
                             <label className="flex items-center space-x-2">
@@ -471,22 +471,22 @@ export default function CourseBrowser() {
             </div>
 
             <div className="mt-4">
-                <table className="w-full table-fixed relative">
+                <table className="w-full table-fixed relative min-w-[1000px]">
                     <thead className=" bg-white z-10">
-                        <tr className="bg-gray-100 text-left">
-                            <th className="sticky-header w-[5%] text-sm">On Langara Website</th>
+                        <tr className="bg-gray-100 text-left text-xs md:text-sm">
+                            <th className="sticky-header w-[5%]">On Langara Website</th>
                             <th className="sticky-header w-[15%]">Course</th>
-                            <th className="sticky-header w-[5%] text-sm">Credits</th>
-                            <th className="sticky-header text-center w-[3%] text-sm">2AR</th>
-                            <th className="sticky-header text-center w-[3%] text-sm">2SC</th>
-                            <th className="sticky-header text-center w-[3%] text-sm">HUM</th>
-                            <th className="sticky-header text-center w-[3%] text-sm">LSC</th>
-                            <th className="sticky-header text-center w-[3%] text-sm">SCI</th>
-                            <th className="sticky-header text-center w-[3%] text-sm">SOC</th>
-                            <th className="sticky-header text-center w-[3%] text-sm">UT</th>
+                            <th className="sticky-header w-[5%]">Credits</th>
+                            <th className="sticky-header text-center w-[3%]">2AR</th>
+                            <th className="sticky-header text-center w-[3%]">2SC</th>
+                            <th className="sticky-header text-center w-[3%]">HUM</th>
+                            <th className="sticky-header text-center w-[3%]">LSC</th>
+                            <th className="sticky-header text-center w-[3%]">SCI</th>
+                            <th className="sticky-header text-center w-[3%]">SOC</th>
+                            <th className="sticky-header text-center w-[3%]">UT</th>
                             <th className="sticky-header p-2 w-[5%] text-sm">Offered Online</th>
-                            <th className="sticky-header p-2 w-[7%] text-sm">First Offered</th>
-                            <th className="sticky-header p-2 w-[7%] text-sm">Last Offered</th>
+                            <th className="sticky-header p-2 w-[6%] text-sm">First Offered</th>
+                            <th className="sticky-header p-2 w-[6%] text-sm">Last Offered</th>
                             <th className="sticky-header p-2 w-[50%]">Description</th>
                             {/* <th className="p-2 w-[10%]">Prerequisites:</th> */}
                             <th className="sticky-header p-2 w-[10%]">Transfers to</th>
