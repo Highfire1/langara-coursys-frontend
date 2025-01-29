@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import Link from 'next/link';
 
+import './styles.css';
+
 // import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 
 import { Button } from "@/components/ui/button"
@@ -73,6 +75,7 @@ interface SearchParams {
     attr_ut?: boolean;
     credits?: number;
     on_langara_website?: boolean;
+    offered_online?: boolean;
     transfer_destinations?: string[];
     page?: number | string;
     courses_per_page?: number | string;
@@ -113,6 +116,7 @@ export default function CourseBrowser() {
     const [subjects, setSubjects] = useState<string[]>([]);
     const [courses, setCourses] = useState<CoursesResponse | null>(null);
     const [searchParams, setSearchParams] = useState<SearchParams>({
+        on_langara_website: true,
         page: 1,
         courses_per_page: initial_courses_per_page
     });
@@ -158,7 +162,7 @@ export default function CourseBrowser() {
                 const data: CoursesResponse = await response.json();
                 const cached = response.headers.get('x-fastapi-cache') === 'HIT';
                 const time = Math.round(performance.now() - start);
-                
+
                 console.log(data)
 
                 setRequestInfo({ time, cached });
@@ -375,11 +379,11 @@ export default function CourseBrowser() {
                                             <DropdownMenuCheckboxItem
                                                 key={index}
                                                 onCheckedChange={(checked) => {
-                                                    const newDestinations = checked 
+                                                    const newDestinations = checked
                                                         ? [...(searchParams.transfer_destinations || []), destination.code]
                                                         : (searchParams.transfer_destinations || []).filter(d => d !== destination.code);
-                                                    
-                                                        handleInputChange('transfer_destinations', newDestinations);
+
+                                                    handleInputChange('transfer_destinations', newDestinations);
                                                 }}
                                                 checked={searchParams.transfer_destinations?.includes(destination.code)}
                                             >
@@ -420,98 +424,72 @@ export default function CourseBrowser() {
                                 <span>On Langara Website</span>
                             </label>
 
-                            {/* <label className="flex items-center space-x-2">
+                            <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
-                                    checked={searchParams.online || false}
+                                    checked={searchParams.offered_online || false}
                                     onChange={(e) => setSearchParams({
                                         ...searchParams,
-                                        online: e.target.checked
+                                        offered_online: e.target.checked
                                     })}
                                     className="form-checkbox h-4 w-4 text-blue-600"
                                 />
-                                <span>Online.</span>
+                                <span>Offered online.</span>
                             </label>
 
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    onChange={e => handleInputChange('filter_open_seats', e.target.checked)}
-                                    className="rounded"
-                                />
-                                <span>Has open seats.</span>
-                            </label>
-
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    onChange={e => handleInputChange('filter_no_waitlist', e.target.checked)}
-                                    className="rounded"
-                                />
-                                <span>None on waitlist.</span>
-                            </label>
-
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    onChange={e => handleInputChange('filter_not_cancelled', e.target.checked)}
-                                    className="rounded"
-                                />
-                                <span>Not cancelled.</span>
-                            </label> */}
                         </div>
                     </div>
                 </form>
             </div>
 
-            {courses && (
-                <>
-                    <div className="flex justify-between items-center text-sm text-gray-600 my-4">
 
-                        <div className="items-center gap-1 font-medium flex-1 hidden md:block ">
-                        </div>
+            <div className="flex justify-between items-center text-sm text-gray-600 my-4">
 
-                        <div className="flex-1 text-left md:text-center">
-                            <span className='md:text-nowrap'>
+                <div className="items-center gap-1 font-medium flex-1 hidden md:block ">
+                </div>
+
+                <div className="flex-1 text-left md:text-center">
+                    <span className='md:text-nowrap'>
+                        {courses ? (
+                            <>
                                 Showing <span className='font-semibold'>{courses.courses.length}</span> courses.
-                            </span>
-                        </div>
+                            </>
+                        ) : "Loading... This should take less than five seconds..."}
+                    </span>
+                </div>
 
-                        <div className="flex-1 text-right">
-                            {loading
-                                ? ' loading...'
-                                : requestInfo.cached ||
-                                    (requestInfo.time && requestInfo.time < 50)
-                                    ? `query fulfilled in ${requestInfo.time}ms (cached)`
-                                    : requestInfo.time
-                                        ? ` query fulfilled in ${requestInfo.time}ms`
-                                        : ''}
-                        </div>
-                    </div>
-                </>
-            )}
+                <div className="flex-1 text-right">
+                    {loading
+                        ? ' loading...'
+                        : requestInfo.cached ||
+                            (requestInfo.time && requestInfo.time < 50)
+                            ? `query fulfilled in ${requestInfo.time}ms (cached)`
+                            : requestInfo.time
+                                ? ` query fulfilled in ${requestInfo.time}ms`
+                                : ''}
+                </div>
+            </div>
 
-            <div className="mt-4 overflow-x-auto">
-                <table className="w-full table-fixed">
+            <div className="mt-4">
+                <table className="w-full table-fixed relative">
                     <thead className=" bg-white z-10">
                         <tr className="bg-gray-100 text-left">
-                            <th className="p-2 w-[7%]">Course</th>
-                            <th className="p-2 w-[15%]">Title</th>
-                            <th className="p-2 w-[7%]">Credits</th>
-                            <th className="p-2 w-[5%]">2AR</th>
-                            <th className="p-2 w-[5%]">2SC</th>
-                            <th className="p-2 w-[5%]">HUM</th>
-                            <th className="p-2 w-[5%]">LSC</th>
-                            <th className="p-2 w-[5%]">SCI</th>
-                            <th className="p-2 w-[5%]">SOC</th>
-                            <th className="p-2 w-[5%]">UT</th>
-                            <th className="p-2 w-[7%]">Offered Online</th>
-                            <th className="p-2 w-[7%]">Active</th>
-                            <th className="p-2 w-[7%]">First Offered</th>
-                            <th className="p-2 w-[7%]">Last Offered</th>
-                            <th className="p-2 w-[40%]">Description</th>
+                            <th className="sticky-header w-[5%] text-sm">On Langara Website</th>
+                            <th className="sticky-header w-[15%]">Course</th>
+                            <th className="sticky-header w-[5%] text-sm">Credits</th>
+                            <th className="sticky-header text-center w-[3%] text-sm">2AR</th>
+                            <th className="sticky-header text-center w-[3%] text-sm">2SC</th>
+                            <th className="sticky-header text-center w-[3%] text-sm">HUM</th>
+                            <th className="sticky-header text-center w-[3%] text-sm">LSC</th>
+                            <th className="sticky-header text-center w-[3%] text-sm">SCI</th>
+                            <th className="sticky-header text-center w-[3%] text-sm">SOC</th>
+                            <th className="sticky-header text-center w-[3%] text-sm">UT</th>
+                            <th className="sticky-header p-2 w-[5%] text-sm">Offered Online</th>
+                            <th className="sticky-header p-2 w-[7%] text-sm">First Offered</th>
+                            <th className="sticky-header p-2 w-[7%] text-sm">Last Offered</th>
+                            <th className="sticky-header p-2 w-[50%]">Description</th>
                             {/* <th className="p-2 w-[10%]">Prerequisites:</th> */}
-                            <th className="p-2 w-[10%]">Transfers to</th>
+                            <th className="sticky-header p-2 w-[10%]">Transfers to</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -525,9 +503,17 @@ export default function CourseBrowser() {
                             ))
                         ) : (
                             courses?.courses.map(course => (
-                                <tr key={course.id} className="border-b">
-                                    <td className="p-2 break-words"><Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" target="_blank" href={`https://planner.langaracs.ca/courses/${course.subject}/${course.course_code}`}>{course.subject} {course.course_code}</Link></td>
-                                    <td className="p-2 break-words">{course.title}</td>
+                                <tr key={course.id} className={`border-b align-top ${course.on_langara_website ? '' : 'bg-red-200'}`}>
+
+                                    <td className={`p-2 break-words text-white text-center ${course.on_langara_website ? 'bg-green-800' : 'bg-red-600'}`}>
+                                        {/* {course.on_langara_website ? '✓' : '✗ '} */}
+                                    </td>
+
+                                    <td className="p-2 break-words">
+                                        <Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" target="_blank" href={`https://planner.langaracs.ca/courses/${course.subject}/${course.course_code}`}>
+                                            {course.subject} {course.course_code}</Link>
+                                        <p>{course.title}</p>
+                                    </td>
                                     <td className="p-2 break-words">{course.credits ? course.credits.toFixed(1) : ""}</td>
 
                                     <td className={`p-2 break-words ${course.attr_ar ? 'bg-green-800 text-white text-center' : ''}`}>
@@ -554,11 +540,9 @@ export default function CourseBrowser() {
                                     <td className={`p-2 break-words ${course.offered_online ? 'bg-green-800 text-white text-center' : ''}`}>
                                         {course.offered_online ? '✓' : ''}
                                     </td>
-                                    <td className={`p-2 break-words ${course.on_langara_website ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.on_langara_website ? '✓' : ''}
-                                    </td>
 
-                                    <td className="p-2 break-words">
+
+                                    <td className="p-2 break-words text-sm">
                                         {course.first_offered_year == 1999 && course.first_offered_term == 20 ?
                                             "Unknown (Before 1999)" // we only have data going back to summer 1999
                                             : course.first_offered_year
@@ -566,11 +550,12 @@ export default function CourseBrowser() {
                                                 `${termToSeason(course.first_offered_term)} ${course.first_offered_year}`
                                                 : "???"}</td>
 
-                                    <td className="p-2 break-words">
+                                    <td className="p-2 break-words text-sm">
                                         {course.first_offered_year ?
                                             `${termToSeason(course.last_offered_term)} ${course.last_offered_year}`
                                             : "???"}</td>
-                                    <td className="p-2 break-words flex flex-col gap-2">
+
+                                    <td className="p-2 break-words flex flex-col gap-2 text-sm">
                                         <span>Lecture: {course.hours_lecture ? course.hours_lecture.toFixed(1) : "0.0"} h + Seminar {course.hours_seminar ? course.hours_seminar.toFixed(1) : "0.0"} h + Lab. {course.hours_lab ? course.hours_lab.toFixed(1) : "0.0"} h</span>
                                         <span>{course.desc_registration_restriction ? course.desc_registration_restriction : ""}</span>
                                         <span>{course.description ? course.description.split('\n').map((line, index) => (
@@ -592,6 +577,8 @@ export default function CourseBrowser() {
                                     </td>
                                     {/* <td className="p-2 break-words">{course.RP ? (course.desc_prerequisite ? course.desc_prerequisite : "Unknown registration restriction") : ""}</td> */}
                                     <td className="p-2 break-words text-sm">{course.transfer_destinations ? course.transfer_destinations.slice(1, course.transfer_destinations.length - 1).replace(/,/g, ', ') : ""}</td>
+
+
 
                                 </tr>
                             ))
