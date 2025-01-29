@@ -13,7 +13,7 @@ function PageContent() {
   const searchParams = useSearchParams();
 
   const year = searchParams.get('year') || '2025';
-  const term = searchParams.get('term') || '10';
+  const term = searchParams.get('term') || '20';
 
   const [, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +21,7 @@ function PageContent() {
 
   useEffect(() => {
     if (!searchParams.get('year') || !searchParams.get('term')) {
-      router.replace(`/timetable?year=${year}&term=${term}`);
+      router.replace(`/planner?year=${year}&term=${term}`);
       return;
     }
 

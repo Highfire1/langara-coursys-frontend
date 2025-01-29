@@ -3,22 +3,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import './styles.css';
-
-// import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    // DropdownMenuLabel,
-    // DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-// type Checked = DropdownMenuCheckboxItemProps["checked"]
 
 interface CourseMax {
     credits: number;
@@ -77,8 +72,6 @@ interface SearchParams {
     on_langara_website?: boolean;
     offered_online?: boolean;
     transfer_destinations?: string[];
-    page?: number | string;
-    courses_per_page?: number | string;
 }
 
 interface SubjectsResponse {
@@ -105,23 +98,33 @@ const termToSeason = (term: number): string => {
 };
 
 export default function CourseBrowser() {
-    // const [showStatusBar, setShowStatusBar] = React.useState<Checked>(true)
-    // const [showActivityBar, setShowActivityBar] = React.useState<Checked>(false)
-    // const [showPanel, setShowPanel] = React.useState<Checked>(false)
-
-
-    const initial_courses_per_page = 50;
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [transfer_destinations, setDestinations] = useState<TransfersResponse>();
     const [subjects, setSubjects] = useState<string[]>([]);
     const [courses, setCourses] = useState<CoursesResponse | null>(null);
-    const [searchParams, setSearchParams] = useState<SearchParams>({
-        on_langara_website: true,
-        page: 1,
-        courses_per_page: initial_courses_per_page
-    });
     const [loading, setLoading] = useState(false);
     const [requestInfo, setRequestInfo] = useState<{ time?: number; cached?: boolean }>({});
+
+    const initialSearchParams: SearchParams = {
+        subject: searchParams.get('subject') || '',
+        course_code: searchParams.get('course_code') || '',
+        title_search: searchParams.get('title_search') || '',
+        attr_ar: searchParams.get('attr_ar') === 'true',
+        attr_sc: searchParams.get('attr_sc') === 'true',
+        attr_hum: searchParams.get('attr_hum') === 'true',
+        attr_lsc: searchParams.get('attr_lsc') === 'true',
+        attr_sci: searchParams.get('attr_sci') === 'true',
+        attr_soc: searchParams.get('attr_soc') === 'true',
+        attr_ut: searchParams.get('attr_ut') === 'true',
+        credits: searchParams.get('credits') ? Number(searchParams.get('credits')) : undefined,
+        on_langara_website: searchParams.get('on_langara_website') === null ? true : searchParams.get('on_langara_website') === 'true',
+        offered_online: searchParams.get('offered_online') === 'true',
+        transfer_destinations: searchParams.getAll('transfer_destinations'),
+    };
+
+    const [currentSearchParams, setCurrentSearchParams] = useState<SearchParams>(initialSearchParams);
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -168,27 +171,37 @@ export default function CourseBrowser() {
                 setRequestInfo({ time, cached });
                 setCourses(data);
                 setLoading(false);
-            }, 200),
+            }, 400),
         []
     );
 
     useEffect(() => {
-        debouncedSearch(searchParams);
-    }, [searchParams, debouncedSearch]);
+        debouncedSearch(currentSearchParams);
+    }, [currentSearchParams, debouncedSearch]);
+
 
     const handleInputChange = (key: keyof SearchParams, value: string | boolean | string[]) => {
-        setSearchParams(prev => ({ ...prev, [key]: value }));
-        if (key === 'page') return;
-        setSearchParams(prev => ({ ...prev, page: 1 }));
-    };
+        setCurrentSearchParams(prev => ({ ...prev, [key]: value }));
 
-    // const semesterOptions = useMemo(() => {
-    //     if (!semesters) return [];
-    //     return semesters.semesters.map(sem => ({
-    //         value: `${sem.year}-${sem.term}`,
-    //         label: `${termToSeason(sem.term)} ${sem.year}`
-    //     }));
-    // }, [semesters]);
+        const newSearchParams = { ...currentSearchParams, [key]: value };
+        const queryParams = new URLSearchParams();
+        Object.entries(newSearchParams).forEach(([key, value]) => {
+            if (key === 'on_langara_website') {
+                if (value === false) {
+                    queryParams.append(key, 'false');
+                }
+            }
+            else if (value !== undefined && value !== '' && value !== false) {
+                if (Array.isArray(value)) {
+                    value.forEach(v => queryParams.append(key, v));
+                } else {
+                    queryParams.append(key, value.toString());
+                }
+            }
+        });
+
+        router.replace(`?${queryParams.toString()}`);
+    };
 
     return (
         <div className="p-4">
@@ -204,8 +217,9 @@ export default function CourseBrowser() {
                                     <label htmlFor="subject" className="mb-1 text-sm font-medium w-fit">Subject</label>
                                     <select
                                         id="subject"
-                                        className="border rounded p-[0.68rem] sm:w-fit w-[150px]"
+                                        value={currentSearchParams.subject}
                                         onChange={e => handleInputChange('subject', e.target.value)}
+                                        className="border rounded p-[0.68rem] sm:w-fit w-[150px]"
                                     >
                                         <option value="">All Subjects</option>
                                         {subjects.map(subject => (
@@ -222,6 +236,7 @@ export default function CourseBrowser() {
                                     <input
                                         type="text"
                                         id="course_code"
+                                        value={currentSearchParams.course_code}
                                         className="border rounded p-2 w-[100px]"
                                         pattern="[0-9]*"
                                         maxLength={4}
@@ -261,23 +276,12 @@ export default function CourseBrowser() {
                                     <input
                                         type="text"
                                         id="title"
+                                        value={currentSearchParams.title_search}
                                         className="border rounded p-2 sm:w-fit w-[150px]"
                                         onChange={e => handleInputChange('title_search', e.target.value)}
                                         placeholder="Introduction to..."
                                     />
                                 </div>
-
-                                {/* Instructor Search */}
-                                {/* <div className="flex flex-col w-min">
-                                    <label htmlFor="instructor" className="mb-1 text-sm font-medium">Instructor</label>
-                                    <input
-                                        type="text"
-                                        id="instructor"
-                                        className="border rounded p-2 sm:w-fit w-[170px]"
-                                        onChange={e => handleInputChange('instructor_search', e.target.value)}
-                                        placeholder="Search by instructor..."
-                                    />
-                                </div> */}
                             </div>
                         </div>
                     </div>
@@ -289,6 +293,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={currentSearchParams.attr_ar || false}
                                     onChange={e => handleInputChange('attr_ar', e.target.checked)}
                                     className="rounded"
                                 />
@@ -297,6 +302,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={currentSearchParams.attr_sc || false}
                                     onChange={e => handleInputChange('attr_sc', e.target.checked)}
                                     className="rounded"
                                 />
@@ -305,6 +311,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={currentSearchParams.attr_hum || false}
                                     onChange={e => handleInputChange('attr_hum', e.target.checked)}
                                     className="rounded"
                                 />
@@ -313,6 +320,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={currentSearchParams.attr_lsc || false}
                                     onChange={e => handleInputChange('attr_lsc', e.target.checked)}
                                     className="rounded"
                                 />
@@ -321,6 +329,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={currentSearchParams.attr_sci || false}
                                     onChange={e => handleInputChange('attr_sci', e.target.checked)}
                                     className="rounded"
                                 />
@@ -329,6 +338,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={currentSearchParams.attr_soc || false}
                                     onChange={e => handleInputChange('attr_soc', e.target.checked)}
                                     className="rounded"
                                 />
@@ -337,6 +347,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={currentSearchParams.attr_ut || false}
                                     onChange={e => handleInputChange('attr_ut', e.target.checked)}
                                     className="rounded"
                                 />
@@ -351,28 +362,12 @@ export default function CourseBrowser() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
 
 
-                            {/* <div className="flex flex-col flex-2 w-min">
-                                <label htmlFor="on_langara_website" className="mb-1 text-sm font-medium w-fit">Active</label>
-                                <select
-                                    id="on_langara_website"
-                                    className="border rounded p-[0.68rem] sm:w-fit w-[150px]"
-                                    onChange={e => handleInputChange('active', e.target.value)}
-                                >
-                                    <option value="">All Subjects</option>
-                                    {subjects.map(subject => (
-                                        <option key={subject} value={subject}>
-                                            {subject}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div> */}
-
                             <div>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="outline">Select Transfer Destinations</Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56">
+                                    <DropdownMenuContent align="end" className="w-56 bg-white overflow-y-scroll h-64" >
                                         {/* <DropdownMenuLabel>Appearance</DropdownMenuLabel>
                                         <DropdownMenuSeparator /> */}
                                         {transfer_destinations?.transfers.map((destination, index) => (
@@ -380,35 +375,18 @@ export default function CourseBrowser() {
                                                 key={index}
                                                 onCheckedChange={(checked) => {
                                                     const newDestinations = checked
-                                                        ? [...(searchParams.transfer_destinations || []), destination.code]
-                                                        : (searchParams.transfer_destinations || []).filter(d => d !== destination.code);
+                                                        ? [...(currentSearchParams.transfer_destinations || []), destination.code]
+                                                        : (currentSearchParams.transfer_destinations || []).filter(d => d !== destination.code);
 
                                                     handleInputChange('transfer_destinations', newDestinations);
                                                 }}
-                                                checked={searchParams.transfer_destinations?.includes(destination.code)}
+                                                checked={currentSearchParams.transfer_destinations?.includes(destination.code)}
+                                                className=
+                                                    {`text-sm ${destination.code === "SFU" ? "bg-red-200" : ''} ${destination.code === "UBCV" ? "bg-blue-200" : ''}`}
                                             >
-                                                {destination.name} ({destination.code})
+                                                {destination.code} ({destination.name})
                                             </DropdownMenuCheckboxItem>
                                         ))}
-                                        {/* <DropdownMenuCheckboxItem
-                                            checked={showStatusBar}
-                                            onCheckedChange={setShowStatusBar}
-                                        >
-                                            Status Bar
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem
-                                            checked={showActivityBar}
-                                            onCheckedChange={setShowActivityBar}
-                                            disabled
-                                        >
-                                            Activity Bar
-                                        </DropdownMenuCheckboxItem>
-                                        <DropdownMenuCheckboxItem
-                                            checked={showPanel}
-                                            onCheckedChange={setShowPanel}
-                                        >
-                                            Panel
-                                        </DropdownMenuCheckboxItem> */}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
 
@@ -416,8 +394,8 @@ export default function CourseBrowser() {
 
                             <label className="flex items-center space-x-2">
                                 <input
-                                    defaultChecked
                                     type="checkbox"
+                                    checked={currentSearchParams.on_langara_website || false}
                                     onChange={e => handleInputChange('on_langara_website', e.target.checked)}
                                     className="rounded"
                                 />
@@ -427,9 +405,9 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
-                                    checked={searchParams.offered_online || false}
-                                    onChange={(e) => setSearchParams({
-                                        ...searchParams,
+                                    checked={currentSearchParams.offered_online || false}
+                                    onChange={(e) => setCurrentSearchParams({
+                                        ...currentSearchParams,
                                         offered_online: e.target.checked
                                     })}
                                     className="form-checkbox h-4 w-4 text-blue-600"
@@ -512,7 +490,7 @@ export default function CourseBrowser() {
                                     <td className="p-2 break-words">
                                         <Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" target="_blank" href={`https://planner.langaracs.ca/courses/${course.subject}/${course.course_code}`}>
                                             {course.subject} {course.course_code}</Link>
-                                        <p>{course.title}</p>
+                                        <p>{course.title ? course.title : course.abbreviated_title}</p>
                                     </td>
                                     <td className="p-2 break-words">{course.credits ? course.credits.toFixed(1) : ""}</td>
 
@@ -543,27 +521,35 @@ export default function CourseBrowser() {
 
 
                                     <td className="p-2 break-words text-sm">
-                                        {course.first_offered_year == 1999 && course.first_offered_term == 20 ?
-                                            "Unknown (Before 1999)" // we only have data going back to summer 1999
+                                        {/* {course.first_offered_year == 1999 && course.first_offered_term == 20 ?
+                                            "Before 1999" // we only have data going back to summer 1999
                                             : course.first_offered_year
                                                 ?
                                                 `${termToSeason(course.first_offered_term)} ${course.first_offered_year}`
-                                                : "???"}</td>
+                                                : "???"}</td> */}
+                                        {course.first_offered_year ?
+                                            `${termToSeason(course.first_offered_term)} ${course.first_offered_year}`
+                                            : "???"}</td>
 
-                                    <td className="p-2 break-words text-sm">
+                                    <td className={`p-2 break-words text-sm ${course.last_offered_year < 2021 ? 'bg-red-200' : ''}`}>
                                         {course.first_offered_year ?
                                             `${termToSeason(course.last_offered_term)} ${course.last_offered_year}`
                                             : "???"}</td>
 
                                     <td className="p-2 break-words flex flex-col gap-2 text-sm">
-                                        <span>Lecture: {course.hours_lecture ? course.hours_lecture.toFixed(1) : "0.0"} h + Seminar {course.hours_seminar ? course.hours_seminar.toFixed(1) : "0.0"} h + Lab. {course.hours_lab ? course.hours_lab.toFixed(1) : "0.0"} h</span>
-                                        <span>{course.desc_registration_restriction ? course.desc_registration_restriction : ""}</span>
-                                        <span>{course.description ? course.description.split('\n').map((line, index) => (
-                                            <React.Fragment key={index}>
-                                                {line}
-                                                {index < course.description.split('\n').length - 1 && <br />}
-                                            </React.Fragment>
-                                        )) : "No description available."}</span>
+                                        {/* <span>Lecture: {course.hours_lecture ? course.hours_lecture : "0"} h + Seminar {course.hours_seminar ? course.hours_seminar: "0"} h + Lab. {course.hours_lab ? course.hours_lab : "0"} h</span> */}
+                                        
+                                        {course.desc_registration_restriction &&
+                                            <span>{course.desc_registration_restriction}</span>
+                                        }
+
+                                        <span>
+                                            {course.description 
+                                                ? course.description //.replace(/\n/g, '\n\n')
+                                                : "No description available."
+                                            }
+                                        </span>
+
                                         {course.desc_prerequisite &&
                                             <span>{course.desc_prerequisite}</span>
                                         }
@@ -573,10 +559,11 @@ export default function CourseBrowser() {
                                         {course.desc_replacement_course &&
                                             <span>{course.desc_replacement_course}</span>
                                         }
-                                        {/* {JSON.stringify(course)} */}
                                     </td>
-                                    {/* <td className="p-2 break-words">{course.RP ? (course.desc_prerequisite ? course.desc_prerequisite : "Unknown registration restriction") : ""}</td> */}
-                                    <td className="p-2 break-words text-sm">{course.transfer_destinations ? course.transfer_destinations.slice(1, course.transfer_destinations.length - 1).replace(/,/g, ', ') : ""}</td>
+                                    
+                                    <td className="p-2 break-words text-sm">
+                                        {course.transfer_destinations ? course.transfer_destinations.slice(1, -1).replaceAll(",", ", ") : ""}
+                                    </td>
 
 
 
@@ -587,52 +574,6 @@ export default function CourseBrowser() {
                 </table>
             </div>
 
-            {/* {courses && (
-                <div className="mt-4 flex justify-center gap-2">
-                    {(() => {
-                        const totalPages = courses.total_pages || 1;
-                        const currentPage = Number(searchParams.page) || 1;
-                        const pages: (number | string)[] = [];
-
-                        pages.push(1);
-                        if (currentPage > 4) {
-                            pages.push('...');
-                        }
-                        const start = Math.max(2, currentPage - 2);
-                        const end = Math.min(totalPages - 1, currentPage + 2);
-
-                        for (let i = start; i <= end; i++) {
-                            if (i !== 1 && i !== totalPages) {
-                                pages.push(i);
-                            }
-                        }
-                        if (currentPage < totalPages - 3) {
-                            pages.push('...');
-                        }
-                        if (totalPages > 1) {
-                            pages.push(totalPages);
-                        }
-
-                        return pages.map((pageNum, i) => (
-                            <button
-                                key={i}
-                                onClick={() => typeof pageNum === 'number' &&
-                                    handleInputChange('page', pageNum.toString())}
-                                className={`px-3 py-1 border rounded
-                                    ${typeof pageNum === 'number'
-                                        ? pageNum === currentPage
-                                            ? 'bg-blue-500 text-white'
-                                            : 'hover:bg-gray-100'
-                                        : 'cursor-default pointer-events-none text-gray-500'
-                                    }`}
-                                disabled={typeof pageNum === 'string'}
-                            >
-                                {pageNum}
-                            </button>
-                        ));
-                    })()}
-                </div>
-            )} */}
         </div>
     );
 }
