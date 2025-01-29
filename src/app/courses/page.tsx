@@ -5,6 +5,7 @@ export const metadata = {
 
 import Link from "next/link";
 import CourseBrowser from "./course-browser";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -17,9 +18,13 @@ export default function Home() {
       </header>
 
       <div className="md:px-10">
-        <CourseBrowser/>
+        {/* I don't understand why suspense is required here
+        next.js requires it when using useSearchParams, but i don't understand why it can't just handle it... */}
+        <Suspense fallback={<div>Loading...</div>}>
+          <CourseBrowser />
+        </Suspense>
       </div>
-      
+
     </div>
   );
 }
