@@ -167,8 +167,6 @@ export default function CourseBrowser() {
                 const cached = response.headers.get('x-fastapi-cache') === 'HIT';
                 const time = Math.round(performance.now() - start);
 
-                console.log(data)
-
                 setRequestInfo({ time, cached });
                 setCourses(data);
                 setLoading(false);
