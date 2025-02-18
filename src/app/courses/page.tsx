@@ -18,6 +18,7 @@ export default function Home() {
       </header>
 
       <div className="md:px-10">
+        
         {/* I don't understand why suspense is required here
         next.js requires it when using useSearchParams, but i don't understand why it can't just handle it... */}
         <Suspense fallback={<div>Loading...</div>}>
