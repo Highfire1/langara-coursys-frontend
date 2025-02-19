@@ -249,11 +249,11 @@ export default function CourseInfo({
                 <h1 className="text-2xl font-bold">
                     {course.attributes.on_langara_website ? (
                         <Link href={`https://langara.ca/programs-and-courses/courses/${course.subject}/${course.course_code}.html`} className="text-[#f15a22] transition-colors duration-200 ease-in hover:text-black hover:underline">
-                            <p>{course.subject} {course.course_code}: {course.attributes.title}</p>
+                            <p>{course.subject} {course.course_code}{course.attributes.title ? `: ${course.attributes.title}` : course.attributes.abbreviated_title ? `: ${course.attributes.abbreviated_title}` : ''}</p>
 
                         </Link>
                     ) : (
-                        <>{course.subject} {course.course_code}: {course.attributes.title}</>
+                        <p>{course.subject} {course.course_code}{course.attributes.title ? `: ${course.attributes.title}` : course.attributes.abbreviated_title ? `: ${course.attributes.abbreviated_title}` : ''}</p>
                     )}
                 </h1>
 
