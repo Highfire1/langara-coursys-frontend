@@ -15,6 +15,7 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { addLinksToCourseDescription } from '@/lib/course-utils';
 
 interface CourseMax {
     credits: number;
@@ -544,19 +545,19 @@ export default function CourseBrowser() {
 
                                         <span>
                                             {course.description 
-                                                ? course.description //.replace(/\n/g, '\n\n')
+                                                ? addLinksToCourseDescription(course.description) //.replace(/\n/g, '\n\n')
                                                 : "No description available."
                                             }
                                         </span>
 
                                         {course.desc_prerequisite &&
-                                            <span>{course.desc_prerequisite}</span>
+                                            <span>{addLinksToCourseDescription(course.desc_prerequisite)}</span>
                                         }
                                         {course.desc_duplicate_credit &&
-                                            <span>{course.desc_duplicate_credit}</span>
+                                            <span>{addLinksToCourseDescription(course.desc_duplicate_credit)}</span>
                                         }
                                         {course.desc_replacement_course &&
-                                            <span>{course.desc_replacement_course}</span>
+                                            <span>{addLinksToCourseDescription(course.desc_replacement_course)}</span>
                                         }
                                     </td>
                                     

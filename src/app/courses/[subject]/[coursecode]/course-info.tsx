@@ -1,6 +1,7 @@
 'use client';
+import { addLinksToCourseDescription } from '@/lib/course-utils';
 import Link from 'next/link';
-import { JSX, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface CourseAttributes {
     credits: number;
@@ -109,56 +110,6 @@ const mapTerm = (term: number): string => {
     }
 };
 
-// yes i am aware that this function is kind of cursed
-// (because it was translated from python by chatgpt)
-// BUT IT WORKS OK. AND THAT IS THE MOST IMPORTANT THING.
-const addLinksToCourseDescription = (text: string): JSX.Element => {
-    const SUS_SEPARATOR = "🏺";
-    const replacementValues = " .,;/()[]";
-    let textSplit = text;
-
-    for (const char of replacementValues) {
-        textSplit = textSplit.split(char).join(`${SUS_SEPARATOR}${char}${SUS_SEPARATOR}`);
-    }
-
-    const words = textSplit.split(SUS_SEPARATOR);
-    const ARBITRARY_BIG_NUMBER = 1000000;
-    let currentSubject = "";
-    let distanceSinceSubjectUpdate = ARBITRARY_BIG_NUMBER;
-
-    const parts: (string | JSX.Element | null)[] = [];
-
-    words.forEach((word, index) => {
-        if (/^[A-Z]{4,8}$/.test(word)) {
-            currentSubject = word;
-            distanceSinceSubjectUpdate = -1;
-        }
-
-        distanceSinceSubjectUpdate += 1;
-
-        if (/^\d{4}$/.test(word)) {
-            if (distanceSinceSubjectUpdate < ARBITRARY_BIG_NUMBER) {
-                parts[parts.length - distanceSinceSubjectUpdate] = null;
-                parts.push(
-                    <a key={`${index}-${word}`} href={`/courses/${currentSubject}/${word}`} className="text-black hover:text-[#f15a22] underline transition-colors duration-200 ease-in">
-                        {currentSubject} {word}
-                    </a>
-                );
-                distanceSinceSubjectUpdate = ARBITRARY_BIG_NUMBER;
-            } else {
-                parts.push(
-                    <a key={`${index}-${word}`} href={`/courses/${currentSubject}/${word}`} className="text-black hover:text-[#f15a22] underline transition-colors duration-200 ease-in">
-                        {word}
-                    </a>
-                );
-            }
-        } else {
-            parts.push(word);
-        }
-    });
-
-    return <>{parts.filter(part => part !== null)}</>;
-};
 
 export default function CourseInfo({
     subject,
@@ -305,31 +256,31 @@ export default function CourseInfo({
 
                             <tr>
                                 <th>2nd Year Arts</th>
-                                <td className={course.attributes.attr_ar ? 'bg-green-500' : ''}>{course.attributes.attr_ar === null ? 'Unknown' : course.attributes.attr_ar ? 'Yes' : 'No'}</td>
+                                <td className={`min-w-[50px] ${course.attributes.attr_ar ? 'bg-green-500' : ''}`}>{course.attributes.attr_ar === null ? '' : course.attributes.attr_ar ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr>
                                 <th>2nd Year Science</th>
-                                <td className={course.attributes.attr_sc ? 'bg-green-500' : ''}>{course.attributes.attr_sc === null ? 'Unknown' : course.attributes.attr_sc ? 'Yes' : 'No'}</td>
+                                <td className={course.attributes.attr_sc ? 'bg-green-500' : ''}>{course.attributes.attr_sc === null ? '' : course.attributes.attr_sc ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr>
                                 <th>Humanities</th>
-                                <td className={course.attributes.attr_hum ? 'bg-green-500' : ''}>{course.attributes.attr_hum === null ? 'Unknown' : course.attributes.attr_hum ? 'Yes' : 'No'}</td>
+                                <td className={course.attributes.attr_hum ? 'bg-green-500' : ''}>{course.attributes.attr_hum === null ? '' : course.attributes.attr_hum ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr>
                                 <th>Lab Science</th>
-                                <td className={course.attributes.attr_lsc ? 'bg-green-500' : ''}>{course.attributes.attr_lsc === null ? 'Unknown' : course.attributes.attr_lsc ? 'Yes' : 'No'}</td>
+                                <td className={course.attributes.attr_lsc ? 'bg-green-500' : ''}>{course.attributes.attr_lsc === null ? '' : course.attributes.attr_lsc ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr>
                                 <th>Science</th>
-                                <td className={course.attributes.attr_sci ? 'bg-green-500' : ''}>{course.attributes.attr_sci === null ? 'Unknown' : course.attributes.attr_sci ? 'Yes' : 'No'}</td>
+                                <td className={course.attributes.attr_sci ? 'bg-green-500' : ''}>{course.attributes.attr_sci === null ? '' : course.attributes.attr_sci ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr>
                                 <th>Social Science</th>
-                                <td className={course.attributes.attr_soc ? 'bg-green-500' : ''}>{course.attributes.attr_soc === null ? 'Unknown' : course.attributes.attr_soc ? 'Yes' : 'No'}</td>
+                                <td className={course.attributes.attr_soc ? 'bg-green-500' : ''}>{course.attributes.attr_soc === null ? '' : course.attributes.attr_soc ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr>
                                 <th>University<br />Transferable</th>
-                                <td className={course.attributes.attr_ut ? 'bg-green-500' : ''}>{course.attributes.attr_ut === null ? 'Unknown' : course.attributes.attr_ut ? 'Yes' : 'No'}</td>
+                                <td className={course.attributes.attr_ut ? 'bg-green-500' : ''}>{course.attributes.attr_ut === null ? '' : course.attributes.attr_ut ? 'Yes' : 'No'}</td>
                             </tr>
 
                         </tbody>
