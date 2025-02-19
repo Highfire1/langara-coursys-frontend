@@ -20,28 +20,28 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/planner" target="_blank" className="block">
+          <Link href="/planner" className="block">
             <div className="bg-[#BDEDBD] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
               <h2 className="text-xl font-bold mb-2">Course Planner</h2>
               <p className="text-sm max-w-[300px]">Plan your courses for a semester using the original visual course planner.</p>
             </div>
           </Link>
 
-          <Link href="/timetable" target="_blank" className="block">
+          <Link href="/timetable" className="block">
             <div className="bg-[#b38cb3] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
               <h2 className="text-xl font-bold mb-2">Timetable Generator (BETA)</h2>
               <p className="text-sm max-w-[300px]">Explore all possible combinations of a list of selected courses.</p>
             </div>
           </Link>
 
-          <Link href="/courses" target="_blank" className="block">
+          <Link href="/courses" className="block">
             <div className="bg-[#F1B5CB] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
               <h2 className="text-xl font-bold mb-2">Course Search</h2>
               <p className="text-sm max-w-[300px]">Explore every single course at Langara. Search by attribute, transfer destinations, and more.</p>
             </div>
           </Link>
 
-          <Link href="/sections" target="_blank" className="block">
+          <Link href="/sections" className="block">
             <div className="bg-[#FEB95F] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
               <h2 className="text-xl font-bold mb-2">Course Offerings</h2>
               <p className="text-sm max-w-[300px]">Explore every single course offering at Langara. View historical data of previous sections, and filter by waitlist, open seats, or on other parameters.</p>
