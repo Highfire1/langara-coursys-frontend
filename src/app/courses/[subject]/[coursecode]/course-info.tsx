@@ -1,5 +1,5 @@
 import { addLinksToCourseDescription } from '@/lib/course-utils';
-import { Course, Transfer} from '@/types/Course';
+import { Course, Transfer } from '@/types/Course';
 import Link from 'next/link';
 
 
@@ -21,7 +21,7 @@ interface CourseInfoProps {
 }
 
 export default async function CourseInfo({ course }: CourseInfoProps) {
-  
+
     const validTransfers: Transfer[] = [];
     const oldTransfers: Transfer[] = [];
 
@@ -82,16 +82,19 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
 
                 <table className="table-auto text-left w-fit">
                     <tbody>
-                        {(course.attributes.hours_lecture !== null || course.attributes.hours_seminar !== null || course.attributes.hours_lab !== null) && (
-                            <tr>
-                                <th className='pr-4'>Course Format</th>
-                                <td>
-                                    Lecture {course.attributes.hours_lecture !== null ? course.attributes.hours_lecture.toFixed(1) : 'N/A'} h + 
-                                    Seminar {course.attributes.hours_seminar !== null ? course.attributes.hours_seminar.toFixed(1) : 'N/A'} h + 
-                                    Lab {course.attributes.hours_lab !== null ? course.attributes.hours_lab.toFixed(1) : 'N/A'} h
-                                </td>
-                            </tr>
-                        )}
+                        <tr>
+                            <th className='pr-4'>Course Format</th>
+                            <td>
+                                {course.attributes.hours_lecture !== null && course.attributes.hours_seminar !== null && course.attributes.hours_lab !== null ? (
+                                    <>
+                                        Lecture {course.attributes.hours_lecture.toFixed(1)} h +
+                                        Seminar {course.attributes.hours_seminar.toFixed(1)} h +
+                                        Lab {course.attributes.hours_lab.toFixed(1)} h
+                                    </>
+                                ) : 'N/A'}
+                            </td>
+                        </tr>
+
                         <tr>
                             <th>Credits</th>
                             <td>{course.attributes.credits !== null ? course.attributes.credits.toFixed(1) : 'N/A'}</td>
