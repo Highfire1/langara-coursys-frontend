@@ -9,7 +9,7 @@ import Header from "@/components/shared/header";
 export default function Home() {
   return (
     <div className="w-full h-full">
-      <Header title="Course Offerings Search" color="#FEB95F"></Header>
+      <Header title="Langara Course Offerings Search" color="#FEB95F"></Header>
 
       <div className="md:px-10">
         <CourseBrowser/>

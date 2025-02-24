@@ -10,7 +10,7 @@ import Header from "@/components/shared/header";
 export default function Home() {
   return (
     <div className="w-full h-full">
-      <Header title="Langara College Course Tools" color="#F1B5CB"/>
+      <Header title="Langara Course Search" color="#F1B5CB"/>
 
       <div className="md:px-10">
         
