@@ -1,99 +1,7 @@
 import { addLinksToCourseDescription } from '@/lib/course-utils';
+import { Course, Transfer} from '@/types/Course';
 import Link from 'next/link';
 
-interface CourseAttributes {
-    credits: number;
-    title: string;
-    desc_replacement_course: string;
-    description: string;
-    desc_duplicate_credit: string;
-    desc_registration_restriction: string;
-    desc_prerequisite: string;
-    hours_lecture: number;
-    hours_seminar: number;
-    hours_lab: number;
-    offered_online: boolean;
-    preparatory_course: boolean;
-    RP: string;
-    abbreviated_title: string;
-    add_fees: number;
-    rpt_limit: number;
-    attr_ar: boolean;
-    attr_sc: boolean;
-    attr_hum: boolean;
-    attr_lsc: boolean;
-    attr_sci: boolean;
-    attr_soc: boolean;
-    attr_ut: boolean;
-    first_offered_year: number;
-    first_offered_term: number;
-    last_offered_year: number;
-    last_offered_term: number;
-    on_langara_website: boolean;
-    discontinued: boolean;
-    transfer_destinations: string;
-}
-
-interface CourseSectionSchedule {
-    type: string;
-    days: string;
-    time: string;
-    start: string | null;
-    end: string | null;
-    room: string;
-    instructor: string;
-    id: string;
-}
-
-interface CourseSection {
-    id: string;
-    crn: number;
-    RP: string;
-    seats: string;
-    waitlist: string;
-    section: string;
-    credits: number;
-    abbreviated_title: string;
-    add_fees: string | null;
-    rpt_limit: number;
-    notes: string;
-    subject: string;
-    course_code: string;
-    year: number;
-    term: number;
-    schedule: CourseSectionSchedule[];
-}
-
-interface CourseTransfer {
-    id: string;
-    source: string;
-    source_credits: number;
-    source_title: string;
-    destination: string;
-    destination_name: string;
-    credit: string;
-    condition: string | null;
-    effective_start: string;
-    effective_end: string | null;
-    subject: string;
-    course_code: string;
-}
-
-interface CourseOutline {
-    url: string;
-    file_name: string;
-    id: string;
-}
-
-interface Course {
-    subject: string;
-    course_code: string;
-    id: string;
-    attributes: CourseAttributes;
-    sections: CourseSection[];
-    transfers: CourseTransfer[];
-    outlines: CourseOutline[];
-}
 
 const mapTerm = (term: number): string => {
     switch (term) {
@@ -109,44 +17,30 @@ const mapTerm = (term: number): string => {
 };
 
 interface CourseInfoProps {
-    subject: string;
-    course_code: string;
+    course: Course;
 }
 
-export default async function CourseInfo({ subject, course_code }: CourseInfoProps) {
+export default async function CourseInfo({ course }: CourseInfoProps) {
   
-    let course: Course | null = null;
-    let error: string | null = null;
-    const validTransfers: CourseTransfer[] = [];
-    const oldTransfers: CourseTransfer[] = [];
+    const validTransfers: Transfer[] = [];
+    const oldTransfers: Transfer[] = [];
 
-    try {
-        const response = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${course_code}`);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch course data: ${response.statusText}`);
+    // show agreements that expired up to two years ago
+    const transferDateCutoff = new Date();
+    transferDateCutoff.setMonth(transferDateCutoff.getMonth() + 24);
+
+    course.transfers.forEach((transfer_agreement: Transfer) => {
+        if (transfer_agreement.effective_end == null || new Date(transfer_agreement.effective_end) > transferDateCutoff) {
+            validTransfers.push(transfer_agreement);
+        } else {
+            oldTransfers.push(transfer_agreement);
         }
-        const data = await response.json();
-        course = data;
+    });
 
-        // show agreements that expired up to two years ago
-        const transferDateCutoff = new Date();
-        transferDateCutoff.setMonth(transferDateCutoff.getMonth() + 24);
+    course.sections = course.sections.reverse();
 
-        data.transfers.forEach((transfer_agreement: CourseTransfer) => {
-            if (transfer_agreement.effective_end == null || new Date(transfer_agreement.effective_end) > transferDateCutoff) {
-                validTransfers.push(transfer_agreement);
-            } else {
-                oldTransfers.push(transfer_agreement);
-            }
-        });
-
-        data.sections = data.sections.reverse();
-    } catch (err) {
-        error = err instanceof Error ? err.message : 'An error occurred';
-    }
 
     if (!course) return <div>No course data found.</div>;
-    if (error) return <div>Error: {error}</div>;
 
     return (
         <div className="flex flex-col gap-2">

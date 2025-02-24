@@ -1,4 +1,5 @@
 // src/types/Course.ts
+import { Section } from "./Section";
 
 export interface CourseAttributes {
     credits: number;
@@ -31,6 +32,7 @@ export interface CourseAttributes {
     active: boolean;
     discontinued: boolean;
     transfer_destinations: string;
+    on_langara_website: boolean;
   }
   
   export interface Transfer {
@@ -55,13 +57,13 @@ export interface CourseAttributes {
   }
   
   export interface Course {
-    sections: import("./Section").Section[];
     subject: string;
     course_code: string;
     id: string;
     attributes: CourseAttributes;
-    transfers: Transfer[]; // Updated to include transfers
-    outlines: Outline[]; // Adjust type if you have specific structure for outlines
+    sections: Section[];
+    transfers: Transfer[];
+    outlines: Outline[];
   }
 
   export interface CourseInternal extends Course {
