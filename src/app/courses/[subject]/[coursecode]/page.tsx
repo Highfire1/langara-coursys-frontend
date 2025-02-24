@@ -8,9 +8,9 @@ export const dynamicParams = true;
 
 
 export async function generateMetadata({ params }: { params: expectedParams }) {
-    const { subject, course_code: coursecode } = await params;
+    const { subject, coursecode: course_code } = await params;
 
-    const courseRes = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${coursecode}`);
+    const courseRes = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${course_code}`);
 
     if (!courseRes.ok) { return { title: `Error ${courseRes.status}`}}
 
@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
         titleText = "";
 
     return {
-        title: `${subject.toUpperCase()} ${coursecode}${titleText}`,
-        description: `Details about ${subject.toUpperCase()} ${coursecode} at Langara College.`,
+        title: `${subject.toUpperCase()} ${course_code}${titleText}`,
+        description: `Details about ${subject.toUpperCase()} ${course_code} at Langara College.`,
     };
 }
 
@@ -54,7 +54,7 @@ export async function generateStaticParams() {
   }
 
 
-type expectedParams = Promise<{ subject: string; course_code: string }>;
+type expectedParams = Promise<{ subject: string; coursecode: string }>;
 
 export default async function Page({
     params: searchParams
@@ -62,7 +62,7 @@ export default async function Page({
     params: expectedParams
 }
 ) {
-    const { subject, course_code: course_code } = await searchParams;
+    const { subject, coursecode: course_code } = await searchParams;
 
     const response = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${course_code}`);
     if (!response.ok) {
