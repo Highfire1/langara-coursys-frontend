@@ -27,9 +27,15 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
     else 
         titleText = "";
 
+    let description;
+    if (course.attributes.description)
+        description = course.attributes.description;
+    else
+        description = "No description available.";
+
     return {
         title: `${subject.toUpperCase()} ${coursecode}${titleText}`,
-        description: `Details about ${subject.toUpperCase()} ${coursecode} at Langara College.`,
+        description: `${description}`,
     };
 }
 
