@@ -85,12 +85,16 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                         {(course.attributes.hours_lecture !== null || course.attributes.hours_seminar !== null || course.attributes.hours_lab !== null) && (
                             <tr>
                                 <th className='pr-4'>Course Format</th>
-                                <td>Lecture {course.attributes.hours_lecture.toFixed(1)} h + Seminar {course.attributes.hours_seminar.toFixed(1)} h + Lab {course.attributes.hours_lab.toFixed(1)} h</td>
+                                <td>
+                                    Lecture {course.attributes.hours_lecture !== null ? course.attributes.hours_lecture.toFixed(1) : 'N/A'} h + 
+                                    Seminar {course.attributes.hours_seminar !== null ? course.attributes.hours_seminar.toFixed(1) : 'N/A'} h + 
+                                    Lab {course.attributes.hours_lab !== null ? course.attributes.hours_lab.toFixed(1) : 'N/A'} h
+                                </td>
                             </tr>
                         )}
                         <tr>
                             <th>Credits</th>
-                            <td>{course.attributes.credits.toFixed(1)}</td>
+                            <td>{course.attributes.credits !== null ? course.attributes.credits.toFixed(1) : 'N/A'}</td>
                         </tr>
                     </tbody>
                 </table>

@@ -2,15 +2,18 @@ import { Course } from "@/types/Course";
 import CourseInfo from "./course-info";
 import Header from "@/components/shared/header";
 
+// warning: note the difference between course_code and coursecode
+// coursecode is the url slug / path parameter
+// course_code is returned by the api
 
 export const revalidate = 1800; // regeneate every 30 minutes
 export const dynamicParams = true;
 
 
 export async function generateMetadata({ params }: { params: expectedParams }) {
-    const { subject, coursecode: course_code } = await params;
+    const { subject, coursecode: coursecode } = await params;
 
-    const courseRes = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${course_code}`);
+    const courseRes = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${coursecode}`);
 
     if (!courseRes.ok) { return { title: `Error ${courseRes.status}`}}
 
@@ -25,8 +28,8 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
         titleText = "";
 
     return {
-        title: `${subject.toUpperCase()} ${course_code}${titleText}`,
-        description: `Details about ${subject.toUpperCase()} ${course_code} at Langara College.`,
+        title: `${subject.toUpperCase()} ${coursecode}${titleText}`,
+        description: `Details about ${subject.toUpperCase()} ${coursecode} at Langara College.`,
     };
 }
 
@@ -49,7 +52,7 @@ export async function generateStaticParams() {
 
     return courses.courses.map((course) => ({
         subject: String(course.subject),
-        course_code: String(course.course_code)
+        coursecode: String(course.course_code)
     }))
   }
 
@@ -62,15 +65,15 @@ export default async function Page({
     params: expectedParams
 }
 ) {
-    const { subject, coursecode: course_code } = await searchParams;
+    const { subject, coursecode: coursecode } = await searchParams;
 
-    const response = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${course_code}`);
+    const response = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${coursecode}`);
     if (!response.ok) {
         return (
             <div className="w-full h-full">
                 <Header title="Langara Course Information" color="#A7C7E7"></Header>
 
-                <div className="md:px-10 py-2">Failed to fetch course data for {subject} {course_code}: {response.status} {response.statusText}</div>
+                <div className="md:px-10 py-2">Failed to fetch course data for {subject} {coursecode}: {response.status} {response.statusText}</div>
             </div>
         )
     }
