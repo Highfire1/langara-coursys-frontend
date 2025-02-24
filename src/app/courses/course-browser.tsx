@@ -76,18 +76,14 @@ interface SearchParams {
     transfer_destinations?: string[];
 }
 
-interface SubjectsResponse {
-    count: number;
-    subjects: string[];
-}
-
 interface TransferDestination {
     code: string;
     name: string;
 }
 
-interface TransfersResponse {
+interface CourseBrowserProps {
     transfers: TransferDestination[];
+    subjects: string[];
 }
 
 const termToSeason = (term: number): string => {
@@ -99,12 +95,11 @@ const termToSeason = (term: number): string => {
     }
 };
 
-export default function CourseBrowser() {
+export default function CourseBrowser({ transfers, subjects }: CourseBrowserProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [transfer_destinations, setDestinations] = useState<TransfersResponse>();
-    const [subjects, setSubjects] = useState<string[]>([]);
+    // const [transfer_destinations, setDestinations] = useState<TransfersResponse>(transfers);
     const [courses, setCourses] = useState<CoursesResponse | null>(null);
     const [loading, setLoading] = useState(false);
     const [requestInfo, setRequestInfo] = useState<{ time?: number; cached?: boolean }>({});
@@ -127,23 +122,6 @@ export default function CourseBrowser() {
     };
 
     const [currentSearchParams, setCurrentSearchParams] = useState<SearchParams>(initialSearchParams);
-
-    useEffect(() => {
-        const fetchInitialData = async () => {
-            const [transferRes, subjectsRes] = await Promise.all([
-                fetch('https://coursesapi.langaracs.ca/v1/index/transfer_destinations'),
-                fetch('https://coursesapi.langaracs.ca/v1/index/subjects')
-            ]);
-
-            const transfersData = await transferRes.json();
-            const subjectsData: SubjectsResponse = await subjectsRes.json();
-
-            setDestinations(transfersData);
-            setSubjects(subjectsData.subjects);
-        };
-
-        fetchInitialData();
-    }, []);
 
     const debouncedSearch = useMemo(
         () =>
@@ -178,7 +156,6 @@ export default function CourseBrowser() {
     useEffect(() => {
         debouncedSearch(currentSearchParams);
     }, [currentSearchParams, debouncedSearch]);
-
 
     const handleInputChange = (key: keyof SearchParams, value: string | boolean | string[]) => {
         setCurrentSearchParams(prev => ({ ...prev, [key]: value }));
@@ -370,7 +347,7 @@ export default function CourseBrowser() {
                                     <DropdownMenuContent align="end" className="w-56 bg-white overflow-y-scroll h-64" >
                                         {/* <DropdownMenuLabel>Appearance</DropdownMenuLabel>
                                         <DropdownMenuSeparator /> */}
-                                        {transfer_destinations?.transfers.map((destination, index) => (
+                                        {transfers.map((destination, index) => (
                                             <DropdownMenuCheckboxItem
                                                 key={index}
                                                 onCheckedChange={(checked) => {
