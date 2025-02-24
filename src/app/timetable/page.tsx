@@ -29,7 +29,7 @@ function PageContent() {
 
   useEffect(() => {
     if (!searchParams.get('year') || !searchParams.get('term')) {
-      router.replace(`/timetable?year=${year}&term=${term}`);
+      router.replace(`/timetable?year=${year}&term=${term}`, {scroll: false});
       return;
     }
 

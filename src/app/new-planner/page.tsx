@@ -21,7 +21,7 @@ function PageContent() {
 
   useEffect(() => {
     if (!searchParams.get('year') || !searchParams.get('term')) {
-      router.replace(`/new-planner?year=${year}&term=${term}`);
+      router.replace(`/new-planner?year=${year}&term=${term}`, {scroll: false});
       return;
     }
 

@@ -200,7 +200,7 @@ export default function CourseBrowser() {
             }
         });
 
-        router.replace(`?${queryParams.toString()}`);
+        router.replace(`?${queryParams.toString()}`, {scroll: false});
     };
 
     return (
