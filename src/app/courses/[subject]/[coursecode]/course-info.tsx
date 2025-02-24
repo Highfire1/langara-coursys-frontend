@@ -1,7 +1,5 @@
-'use client';
 import { addLinksToCourseDescription } from '@/lib/course-utils';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 interface CourseAttributes {
     credits: number;
@@ -110,65 +108,45 @@ const mapTerm = (term: number): string => {
     }
 };
 
-
-export default function CourseInfo({
-    subject,
-    course_code,
-}: {
+interface CourseInfoProps {
     subject: string;
     course_code: string;
-}) {
-    const [course, setCourse] = useState<Course | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+}
 
-    const [validTransfers, setValidTransfers] = useState<CourseTransfer[]>([]);
-    const [oldTransfers, setOldTransfers] = useState<CourseTransfer[]>([]);
+export default async function CourseInfo({ subject, course_code }: CourseInfoProps) {
+  
+    let course: Course | null = null;
+    let error: string | null = null;
+    const validTransfers: CourseTransfer[] = [];
+    const oldTransfers: CourseTransfer[] = [];
 
-    useEffect(() => {
-        const fetchCourse = async () => {
-            try {
-                const response = await fetch(
-                    `https://coursesapi.langaracs.ca/v1/courses/${subject}/${course_code}`
-                );
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch course data: ${response.statusText}`);
-                }
-                const data = await response.json();
-                setCourse(data);
+    try {
+        const response = await fetch(`https://coursesapi.langaracs.ca/v1/courses/${subject}/${course_code}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch course data: ${response.statusText}`);
+        }
+        const data = await response.json();
+        course = data;
 
-                // show agreements that expired up to two years ago
-                const transferDateCutoff = new Date();
-                transferDateCutoff.setMonth(transferDateCutoff.getMonth() + 24);
+        // show agreements that expired up to two years ago
+        const transferDateCutoff = new Date();
+        transferDateCutoff.setMonth(transferDateCutoff.getMonth() + 24);
 
-                const validTransfers: CourseTransfer[] = [];
-                const oldTransfers: CourseTransfer[] = [];
-
-                data.transfers.forEach((transfer_agreement: CourseTransfer) => {
-                    if (transfer_agreement.effective_end == null || new Date(transfer_agreement.effective_end) > transferDateCutoff) {
-                        validTransfers.push(transfer_agreement);
-                    } else {
-                        oldTransfers.push(transfer_agreement);
-                    }
-                });
-
-                setValidTransfers(validTransfers);
-                setOldTransfers(oldTransfers);
-
-                data.sections = data.sections.reverse();
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'An error occurred');
-            } finally {
-                setLoading(false);
+        data.transfers.forEach((transfer_agreement: CourseTransfer) => {
+            if (transfer_agreement.effective_end == null || new Date(transfer_agreement.effective_end) > transferDateCutoff) {
+                validTransfers.push(transfer_agreement);
+            } else {
+                oldTransfers.push(transfer_agreement);
             }
-        };
+        });
 
-        fetchCourse();
-    }, [subject, course_code]); // Add dependencies here
+        data.sections = data.sections.reverse();
+    } catch (err) {
+        error = err instanceof Error ? err.message : 'An error occurred';
+    }
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
     if (!course) return <div>No course data found.</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div className="flex flex-col gap-2">
