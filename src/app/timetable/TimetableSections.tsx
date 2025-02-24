@@ -40,15 +40,16 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
         <div>
           <h2 className="font-bold text-lg">
             {courses.length === 0 ? "Timetables List" :
-             timetables.length === 0 ? "Couldn't generate any timetables." :
+             timetables.length === 0 ? "No timetables found." :
              `Timetable ${currentIndex + 1} of ${timetables.length}`}
           </h2>
-          {timetables.length === 0 && courses.length > 0 && (
+          {/* commented out until i can write better error messages that actually tell you what went wrong */}
+          {/* {timetables.length === 0 && courses.length > 0 && (
             <>
               <p>There is likely an unfixable time conflict.</p>
               <p>Try selecting some different sections.</p>
             </>
-          )}
+          )} */}
         </div>
 
 
