@@ -65,12 +65,11 @@ function PageContent() {
   if (error) return <div className='w-[100vw] h-[100vh] p-4'>{error}</div>;
 
   return (
-    <div className="w-[100vw] h-[100vh] flex flex-col">
+    <div className="h-[100vh] flex flex-col">
       <Header title="Langara Timetable Generator" color="#b38cb3"/>
       
-
-      <div className="flex gap-2 bg-gray-400 w-full h-full">
-        <div className="w-1/4 p-2 max-h-full">
+      <div className="flex gap-2 bg-gray-50 flex-grow overflow-hidden">
+        <div className="w-1/4 p-2 overflow-y-auto h-full">
           <SelectedCourses
             courses={courses}
             selectedCourses={selectedCourses}
@@ -79,13 +78,13 @@ function PageContent() {
             term={term}
           />
         </div>
-        <div className="w-1/4 p-2 max-h-full">
+        <div className="w-1/4 p-2 overflow-auto">
           <TimetableSections
             courses={selectedCourses}
             setCurrentTimetable={setCurrentTimetable}
           />
         </div>
-        <div className="w-2/4 h-full flex flex-col p-2">
+        <div className="w-2/4 h-full p-2">
           <div className="bg-gray-500 rounded h-full p-2">
             <Calendar currentTimetable={currentTimetable} />
           </div>

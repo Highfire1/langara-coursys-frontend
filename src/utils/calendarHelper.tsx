@@ -8,12 +8,18 @@ const DAYS_MAP: { [key: string]: number } = {
   'F': 5, // Friday
 };
 
-const TYPE_COLORS: { [key: string]: string } = {
-  'LEC': '#3788d8',
-  'LAB': '#38b000',
-  'TUT': '#9d4edd',
-  'SEM': '#ff6b6b',
-};
+// Function to generate a color based on the course subject and course code
+function generateColor(subject: string, courseCode: string): string {
+  const input = `${subject}${courseCode}`;
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = input.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = hash % 360; // Use the hash to generate a hue value between 0 and 360
+  const saturation = 50; // Fixed saturation value
+  const lightness = 50; // Fixed lightness value
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
 
 export function convertScheduleToEvents(sections: Section[]) {
   const events: {
@@ -56,6 +62,7 @@ function createEventsFromSchedule(schedule: Schedule, section: Section) {
   }[] = [];
   const days = schedule.days.split('');
   const [startTime, endTime] = schedule.time.split('-');
+  const color = generateColor(section.subject, section.course_code);
 
   days.forEach((day) => {
     if (day !== '-' && DAYS_MAP[day]) {
@@ -64,8 +71,8 @@ function createEventsFromSchedule(schedule: Schedule, section: Section) {
         startTime: formatTime(startTime),
         endTime: formatTime(endTime),
         daysOfWeek: [DAYS_MAP[day]],
-        backgroundColor: TYPE_COLORS[schedule.type] || '#666',
-        borderColor: TYPE_COLORS[schedule.type] || '#666',
+        backgroundColor: color,
+        borderColor: color,
         extendedProps: {
           instructor: schedule.instructor,
           type: schedule.type,

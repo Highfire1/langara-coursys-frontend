@@ -9,8 +9,8 @@ import Link from "next/link";
 
 export default function Home() {
     return (
-        <div className="w-full h-full bg-gray-400">
-            <Header title="About the Langara Course Planner" color="null" />
+        <div className="w-full h-full bg-gray-300">
+            <Header title="About the Langara Course Planner" color="#9ca3af  " />
 
             <div className="px-2 md:px-20 md:max-w-[1000px] py-6 mx-auto">
 
@@ -37,7 +37,7 @@ export default function Home() {
                 <section>
                 <h2 className="text-2xl font-bold mb-3">Can I use the data in my own project?</h2>
                 <p>Yes, you can.</p>
-                <p>Data is freely available through an endpoint at <Link href="https://coursesapi.langaracs.ca" target="_blank" className="hover:underline text-blue-800">coursesapi.langaracs.ca</Link>.</p>
+                <p>Data is freely available through a REST API at <Link href="https://coursesapi.langaracs.ca" target="_blank" className="hover:underline text-blue-800">coursesapi.langaracs.ca</Link>.</p>
                 <p>Let me know if you create something using the API so that I can advertise it.</p>
                 </section>
 

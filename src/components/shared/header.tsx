@@ -17,7 +17,7 @@ const Header: React.FC<HeaderProps> = ({ title, color = '#D3D3D3', navigateTo = 
             </Link>
             <p>Note: this website is a student project and is not affiliated with Langara College.</p>
             {/* <p>Utilities built by Anderson Tseng and hosted by the Langara Computer Science Club.</p> */}
-            <p>Suggestions? Feedback? Found a bug? Please send a report through <a className="hover:underline text-blue-800" href="https://forms.gle/CYKP7xsp2an6gNEK9" target="_blank">this form.</a></p>
+            <p>Suggestions? Feedback? Found a bug? Please send a report through <a className="text-blue-800 hover:text-blue-600 underline" href="https://forms.gle/CYKP7xsp2an6gNEK9" target="_blank">this form.</a></p>
         </header>
     );
 };

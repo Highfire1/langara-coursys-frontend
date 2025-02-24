@@ -16,7 +16,7 @@ export default function Home() {
       <div className="px-4 py-6 flex flex-col gap-4">
         <div>
           <strong>Welcome to the Langara Course Planner!</strong>
-          <p>This is a website that helps you effectively plan and look for courses at Langara College. Check out the about page for more information.</p>
+            <p>This is a website that helps you effectively plan and look for courses at Langara College. Check out the <Link href="/about" className="text-blue-800 hover:text-blue-600 underline">about page</Link> for more information.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

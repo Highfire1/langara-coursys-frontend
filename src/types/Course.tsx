@@ -69,6 +69,7 @@ export interface CourseAttributes {
   export interface CourseInternal extends Course {
     hidden: boolean;
     sections_enhanced: import("./Section").SectionInternal[];
+    ui_hidden: boolean;
   }
   
   export interface CoursesResponse {

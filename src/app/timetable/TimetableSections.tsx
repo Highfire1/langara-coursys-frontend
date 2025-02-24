@@ -14,7 +14,7 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
   const [timetables, setTimetables] = useState<Section[][]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Generate timetables when courses change
+  //  Generate timetables when courses change
   useEffect(() => {
     if (courses.length > 0) {
       const generated = generateTimetables(courses);
@@ -25,26 +25,33 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
     }
   }, [courses]);
 
-  // Update current timetable when index or timetables change
+  //  Update current timetable when index or timetables change
   useEffect(() => {
     const currentTimetable = timetables.length > 0 ? timetables[currentIndex] : [];
     setCurrentTimetable(currentTimetable);
   }, [currentIndex, timetables, setCurrentTimetable]);
 
-  if (timetables.length === 0) {
-    return (
-      <div className='border w-full h-full p-2 rounded flex flex-col'>
-        <h2 className="font-bold text-lg">No timetables available</h2>
-      </div>
-    );
-  }
 
   return (
     <div className='border w-full h-full p-2 rounded flex flex-col'>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-bold text-lg">
-          Timetable {currentIndex + 1} of {timetables.length}
-        </h2>
+
+
+        <div>
+          <h2 className="font-bold text-lg">
+            {courses.length === 0 ? "Timetables List" :
+             timetables.length === 0 ? "Couldn't generate any timetables." :
+             `Timetable ${currentIndex + 1} of ${timetables.length}`}
+          </h2>
+          {timetables.length === 0 && courses.length > 0 && (
+            <>
+              <p>There is likely an unfixable time conflict.</p>
+              <p>Try selecting some different sections.</p>
+            </>
+          )}
+        </div>
+
+
         <div className="flex gap-2">
           <button
             onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
@@ -55,7 +62,7 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
           </button>
           <button
             onClick={() => setCurrentIndex(prev => Math.min(timetables.length - 1, prev + 1))}
-            disabled={currentIndex === timetables.length - 1}
+            disabled={timetables.length==0 || currentIndex === timetables.length - 1}
             className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
           >
             Next
@@ -64,17 +71,32 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
       </div>
 
       <div className='flex-grow border-2 rounded overflow-auto'>
-        {timetables[currentIndex].map((section, index) => (
+        {timetables.length > 0 && timetables[currentIndex].map((section, index) => (
           <div key={index} className="p-2 border-b">
-            <h3 className="font-semibold">{section.subject} {section.course_code} - Section {section.section}</h3>
-            {section.schedule.map((schedule, scheduleIndex) => (
-              <div key={scheduleIndex} className="text-sm">
-                <p>{schedule.type}: {schedule.days} {schedule.time}</p>
-                <p>Instructor: {schedule.instructor}</p>
-              </div>
-            ))}
+        <h3 className="font-semibold">{section.subject} {section.course_code} - Section {section.section}</h3>
+        <p className="text-sm">
+          {section.seats} seat{Number(section.seats) > 1 ? 's' : ''} open
+          {section.waitlist === " " ? "." : ` / ${section.waitlist} on waitlist.`}
+        </p>
+
+        {section.schedule.map((schedule, scheduleIndex) => (
+          <div key={scheduleIndex} className="text-sm">
+            <table>
+          <tbody>
+              <tr key={scheduleIndex}>
+            <td className="pr-1">{schedule.type}</td>
+            <td className="pr-1">{schedule.days}</td>
+            <td className="pr-1">{schedule.time}</td>
+            <td>{schedule.instructor}</td>
+              </tr>
+          </tbody>
+            </table>
           </div>
         ))}
+
+          </div>
+        ))}
+
       </div>
     </div>
   );
