@@ -11,7 +11,7 @@ import Composer from './composer';
 
 export default function Page() {
   return (
-    <div className="h-[100vh] flex flex-col">
+    <div className="h-[100vh] flex flex-col overflow-y-auto">
       <Header title="Langara Timetable Generator" color="#b38cb3" />
 
       <Suspense fallback={<div>Loading search parameters...</div>}>

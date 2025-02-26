@@ -34,7 +34,7 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
 
   return (
     <div className='border w-full h-full p-2 rounded flex flex-col'>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col lg:flex-row justify-between items-center mb-4">
 
 
         <div>
@@ -53,7 +53,7 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
         </div>
 
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-row">
           <button
             onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
             disabled={currentIndex === 0}

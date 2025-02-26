@@ -65,7 +65,7 @@ export default function Composer() {
 
     return (
 
-        <div className="flex gap-2 bg-gray-50 flex-grow overflow-hidden">
+        <div className="flex gap-2 bg-gray-50 flex-grow overflow-hidden min-w-[800px]">
             <div className="w-1/4 p-2 overflow-y-auto h-full">
                 <SelectedCourses
                     courses={courses}

@@ -117,7 +117,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                 </p>
                 <p className='text-sm'>{course.attributes.title} ({course.attributes.credits} credits)</p>
 
-                <div className='grid grid-cols-[1fr_2fr_1fr]'>
+                <div className='sm:grid sm:grid-cols-[1fr_2fr_1fr] sm:text-base flex flex-col text-sm'>
                   <button
                   onClick={() => {
                     const hideAll = !course.hidden;
