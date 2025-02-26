@@ -63,7 +63,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[200px] justify-between"
+            className="w-auto justify-between"
           >
             {value
               ? `Added ${courses.find((course) => course.id === value)?.subject} ${courses.find((course) => course.id === value)?.course_code}`
@@ -71,7 +71,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
+        <PopoverContent className="max-w-[600px] md:w-[750px] lg:w-auto p-0">
           <Command>
             <CommandInput placeholder="Search for a course..." />
             <CommandList>
