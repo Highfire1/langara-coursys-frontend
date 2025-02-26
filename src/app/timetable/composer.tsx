@@ -61,8 +61,8 @@ export default function Composer() {
 
     return (
 
-        <div className="flex gap-2 bg-gray-50 flex-grow overflow-hidden min-w-[800px]">
-            <div className="w-1/4 p-2 overflow-y-auto h-full">
+        <div className="flex gap-2 bg-gray-100 flex-grow overflow-hidden min-w-[800px]">
+            <div className="w-1/4 overflow-y-auto h-full">
                 <SelectedCourses
                     courses={courses}
                     selectedCourses={selectedCourses}
@@ -71,14 +71,14 @@ export default function Composer() {
                     term={term}
                 />
             </div>
-            <div className="w-1/4 p-2 overflow-auto">
-                <TimetableSections
-                    courses={selectedCourses}
-                    setCurrentTimetable={setCurrentTimetable}
-                />
+            <div className="w-1/4 overflow-auto ">
+                    <TimetableSections
+                        courses={selectedCourses}
+                        setCurrentTimetable={setCurrentTimetable}
+                    />
             </div>
-            <div className="w-2/4 h-full p-2">
-                <div className="bg-gray-500 rounded h-full p-2">
+            <div className="w-2/4 h-full">
+                <div className="rounded h-full p-2">
                     <Calendar currentTimetable={currentTimetable} />
                 </div>
             </div>

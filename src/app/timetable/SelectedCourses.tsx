@@ -18,6 +18,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
+// import { generateColor } from '@/utils/calendarHelper'
+
 interface CoursesProps {
   courses: Course[];
   selectedCourses: CourseInternal[];
@@ -109,7 +111,10 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
             <div key={index} className='border-b pb-3'>
 
-              <div className={`p-2 ${course.hidden ? 'bg-gray-300' : 'bg-[#84bd84]'}`}>
+              {/* tailwind has some issues with rendering arbitrary values... it should be fixable but this works */}
+              {/* <div className={`p-2 ${course.hidden ? 'bg-gray-300' : ''}`} style={{backgroundColor: !course.hidden ? generateColor(course.subject, course.course_code) : undefined}}>  */}
+              <div className={`p-2 ${course.hidden ? 'bg-gray-300' : 'bg-[#d0ead0]'}`}>
+
 
 
                 <p className='font-semibold'>
@@ -162,7 +167,14 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
               {!course.ui_hidden && (
                 <div>
                   {course.sections_enhanced.map((section, sectionIndex) => (
-                    <div key={sectionIndex} className={`border-2 p-1 border-black text-sm ${section.hidden || section.hidden_by_pin || course.hidden ? 'bg-gray-200' : 'bg-[#bdedbd]'}`}>
+                    <div key={sectionIndex} className={`border-2 p-1 border-black text-sm ${section.hidden || section.hidden_by_pin || course.hidden
+                        ? 'bg-gray-200'
+                        : (section.waitlist !== " " && Number(section.waitlist) > 10) || section.seats === "Cancel"
+                          ? 'bg-red-200'
+                          : section.waitlist !== " " && Number(section.waitlist) > 0
+                            ? 'bg-yellow-200'
+                            : 'bg-green-200'
+                      }`}>
                       <div className="flex justify-between">
                         <button
                           onClick={() => {

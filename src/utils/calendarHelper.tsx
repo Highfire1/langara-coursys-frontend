@@ -11,16 +11,16 @@ const DAYS_MAP: { [key: string]: number } = {
 };
 
 // Function to generate a color based on the course subject and course code
-function generateColor(subject: string, courseCode: string): string {
+export function generateColor(subject: string, courseCode: string): string {
   const input = `${subject}${courseCode}`;
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     hash = input.charCodeAt(i) + ((hash << 5) - hash);
   }
   const hue = hash % 360; // Use the hash to generate a hue value between 0 and 360
-  const saturation = 50; // Fixed saturation value
-  const lightness = 50; // Fixed lightness value
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  const saturation = 70; // Fixed saturation value
+  const lightness = 70; // Fixed lightness value
+  return `hsl(${hue},${saturation}%,${lightness}%)`;
 }
 
 export function convertScheduleToEvents(sections: Section[]) {
@@ -152,6 +152,7 @@ function createEventsFromSchedule(schedule: Schedule, section: Section) {
         daysOfWeek: number[];
         backgroundColor: string;
         borderColor: string;
+        textColor: string; 
         start?: string;
         end?: string;
         extendedProps: {
@@ -164,6 +165,7 @@ function createEventsFromSchedule(schedule: Schedule, section: Section) {
         daysOfWeek: [DAYS_MAP[day]],
         backgroundColor: color,
         borderColor: color,
+        textColor: 'black',
         extendedProps: {
           instructor: schedule.instructor,
           type: schedule.type,

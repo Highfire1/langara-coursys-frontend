@@ -37,7 +37,7 @@ const Calendar = ({ currentTimetable }: CalendarProps) => {
             <>
               <div className="fc-event-main-frame">
                 <div className="fc-event-title-container">
-                  <div className="fc-event-title">{eventInfo.event.title}</div>
+                  <div className="fc-event-title"><strong>{eventInfo.event.title}</strong></div>
                   <div className="text-xs">
                     {eventInfo.event.extendedProps.instructor}
                   </div>
