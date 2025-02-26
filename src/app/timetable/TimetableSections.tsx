@@ -102,6 +102,19 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
         ))}
 
       </div>
+      
+      {/* todo: make shareable link */}
+      <span className="text-sm">CRNS:</span>
+      {timetables.length > 0 && (
+        <div className="text-sm">
+          {timetables[currentIndex].map((section) => (
+            <span key={section.crn} className="mr-2">
+              {section.crn}
+            </span>
+          ))}
+        </div>
+      )}
+
     </div>
   );
 }
