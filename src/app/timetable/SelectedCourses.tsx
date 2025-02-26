@@ -230,7 +230,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                       ) : (
                         <div>
                           <p>
-                            {section.seats} seat{Number(section.seats) > 1 ? 's' : ''} open
+                            {section.seats} seat{Number(section.seats) == 1 ? '' : 's'} open
                             {section.waitlist === " " ? "." : ` / ${section.waitlist} on waitlist.`}
                           </p>
 
