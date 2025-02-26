@@ -64,6 +64,64 @@ export function generateHiddenDays(sections: Section[]) {
   return hasSaturday ? [0] : [0, 6];
 }
 
+// generate calendar start and end time
+// default is 8 am to 10 pm but it automagically updates hours to fit all sections
+// e.g. if there is a class that starts at 7:30 am, the calendar will start at 7 am
+// and if there is a class that ends at 10:30 pm, the calendar will end at 11 pm
+export function generateSlotTimes(sections: Section[]) {
+  let earliestTime = 830;  // Default to 8 AM
+  let latestTime = 2230;   // Default to 10 PM
+
+  sections.forEach(section => {
+    section.schedule.forEach(schedule => {
+      if (!schedule.time) return;
+      
+      const [start, end] = schedule.time.split('-').map(t => parseInt(t || '1830'));
+      
+      if (start && !isNaN(start)) {
+        earliestTime = Math.min(earliestTime, start);
+      }
+      if (end && !isNaN(end)) {
+        latestTime = Math.max(latestTime, end);
+      }
+    });
+  });
+
+  // Convert to HH:mm format and adjust by 30 minutes
+  let minTime = formatTime(adjustTime(earliestTime.toString().padStart(4, '0'), -30));
+  let maxTime = formatTime(adjustTime(latestTime.toString().padStart(4, '0'), 30));
+
+  // If minTime ends in 30, subtract another 30 minutes and add an hour
+  if (minTime.includes(':30')) {
+    const adjusted = new Date(`2000-01-01T${minTime}`);
+    adjusted.setHours(adjusted.getHours() + 1);
+    adjusted.setMinutes(0);
+    minTime = adjusted.toTimeString().slice(0, 8);
+  }
+
+  // If maxTime ends in 30, substract 30 minutes and add an hour
+  if (maxTime.includes(':30')) {
+    const adjusted = new Date(`2000-01-01T${maxTime}`);
+    adjusted.setHours(adjusted.getHours() + 1);
+    adjusted.setMinutes(0);
+    maxTime = adjusted.toTimeString().slice(0, 8);
+  }
+
+  return {
+    slotMinTime: minTime,
+    slotMaxTime: maxTime
+  };
+}
+
+function adjustTime(time: string, minutes: number): string {
+  const hour = parseInt(time.slice(0, 2));
+  const minute = parseInt(time.slice(2));
+  const date = new Date(0, 0, 0, hour, minute + minutes);
+  
+  return `${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}`;
+}
+
+
 
 function createEventsFromSchedule(schedule: Schedule, section: Section) {
   const events: {

@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import { Section } from '../../types/Section';
-import { convertScheduleToEvents, generateHiddenDays } from '@/utils/calendarHelper';
+import { convertScheduleToEvents, generateHiddenDays, generateSlotTimes } from '@/utils/calendarHelper';
 
 interface CalendarProps {
   currentTimetable: Section[];
@@ -14,6 +14,7 @@ const Calendar = ({ currentTimetable }: CalendarProps) => {
   const calendarRef = useRef<FullCalendar>(null);
   const events = convertScheduleToEvents(currentTimetable);
   const hiddenDays = generateHiddenDays(currentTimetable);
+  const { slotMinTime, slotMaxTime } = generateSlotTimes(currentTimetable);
 
   return (
     <>
@@ -24,8 +25,8 @@ const Calendar = ({ currentTimetable }: CalendarProps) => {
         height={"100%"}
         timeZone='America/Vancouver'
         initialView="timeGridWeek"
-        slotMinTime="07:00"
-        slotMaxTime="22:00"
+        slotMinTime={slotMinTime}
+        slotMaxTime={slotMaxTime}
         displayEventTime={true}
         hiddenDays={hiddenDays}
         allDaySlot={false}
