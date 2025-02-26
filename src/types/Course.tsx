@@ -75,3 +75,11 @@ export interface CourseAttributes {
   export interface CoursesResponse {
     courses: Course[];
   }
+
+  export interface LatestSemesterResponse {
+    courses_first_day: string;
+    courses_last_day: string;
+    id: string;
+    term: number;
+    year: number;
+  }
