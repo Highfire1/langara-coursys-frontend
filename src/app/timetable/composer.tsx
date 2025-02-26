@@ -1,9 +1,5 @@
 'use client';
 
-// export const metadata = {
-//   title: "Langara Timetable Generator",
-//   description: "Explore all possible combinations of a list of selected courses.",
-// };
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';

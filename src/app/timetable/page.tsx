@@ -1,8 +1,12 @@
 
-// export const metadata = {
-//   title: "Langara Timetable Generator",
-//   description: "Explore all possible combinations of a list of selected courses.",
-// };
+// TODO:
+// CURRENTLY EVERY RENDER IS DOUBLED...
+// I DO NOT KNOW WHY THIS IS HAPPENING
+
+export const metadata = {
+  title: "Langara Timetable Generator",
+  description: "Explore all possible combinations of a list of selected courses.",
+};
 
 import { Suspense } from 'react';
 import Header from '@/components/shared/header';

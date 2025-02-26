@@ -21,7 +21,8 @@ const Calendar = ({ currentTimetable }: CalendarProps) => {
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin]}
-        rerenderDelay={5}
+        // makes calendar flicker because we are destroying and recreating the calendar on each render
+        // rerenderDelay={5} 
         height={"100%"}
         timeZone='America/Vancouver'
         initialView="timeGridWeek"
