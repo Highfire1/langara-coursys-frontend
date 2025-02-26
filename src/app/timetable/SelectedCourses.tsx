@@ -167,13 +167,14 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
               {!course.ui_hidden && (
                 <div>
                   {course.sections_enhanced.map((section, sectionIndex) => (
-                    <div key={sectionIndex} className={`border-2 p-1 border-black text-sm ${section.hidden || section.hidden_by_pin || course.hidden
-                        ? 'bg-gray-200'
-                        : (section.waitlist !== " " && Number(section.waitlist) > 10) || section.seats === "Cancel"
-                          ? 'bg-red-200'
-                          : section.waitlist !== " " && Number(section.waitlist) > 0
-                            ? 'bg-yellow-200'
-                            : 'bg-green-200'
+                    <div key={sectionIndex} className={`border-2 border-gray-700 text-sm rounded-sm 
+                      ${section.hidden || section.hidden_by_pin || course.hidden
+                      ? 'bg-gray-200'
+                      : (section.waitlist !== " " && Number(section.waitlist) > 10) || section.seats === "Cancel"
+                        ? 'bg-red-200'
+                        : section.waitlist !== " " && Number(section.waitlist) > 0
+                          ? 'bg-yellow-200'
+                          : 'bg-green-200'
                       }`}>
                       <div className="flex justify-between">
                         <button
@@ -200,7 +201,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                               ));
                             }
                           }}
-                          className="text-gray-700 hover:text-gray-900"
+                          className="text-gray-700 hover:text-gray-900 p-1"
                         >
                           {(section.hidden_by_pin) ? "Hidden by pin" : (section.hidden) ? "Select" : "Hide"}
                         </button>
@@ -230,36 +231,38 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                               };
                             }));
                           }}
-                          className="text-gray-700 hover:text-gray-900"
+                          className="text-gray-700 hover:text-gray-900 p-1"
                         >
                           {section.pinned ? "PINNED (unpin)" : "Pin"}
                         </button>
                       </div>
+                      <div className='px-1 overflow-x-scroll text-sm lg:text-sm'>
 
-                      <p>Section {section.section} ({section.crn})</p>
-                      {section.seats === "Cancel" ? (
-                        <p className="text-red-900">Cancelled</p>
-                      ) : (
-                        <div>
-                          <p>
-                            {section.seats} seat{Number(section.seats) == 1 ? '' : 's'} open
-                            {section.waitlist === " " ? "." : ` / ${section.waitlist} on waitlist.`}
-                          </p>
+                        <p>Section {section.section} ({section.crn})</p>
+                        {section.seats === "Cancel" ? (
+                          <p className="text-red-900">Cancelled</p>
+                        ) : (
+                          <div>
+                            <p>
+                              {section.seats} seat{Number(section.seats) == 1 ? '' : 's'} open
+                              {section.waitlist === " " ? "." : ` / ${section.waitlist} on waitlist.`}
+                            </p>
 
-                          <table>
-                            <tbody>
-                              {section.schedule.map((schedule, scheduleIndex) => (
-                                <tr key={scheduleIndex}>
-                                  <td className="pr-1 whitespace-nowrap">{schedule.type}</td>
-                                  <td className="pr-1 whitespace-nowrap">{schedule.days}</td>
-                                  <td className="pr-1 whitespace-nowrap">{schedule.time}</td>
-                                  <td className="break-words">{schedule.instructor}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
+                            <table>
+                              <tbody>
+                                {section.schedule.map((schedule, scheduleIndex) => (
+                                  <tr key={scheduleIndex}>
+                                    <td className="pr-1 whitespace-nowrap">{schedule.type}</td>
+                                    <td className="pr-1 whitespace-nowrap">{schedule.days}</td>
+                                    <td className="pr-1 whitespace-nowrap">{schedule.time}</td>
+                                    <td className="break-words">{schedule.instructor}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
