@@ -465,7 +465,7 @@ export default function CourseBrowser({ transfers, subjects }: CourseBrowserProp
                                     </td>
 
                                     <td className="p-2 break-words">
-                                        <Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" target="_blank" href={`/courses/${course.subject}/${course.course_code}`}>
+                                        <Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={`/courses/${course.subject}/${course.course_code}`}>
                                             {course.subject} {course.course_code}</Link>
                                         <p>{course.title ? course.title : course.abbreviated_title}</p>
                                     </td>
