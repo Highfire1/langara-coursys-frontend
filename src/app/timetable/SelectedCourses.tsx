@@ -94,11 +94,11 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
       <div>
         <p className='text-sm'>
           {selectedCourses.length === 0 && (
-        <>
-          Nothing here... yet.
-          <br />
-          You can add a course using the search bar above.
-        </>
+            <>
+              Nothing here... yet.
+              <br />
+              You can add a course using the search bar above.
+            </>
           )}
         </p>
       </div>
@@ -106,10 +106,10 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
       <div className='h-full w-full border-2 rounded overflow-auto'>
         <div className="w-full overflow-y-scroll max-h-fit overflow-scroll">
           {selectedCourses.map((course, index) => (
-            
+
             <div key={index} className='border-b pb-3'>
 
-                <div className={`p-2 ${course.hidden ? 'bg-gray-300' : 'bg-[#84bd84]'}`}>
+              <div className={`p-2 ${course.hidden ? 'bg-gray-300' : 'bg-[#84bd84]'}`}>
 
 
                 <p className='font-semibold'>
@@ -119,42 +119,42 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
                 <div className='sm:grid sm:grid-cols-[1fr_2fr_1fr] sm:text-base flex flex-col text-sm'>
                   <button
-                  onClick={() => {
-                    const hideAll = !course.hidden;
-                    setSelectedCourses(selectedCourses.map(c =>
-                    c.id === course.id
-                      ? {
-                      ...c,
-                      hidden: hideAll,
-                      }
-                      : c
-                    ));
-                  }}
-                  className="text-gray-700 hover:text-gray-900"
+                    onClick={() => {
+                      const hideAll = !course.hidden;
+                      setSelectedCourses(selectedCourses.map(c =>
+                        c.id === course.id
+                          ? {
+                            ...c,
+                            hidden: hideAll,
+                          }
+                          : c
+                      ));
+                    }}
+                    className="text-gray-700 hover:text-gray-900"
                   >
-                  {(course.hidden) ? "Select" : "Hide"}
+                    {(course.hidden) ? "Select" : "Hide"}
                   </button>
 
                   <button
-                  onClick={() => {
-                    setSelectedCourses(selectedCourses.map(c =>
-                    c.id === course.id
-                      ? { ...c, ui_hidden: !c.ui_hidden }
-                      : c
-                    ));
-                  }}
-                  className="text-blue-700 hover:text-blue-900 text-center"
+                    onClick={() => {
+                      setSelectedCourses(selectedCourses.map(c =>
+                        c.id === course.id
+                          ? { ...c, ui_hidden: !c.ui_hidden }
+                          : c
+                      ));
+                    }}
+                    className="text-blue-700 hover:text-blue-900 text-center"
                   >
-                  {(course.ui_hidden) ? `Show Sections (${course.sections_enhanced.length})` : `Hide Sections (${course.sections_enhanced.length})`}
+                    {(course.ui_hidden) ? `Show Sections (${course.sections_enhanced.length})` : `Hide Sections (${course.sections_enhanced.length})`}
                   </button>
 
                   <button
-                  onClick={() => {
-                    setSelectedCourses(selectedCourses.filter(c => c.id !== course.id));
-                  }}
-                  className="text-red-700 hover:text-red-900"
+                    onClick={() => {
+                      setSelectedCourses(selectedCourses.filter(c => c.id !== course.id));
+                    }}
+                    className="text-red-700 hover:text-red-900"
                   >
-                  Remove
+                    Remove
                   </button>
                 </div>
               </div>
@@ -238,10 +238,10 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                             <tbody>
                               {section.schedule.map((schedule, scheduleIndex) => (
                                 <tr key={scheduleIndex}>
-                                  <td className="pr-1">{schedule.type}</td>
-                                  <td className="pr-1">{schedule.days}</td>
-                                  <td className="pr-1">{schedule.time}</td>
-                                  <td>{schedule.instructor}</td>
+                                  <td className="pr-1 whitespace-nowrap">{schedule.type}</td>
+                                  <td className="pr-1 whitespace-nowrap">{schedule.days}</td>
+                                  <td className="pr-1 whitespace-nowrap">{schedule.time}</td>
+                                  <td className="break-words">{schedule.instructor}</td>
                                 </tr>
                               ))}
                             </tbody>

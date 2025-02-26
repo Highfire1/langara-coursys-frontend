@@ -1,11 +1,13 @@
 import { Schedule, Section } from '../types/Section';
 
+// ASSUMPTION: sunday doesn't exist
 const DAYS_MAP: { [key: string]: number } = {
   'M': 1, // Monday
   'T': 2, // Tuesday
   'W': 3, // Wednesday
   'R': 4, // Thursday
   'F': 5, // Friday
+  'S': 6, // Saturday
 };
 
 // Function to generate a color based on the course subject and course code
@@ -24,11 +26,13 @@ function generateColor(subject: string, courseCode: string): string {
 export function convertScheduleToEvents(sections: Section[]) {
   const events: {
     title: string;
-    startTime: string;
-    endTime: string;
+    startTime?: string;
+    endTime?: string;
     daysOfWeek: number[];
     backgroundColor: string;
     borderColor: string;
+    start?: string;
+    end?: string;
     extendedProps: {
       instructor: string;
       type: string;
@@ -46,14 +50,31 @@ export function convertScheduleToEvents(sections: Section[]) {
   return events;
 }
 
+export function generateHiddenDays(sections: Section[]) {
+  
+  let hasSaturday = false;
+  sections.forEach(section => {
+    section.schedule.forEach(schedule => {
+      if (schedule.days.includes('S')) {
+        hasSaturday = true;
+      }
+    });
+  });
+  
+  return hasSaturday ? [0] : [0, 6];
+}
+
+
 function createEventsFromSchedule(schedule: Schedule, section: Section) {
   const events: {
     title: string;
-    startTime: string;
-    endTime: string;
+    startTime?: string;
+    endTime?: string;
     daysOfWeek: number[];
     backgroundColor: string;
     borderColor: string;
+    start?: string;
+    end?: string;
     extendedProps: {
       instructor: string;
       type: string;
@@ -66,10 +87,22 @@ function createEventsFromSchedule(schedule: Schedule, section: Section) {
 
   days.forEach((day) => {
     if (day !== '-' && DAYS_MAP[day]) {
-      events.push({
+      const event: {
+        title: string;
+        startTime?: string;
+        endTime?: string;
+        daysOfWeek: number[];
+        backgroundColor: string;
+        borderColor: string;
+        start?: string;
+        end?: string;
+        extendedProps: {
+          instructor: string;
+          type: string;
+          section: string;
+        };
+      } = {
         title: `${section.subject} ${section.course_code}\n${schedule.type}`,
-        startTime: formatTime(startTime),
-        endTime: formatTime(endTime),
         daysOfWeek: [DAYS_MAP[day]],
         backgroundColor: color,
         borderColor: color,
@@ -77,8 +110,30 @@ function createEventsFromSchedule(schedule: Schedule, section: Section) {
           instructor: schedule.instructor,
           type: schedule.type,
           section: section.section
-        }
-      });
+        },
+      };
+
+
+      // not technically correct, but its close enough
+      // if you set a recuring time fullcalendar breaks and renders exams every week
+      // even if start and end are defined?
+      // honestly not sure whats happening here
+      const event_is_one_day = schedule.start !== null && schedule.end !== null && schedule.start === schedule.end;
+
+      if (!event_is_one_day) {
+        event.startTime = formatTime(startTime);
+        event.endTime = formatTime(endTime);
+      }
+
+      if (schedule.start) {
+        event.start = `${schedule.start}`;
+      }
+
+      if (schedule.end) {
+        event.end = `${schedule.end}`;
+      }
+
+      events.push(event);
     }
   });
 

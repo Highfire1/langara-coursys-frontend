@@ -1,7 +1,6 @@
 import { CourseInternal } from '../types/Course';
 import { Section, Schedule } from '../types/Section';
 
-
 // Convert day string (M------) to array of day numbers (0 = Monday)
 function getDays(dayStr: string): number[] {
   const days: number[] = [];
@@ -25,6 +24,11 @@ function timeToMinutes(time: string): { start: number; end: number } {
 
 // Check if two schedules conflict
 function hasConflict(schedule1: Schedule, schedule2: Schedule): boolean {
+  // If either schedule is an exam, there is no conflict
+  if (schedule1.type === "Exam" || schedule2.type === "Exam") {
+    return false;
+  }
+
   const days1 = getDays(schedule1.days);
   const days2 = getDays(schedule2.days);
   

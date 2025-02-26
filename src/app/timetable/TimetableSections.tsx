@@ -40,8 +40,8 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
         <div>
           <h2 className="font-bold text-lg">
             {courses.length === 0 ? "Timetables List" :
-             timetables.length === 0 ? "No timetables found." :
-             `Timetable ${currentIndex + 1} of ${timetables.length}`}
+              timetables.length === 0 ? "No timetables found." :
+                `Timetable ${currentIndex + 1} of ${timetables.length}`}
           </h2>
           {/* commented out until i can write better error messages that actually tell you what went wrong */}
           {/* {timetables.length === 0 && courses.length > 0 && (
@@ -63,7 +63,7 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
           </button>
           <button
             onClick={() => setCurrentIndex(prev => Math.min(timetables.length - 1, prev + 1))}
-            disabled={timetables.length==0 || currentIndex === timetables.length - 1}
+            disabled={timetables.length == 0 || currentIndex === timetables.length - 1}
             className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
           >
             Next
@@ -74,26 +74,29 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
       <div className='flex-grow border-2 rounded overflow-auto'>
         {timetables.length > 0 && timetables[currentIndex].map((section, index) => (
           <div key={index} className="p-2 border-b">
-        <h3 className="font-semibold">{section.subject} {section.course_code} - Section {section.section}</h3>
-        <p className="text-sm">
-          {section.seats} seat{Number(section.seats) > 1 ? 's' : ''} open
-          {section.waitlist === " " ? "." : ` / ${section.waitlist} on waitlist.`}
-        </p>
+            <h3 className="font-semibold">{section.subject} {section.course_code} - Section {section.section}</h3>
+            <p className="text-sm">
+              {section.seats} seat{Number(section.seats) > 1 ? 's' : ''} open
+              {section.waitlist === " " ? "." : ` / ${section.waitlist} on waitlist.`}
+            </p>
 
-        {section.schedule.map((schedule, scheduleIndex) => (
-          <div key={scheduleIndex} className="text-sm">
-            <table>
-          <tbody>
-              <tr key={scheduleIndex}>
-            <td className="pr-1">{schedule.type}</td>
-            <td className="pr-1">{schedule.days}</td>
-            <td className="pr-1">{schedule.time}</td>
-            <td>{schedule.instructor}</td>
-              </tr>
-          </tbody>
-            </table>
-          </div>
-        ))}
+            <div className="text-sm">
+              <table>
+                <tbody>
+                  {section.schedule.map((schedule, scheduleIndex) => (
+
+                    <tr key={scheduleIndex} className="text-xs">
+                      <td className="pr-1 whitespace-nowrap">{schedule.type}</td>
+                      <td className="pr-1 whitespace-nowrap">{schedule.days}</td>
+                      <td className="pr-1 whitespace-nowrap">{schedule.time}</td>
+                      <td className="pr-1 whitespace-nowrap">{schedule.room}</td>
+                      <td className="break-words">{schedule.instructor}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
 
           </div>
         ))}
