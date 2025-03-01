@@ -6,8 +6,6 @@ import { debounce } from 'lodash';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import './styles.css';
-
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -429,22 +427,22 @@ export default function CourseBrowser({ transfers, subjects }: CourseBrowserProp
                 <table className="w-full table-fixed relative min-w-[1000px]">
                     <thead className=" bg-white z-10">
                         <tr className="bg-gray-100 text-left text-xs md:text-sm">
-                            <th className="sticky-header w-[5%]">On Langara Website</th>
-                            <th className="sticky-header w-[15%]">Course</th>
-                            <th className="sticky-header w-[5%]">Credits</th>
-                            <th className="sticky-header text-center w-[3%]">2AR</th>
-                            <th className="sticky-header text-center w-[3%]">2SC</th>
-                            <th className="sticky-header text-center w-[3%]">HUM</th>
-                            <th className="sticky-header text-center w-[3%]">LSC</th>
-                            <th className="sticky-header text-center w-[3%]">SCI</th>
-                            <th className="sticky-header text-center w-[3%]">SOC</th>
-                            <th className="sticky-header text-center w-[3%]">UT</th>
-                            <th className="sticky-header p-2 w-[5%] text-sm">Offered Online</th>
-                            <th className="sticky-header p-2 w-[6%] text-sm">First Offered</th>
-                            <th className="sticky-header p-2 w-[6%] text-sm">Last Offered</th>
-                            <th className="sticky-header p-2 w-[50%]">Description</th>
+                            <th className="sticky bg-gray-100 top-0 w-[5%]">On Langara Website</th>
+                            <th className="sticky bg-gray-100 top-0 w-[15%]">Course</th>
+                            <th className="sticky bg-gray-100 top-0 w-[5%]">Credits</th>
+                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">2AR</th>
+                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">2SC</th>
+                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">HUM</th>
+                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">LSC</th>
+                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">SCI</th>
+                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">SOC</th>
+                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">UT</th>
+                            <th className="sticky bg-gray-100 top-0 p-2 w-[5%] text-sm">Offered Online</th>
+                            <th className="sticky bg-gray-100 top-0 p-2 w-[6%] text-sm">First Offered</th>
+                            <th className="sticky bg-gray-100 top-0 p-2 w-[6%] text-sm">Last Offered</th>
+                            <th className="sticky bg-gray-100 top-0 p-2 w-[50%]">Description</th>
                             {/* <th className="p-2 w-[10%]">Prerequisites:</th> */}
-                            <th className="sticky-header p-2 w-[10%]">Transfers to</th>
+                            <th className="sticky bg-gray-100 top-0 p-2 w-[10%]">Transfers to</th>
                         </tr>
                     </thead>
                     <tbody>
