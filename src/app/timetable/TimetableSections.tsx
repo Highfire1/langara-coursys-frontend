@@ -33,10 +33,9 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
 
 
   return (
-    <div className='border w-full h-full p-2 rounded flex flex-col'>
-      <div className="flex flex-col lg:flex-row justify-between items-center mb-4">
-
-
+    <div className='w-full h-full p-2 rounded flex flex-col'>
+      
+      <div className="flex flex-col lg:flex-row justify-between items-center mb-1">
         <div>
           <h2 className="font-bold text-lg">
             {courses.length === 0 ? "Timetables List" :
@@ -71,6 +70,18 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
         </div>
       </div>
 
+      {/* todo: make shareable link */}
+      {timetables.length > 0 && (
+        <div className="text-sm mb-1">
+          <span className="text-sm">CRNS: </span>
+          {timetables[currentIndex].map((section) => (
+            <span key={section.crn} className="mr-2">
+              {section.crn}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className='flex-grow border-2 rounded overflow-auto'>
         {timetables.length > 0 && timetables[currentIndex].map((section, index) => (
           <div key={index} className="p-2 border-b">
@@ -102,18 +113,6 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
         ))}
 
       </div>
-      
-      {/* todo: make shareable link */}
-      <span className="text-sm">CRNS:</span>
-      {timetables.length > 0 && (
-        <div className="text-sm">
-          {timetables[currentIndex].map((section) => (
-            <span key={section.crn} className="mr-2">
-              {section.crn}
-            </span>
-          ))}
-        </div>
-      )}
 
     </div>
   );

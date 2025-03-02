@@ -54,7 +54,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
   }
 
   return (
-    <div className='flex flex-col gap-2 h-full w-full p-2 rounded border overflow-hidden'>
+    <div className='flex flex-col gap-2 h-full w-full p-2 rounded overflow-hidden'>
       <h2 className='font-bold text-lg'>Selected Courses ({term === "10" ? "Spring" : term === "20" ? "Summer" : term === "30" ? "Fall" : ""} {year})</h2>
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -71,7 +71,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="max-w-[600px] md:w-[750px] lg:w-auto p-0">
+        <PopoverContent className="max-w-[600px] md:w-[750px] lg:w-auto p-0 bg-white">
           <Command>
             <CommandInput placeholder="Search for a course..." />
             <CommandList>
@@ -105,11 +105,11 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
         </p>
       </div>
 
-      <div className='h-full w-full border-2 rounded overflow-auto'>
+      <div className='h-full w-full border-2 border-gray-700 rounded overflow-auto'>
         <div className="w-full overflow-y-scroll max-h-fit overflow-scroll">
           {selectedCourses.map((course, index) => (
 
-            <div key={index} className='border-b pb-3'>
+            <div key={index} className='border-black pb-3'>
 
               {/* tailwind has some issues with rendering arbitrary values... it should be fixable but this works */}
               {/* <div className={`p-2 ${course.hidden ? 'bg-gray-300' : ''}`} style={{backgroundColor: !course.hidden ? generateColor(course.subject, course.course_code) : undefined}}>  */}

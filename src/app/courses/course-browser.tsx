@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 
-import { debounce } from 'lodash';
-import Link from 'next/link';
+import { throttle } from 'lodash';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from "@/components/ui/button"
@@ -13,49 +12,8 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { addLinksToCourseDescription } from '@/lib/course-utils';
-
-interface CourseMax {
-    credits: number;
-    title: string;
-    desc_replacement_course: string;
-    description: string;
-    desc_duplicate_credit: string;
-    desc_registration_restriction: string;
-    desc_prerequisite: string;
-    hours_lecture: number;
-    hours_seminar: number;
-    hours_lab: number;
-    offered_online: boolean;
-    preparatory_course: boolean;
-    RP: string;
-    abbreviated_title: string;
-    add_fees: number;
-    rpt_limit: number;
-    attr_ar: boolean;
-    attr_sc: boolean;
-    attr_hum: boolean;
-    attr_lsc: boolean;
-    attr_sci: boolean;
-    attr_soc: boolean;
-    attr_ut: boolean;
-    first_offered_year: number;
-    first_offered_term: number;
-    last_offered_year: number;
-    last_offered_term: number;
-    on_langara_website: boolean;
-    discontinued: boolean;
-    transfer_destinations: string;
-    id: string;
-    subject: string;
-    course_code: string;
-    id_course: string;
-}
-
-interface CoursesResponse {
-    courses: CourseMax[];
-    total_pages?: number;
-}
+import { CourseBrowserProps, CourseMax, v2SearchCoursesResponse } from '@/types/Course';
+import CourseList from './course-list';
 
 interface SearchParams {
     subject?: string;
@@ -74,31 +32,12 @@ interface SearchParams {
     transfer_destinations?: string[];
 }
 
-interface TransferDestination {
-    code: string;
-    name: string;
-}
-
-interface CourseBrowserProps {
-    transfers: TransferDestination[];
-    subjects: string[];
-}
-
-const termToSeason = (term: number): string => {
-    switch (term) {
-        case 10: return 'Spring';
-        case 20: return 'Summer';
-        case 30: return 'Fall';
-        default: return 'Unknown';
-    }
-};
-
-export default function CourseBrowser({ transfers, subjects }: CourseBrowserProps) {
+export default function CourseBrowser({ transfers, subjects, initialCourses }: CourseBrowserProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     // const [transfer_destinations, setDestinations] = useState<TransfersResponse>(transfers);
-    const [courses, setCourses] = useState<CoursesResponse | null>(null);
+    const [courses, setCourses] = useState<CourseMax[] | null>(null);
     const [loading, setLoading] = useState(false);
     const [requestInfo, setRequestInfo] = useState<{ time?: number; cached?: boolean }>({});
 
@@ -123,32 +62,45 @@ export default function CourseBrowser({ transfers, subjects }: CourseBrowserProp
 
     const debouncedSearch = useMemo(
         () =>
-            debounce(async (params: SearchParams) => {
-                setLoading(true);
-                const queryParams = new URLSearchParams();
-                Object.entries(params).forEach(([key, value]) => {
-                    if (value !== undefined && value !== '' && value !== false) {
-                        if (Array.isArray(value)) {
-                            value.forEach(v => queryParams.append(key, v));
-                        } else {
-                            queryParams.append(key, value.toString());
+            throttle(
+                async (params: SearchParams) => {
+                    setLoading(true);
+                    const queryParams = new URLSearchParams();
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== '' && value !== false) {
+                            if (Array.isArray(value)) {
+                                value.forEach(v => queryParams.append(key, v));
+                            } else {
+                                queryParams.append(key, value.toString());
+                            }
                         }
+                    });
+
+                    if (queryParams.toString() === 'on_langara_website=true') {
+                        console.log("USED SERVER SIDE CALLED DATA")
+                        const data = initialCourses
+                        setCourses(data);
+                        setLoading(false);
+                        return
                     }
-                });
 
-                const start = performance.now();
-                const response = await fetch(
-                    `https://coursesapi.langaracs.ca/v2/search/courses?${queryParams}`
-                );
-                const data: CoursesResponse = await response.json();
-                const cached = response.headers.get('x-fastapi-cache') === 'HIT';
-                const time = Math.round(performance.now() - start);
+                    console.log("CALLED API")
 
-                setRequestInfo({ time, cached });
-                setCourses(data);
-                setLoading(false);
-            }, 400),
-        []
+                    const start = performance.now();
+                    const response = await fetch(
+                        `https://coursesapi.langaracs.ca/v2/search/courses?${queryParams}`
+                    );
+                    const dataRes: v2SearchCoursesResponse = await response.json();
+                    const cached = response.headers.get('x-fastapi-cache') === 'HIT';
+                    const time = Math.round(performance.now() - start);
+
+                    setRequestInfo({ time, cached });
+                    setCourses(dataRes.courses);
+                    setLoading(false);
+                },
+                400,
+            ),
+        [initialCourses]
     );
 
     useEffect(() => {
@@ -175,8 +127,9 @@ export default function CourseBrowser({ transfers, subjects }: CourseBrowserProp
             }
         });
 
-        router.replace(`?${queryParams.toString()}`, {scroll: false});
+        router.replace(`?${queryParams.toString()}`, { scroll: false });
     };
+
 
     return (
         <div className="p-4">
@@ -357,7 +310,7 @@ export default function CourseBrowser({ transfers, subjects }: CourseBrowserProp
                                                 }}
                                                 checked={currentSearchParams.transfer_destinations?.includes(destination.code)}
                                                 className=
-                                                    {`text-sm ${destination.code === "SFU" ? "bg-red-200" : ''} ${destination.code === "UBCV" ? "bg-blue-200" : ''}`}
+                                                {`text-sm ${destination.code === "SFU" ? "bg-red-200" : ''} ${destination.code === "UBCV" ? "bg-blue-200" : ''}`}
                                             >
                                                 {destination.code} ({destination.name})
                                             </DropdownMenuCheckboxItem>
@@ -405,7 +358,7 @@ export default function CourseBrowser({ transfers, subjects }: CourseBrowserProp
                     <span className='md:text-nowrap'>
                         {courses ? (
                             <>
-                                Showing <span className='font-semibold'>{courses.courses.length}</span> courses.
+                                Showing <span className='font-semibold'>{courses.length}</span> courses.
                             </>
                         ) : "Loading... This should take less than five seconds..."}
                     </span>
@@ -423,131 +376,9 @@ export default function CourseBrowser({ transfers, subjects }: CourseBrowserProp
                 </div>
             </div>
 
-            <div className="mt-4">
-                <table className="w-full table-fixed relative min-w-[1000px]">
-                    <thead className=" bg-white z-10">
-                        <tr className="bg-gray-100 text-left text-xs md:text-sm">
-                            <th className="sticky bg-gray-100 top-0 w-[5%]">On Langara Website</th>
-                            <th className="sticky bg-gray-100 top-0 w-[15%]">Course</th>
-                            <th className="sticky bg-gray-100 top-0 w-[5%]">Credits</th>
-                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">2AR</th>
-                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">2SC</th>
-                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">HUM</th>
-                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">LSC</th>
-                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">SCI</th>
-                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">SOC</th>
-                            <th className="sticky bg-gray-100 top-0 text-center w-[3%]">UT</th>
-                            <th className="sticky bg-gray-100 top-0 p-2 w-[5%] text-sm">Offered Online</th>
-                            <th className="sticky bg-gray-100 top-0 p-2 w-[6%] text-sm">First Offered</th>
-                            <th className="sticky bg-gray-100 top-0 p-2 w-[6%] text-sm">Last Offered</th>
-                            <th className="sticky bg-gray-100 top-0 p-2 w-[50%]">Description</th>
-                            {/* <th className="p-2 w-[10%]">Prerequisites:</th> */}
-                            <th className="sticky bg-gray-100 top-0 p-2 w-[10%]">Transfers to</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading && false ? (
-                            Array.from({ length: 10 }).map((_, index) => (
-                                <tr key={index}>
-                                    <td colSpan={5} className="p-2">
-                                        Loading...
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            courses?.courses.map(course => (
-                                <tr key={course.id} className={`border-b align-top ${course.on_langara_website ? '' : 'bg-red-200'}`}>
+            <CourseList loading={loading} courses={courses || []} />
 
-                                    <td className={`p-2 break-words text-white text-center ${course.on_langara_website ? 'bg-green-800' : 'bg-red-600'}`}>
-                                        {/* {course.on_langara_website ? '✓' : '✗ '} */}
-                                    </td>
-
-                                    <td className="p-2 break-words">
-                                        <Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={`/courses/${course.subject}/${course.course_code}`}>
-                                            {course.subject} {course.course_code}</Link>
-                                        <p>{course.title ? course.title : course.abbreviated_title}</p>
-                                    </td>
-                                    <td className="p-2 break-words">{course.credits ? course.credits.toFixed(1) : ""}</td>
-
-                                    <td className={`p-2 break-words ${course.attr_ar ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.attr_ar ? '✓' : ''}
-                                    </td>
-                                    <td className={`p-2 break-words ${course.attr_sc ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.attr_sc ? '✓' : ''}
-                                    </td>
-                                    <td className={`p-2 break-words ${course.attr_hum ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.attr_hum ? '✓' : ''}
-                                    </td>
-                                    <td className={`p-2 break-words ${course.attr_lsc ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.attr_lsc ? '✓' : ''}
-                                    </td>
-                                    <td className={`p-2 break-words ${course.attr_sci ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.attr_sci ? '✓' : ''}
-                                    </td>
-                                    <td className={`p-2 break-words ${course.attr_soc ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.attr_soc ? '✓' : ''}
-                                    </td>
-                                    <td className={`p-2 break-words ${course.attr_ut ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.attr_ut ? '✓' : ''}
-                                    </td>
-                                    <td className={`p-2 break-words ${course.offered_online ? 'bg-green-800 text-white text-center' : ''}`}>
-                                        {course.offered_online ? '✓' : ''}
-                                    </td>
-
-
-                                    <td className="p-2 break-words text-sm">
-                                        {/* {course.first_offered_year == 1999 && course.first_offered_term == 20 ?
-                                            "Before 1999" // we only have data going back to summer 1999
-                                            : course.first_offered_year
-                                                ?
-                                                `${termToSeason(course.first_offered_term)} ${course.first_offered_year}`
-                                                : "???"}</td> */}
-                                        {course.first_offered_year ?
-                                            `${termToSeason(course.first_offered_term)} ${course.first_offered_year}`
-                                            : "???"}</td>
-
-                                    <td className={`p-2 break-words text-sm ${course.last_offered_year < 2021 ? 'bg-red-200' : ''}`}>
-                                        {course.first_offered_year ?
-                                            `${termToSeason(course.last_offered_term)} ${course.last_offered_year}`
-                                            : "???"}</td>
-
-                                    <td className="p-2 break-words flex flex-col gap-2 text-sm">
-                                        {/* <span>Lecture: {course.hours_lecture ? course.hours_lecture : "0"} h + Seminar {course.hours_seminar ? course.hours_seminar: "0"} h + Lab. {course.hours_lab ? course.hours_lab : "0"} h</span> */}
-                                        
-                                        {course.desc_registration_restriction &&
-                                            <span>{course.desc_registration_restriction}</span>
-                                        }
-
-                                        <span>
-                                            {course.description 
-                                                ? addLinksToCourseDescription(course.description) //.replace(/\n/g, '\n\n')
-                                                : "No description available."
-                                            }
-                                        </span>
-
-                                        {course.desc_prerequisite &&
-                                            <span>{addLinksToCourseDescription(course.desc_prerequisite)}</span>
-                                        }
-                                        {course.desc_duplicate_credit &&
-                                            <span>{addLinksToCourseDescription(course.desc_duplicate_credit)}</span>
-                                        }
-                                        {course.desc_replacement_course &&
-                                            <span>{addLinksToCourseDescription(course.desc_replacement_course)}</span>
-                                        }
-                                    </td>
-                                    
-                                    <td className="p-2 break-words text-sm">
-                                        {course.transfer_destinations ? course.transfer_destinations.slice(1, -1).replaceAll(",", ", ") : ""}
-                                    </td>
-
-
-
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            
 
         </div>
     );

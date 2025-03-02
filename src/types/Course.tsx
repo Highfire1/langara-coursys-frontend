@@ -71,10 +71,6 @@ export interface CourseAttributes {
     sections_enhanced: import("./Section").SectionInternal[];
     ui_hidden: boolean;
   }
-  
-  export interface CoursesResponse {
-    courses: Course[];
-  }
 
   export interface LatestSemesterResponse {
     courses_first_day: string;
@@ -83,3 +79,81 @@ export interface CourseAttributes {
     term: number;
     year: number;
   }
+
+  
+export interface CourseMax {
+  credits: number;
+  title: string;
+  desc_replacement_course: string;
+  description: string;
+  desc_duplicate_credit: string;
+  desc_registration_restriction: string;
+  desc_prerequisite: string;
+  hours_lecture: number;
+  hours_seminar: number;
+  hours_lab: number;
+  offered_online: boolean;
+  preparatory_course: boolean;
+  RP: string;
+  abbreviated_title: string;
+  add_fees: number;
+  rpt_limit: number;
+  attr_ar: boolean;
+  attr_sc: boolean;
+  attr_hum: boolean;
+  attr_lsc: boolean;
+  attr_sci: boolean;
+  attr_soc: boolean;
+  attr_ut: boolean;
+  first_offered_year: number;
+  first_offered_term: number;
+  last_offered_year: number;
+  last_offered_term: number;
+  on_langara_website: boolean;
+  discontinued: boolean;
+  transfer_destinations: string;
+  id: string;
+  subject: string;
+  course_code: string;
+  id_course: string;
+}
+
+export interface CoursesResponse {
+  courses: Course[];
+}
+
+export interface TransferDestination {
+  code: string;
+  name: string;
+}
+
+export interface CourseBrowserProps {
+  transfers: TransferDestination[];
+  subjects: string[];
+  initialCourses: CourseMax[];
+}
+export interface v1IndexTransfersResponse {
+  transfers: {
+    code: string;
+    name: string;
+  }[];
+}
+
+export interface v1IndexSubjectsResponse {
+  count: number;
+  subjects: string[];
+}
+
+export interface v2SearchCoursesResponse {
+  courses: CourseMax[];
+}
+
+export interface v1SearchCoursesResponse {
+    subject_count: number;
+    course_count: number;
+    courses: {
+      subject: string;
+      course_code: string;
+      on_langara_website: boolean;
+    }[];
+}
