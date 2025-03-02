@@ -277,7 +277,7 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                     </div>
                 </details>
 
-                <details>
+                <details open={validTransfers.length === 0}>
                     <summary className="text-l font-bold cursor-pointer">Inactive Transfer Agreements (click to open)</summary>
                     <div className="max-w-[1000px] overflow-x-auto pt-2">
 

@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import Link from 'next/link';
 
 // import { generateColor } from '@/utils/calendarHelper'
 
@@ -117,9 +118,9 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
 
 
-                <p className='font-semibold'>
+                <Link href={`/courses/${course.subject}/${course.course_code}`} className='font-semibold hover:text-orange-700 hover:underline' target='_blank'>
                   {`${course.subject} ${course.course_code}: ${course.attributes.abbreviated_title}`}
-                </p>
+                </Link>
                 <p className='text-sm'>{course.attributes.title} ({course.attributes.credits} credits)</p>
 
                 <div className='sm:grid sm:grid-cols-[1fr_2fr_1fr] sm:text-base flex flex-col text-sm'>
@@ -135,7 +136,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                           : c
                       ));
                     }}
-                    className="text-gray-700 hover:text-gray-900"
+                    className="text-gray-700 hover:text-gray-900 cursor-pointer"
                   >
                     {(course.hidden) ? "Select" : "Hide"}
                   </button>
@@ -148,7 +149,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                           : c
                       ));
                     }}
-                    className="text-blue-700 hover:text-blue-900 text-center"
+                    className="text-blue-700 hover:text-blue-900 text-center cursor-pointer"
                   >
                     {(course.ui_hidden) ? `Show Sections (${course.sections_enhanced.length})` : `Hide Sections (${course.sections_enhanced.length})`}
                   </button>
@@ -157,7 +158,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                     onClick={() => {
                       setSelectedCourses(selectedCourses.filter(c => c.id !== course.id));
                     }}
-                    className="text-red-700 hover:text-red-900"
+                    className="text-red-700 hover:text-red-900 cursor-pointer"
                   >
                     Remove
                   </button>
