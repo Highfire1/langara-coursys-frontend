@@ -50,19 +50,16 @@ export default function CourseList({ loading, courses }: CourseListProps): JSX.E
                 </thead>
                 <tbody>
                     {loading ? (
-                        Array.from({ length: 10 }).map((_, index) => (
-                            <tr key={index}>
-                                <td colSpan={5} className="p-2">
+                            <tr>
+                                <td colSpan={15} className="p-2 text-center h-[2000px]">
                                     Loading...
                                 </td>
                             </tr>
-                        ))
                     ) : (
                         courses?.map(course => (
                             <tr key={course.id} className={`border-b align-top ${course.on_langara_website ? '' : 'bg-red-200'}`}>
 
                                 <td className={`p-2 break-words text-white text-center ${course.on_langara_website ? 'bg-green-800' : 'bg-red-600'}`}>
-                                    {/* {course.on_langara_website ? '✓' : '✗ '} */}
                                 </td>
 
                                 <td className="p-2 break-words">
