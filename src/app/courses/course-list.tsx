@@ -51,7 +51,7 @@ export default function CourseList({ loading, courses }: CourseListProps): JSX.E
                 <tbody>
                     {loading ? (
                             <tr>
-                                <td colSpan={15} className="p-2 text-center h-[2000px]">
+                                <td colSpan={15} className="p-2 text-center align-top h-[2000px]">
                                     Loading...
                                 </td>
                             </tr>
