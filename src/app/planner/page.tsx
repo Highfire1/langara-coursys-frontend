@@ -10,7 +10,7 @@ const PlannerPage = () => {
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Header title="Langara Course Planner" color="rgb(189,237,189)"/>
             <iframe
-                src="https://planner.langaracs.ca/"
+                src="https://oldplanner.langaracs.ca/"
                 style={{
                     width: '100%',
                     height: '100%',
