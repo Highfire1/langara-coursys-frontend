@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 
-import { throttle } from 'lodash';
+import { debounce } from 'lodash';
 import { useSearchParams } from 'next/navigation';
 
 import { Button } from "@/components/ui/button"
@@ -37,7 +37,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
 
     // const [transfer_destinations, setDestinations] = useState<TransfersResponse>(transfers);
     const [courses, setCourses] = useState<CourseMax[] | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [requestInfo, setRequestInfo] = useState<{ time?: number; cached?: boolean }>({});
 
     const initialSearchParams: SearchParams = {
@@ -61,9 +61,8 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
 
     const debouncedSearch = useMemo(
         () =>
-            throttle(
+            debounce(
                 async (params: SearchParams) => {
-                    setLoading(true);
                     const queryParams = new URLSearchParams();
                     Object.entries(params).forEach(([key, value]) => {
                         if (value !== undefined && value !== '' && value !== false) {
@@ -104,6 +103,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
     );
 
     useEffect(() => {
+        setLoading(true);
         debouncedSearch(currentSearchParams);
     }, [currentSearchParams, debouncedSearch]);
 
@@ -358,11 +358,11 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
 
                 <div className="flex-1 text-left md:text-center">
                     <span className='md:text-nowrap'>
-                        {courses ? (
+                        {!loading ? (
                             <>
-                                Showing <span className='font-semibold'>{courses.length}</span> courses.
+                                Showing <span className='font-semibold'>{courses?.length || 'ERROR'}</span> courses.
                             </>
-                        ) : "Loading... This should take less than five seconds..."}
+                        ) : "Loading..."}
                     </span>
                 </div>
 
