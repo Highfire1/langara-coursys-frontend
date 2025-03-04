@@ -35,6 +35,13 @@ export default function Home() {
                 </section>
 
                 <section>
+                <h2 className="text-2xl font-bold mb-3">How was this website built?</h2>
+                <p>Frontend: Next.js, Tailwind, some components including FullCalendar and shadcn.</p>
+                <p>Backend: Python, bs4, Selenium, FastAPI, Scalar</p>
+                <p>This project is entirely free and <Link href="https://github.com/langaracpsc/CourSys" target="_blank" className="hover:underline text-blue-800">open source</Link>. If you are interested in contributing please reach out.</p>
+                </section>
+
+                <section>
                 <h2 className="text-2xl font-bold mb-3">Can I use the data in my own project?</h2>
                 <p>Yes, you can.</p>
                 <p>Data is freely available through a REST API at <Link href="https://coursesapi.langaracs.ca" target="_blank" className="hover:underline text-blue-800">coursesapi.langaracs.ca</Link>.</p>
@@ -43,7 +50,6 @@ export default function Home() {
 
                 <section>
                 <h2 className="text-2xl font-bold mb-3">Who are you?</h2>
-                <p>...</p>
                 <p>I am just someone who wants to make a bit of change in this world.</p>
                 <p>You can learn more about me at <Link href="https://andersontseng.ca" target="_blank" className="hover:underline text-blue-800">andersontseng.ca</Link>.</p>
                 </section>
