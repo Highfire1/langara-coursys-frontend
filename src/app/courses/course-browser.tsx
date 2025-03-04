@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 import { throttle } from 'lodash';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import { Button } from "@/components/ui/button"
 import {
@@ -33,7 +33,6 @@ interface SearchParams {
 }
 
 export default function CourseBrowser({ transfers, subjects, initialCourses }: CourseBrowserProps) {
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     // const [transfer_destinations, setDestinations] = useState<TransfersResponse>(transfers);
@@ -81,7 +80,6 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
                         const data = initialCourses
                         setCourses(data);
                         setLoading(false);
-                        return
                     }
 
                     console.log("CALLED API")
@@ -127,7 +125,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
             }
         });
 
-        router.replace(`?${queryParams.toString()}`, { scroll: false });
+        window.history.replaceState(null, '', `?${queryParams.toString()}`);
     };
 
 
