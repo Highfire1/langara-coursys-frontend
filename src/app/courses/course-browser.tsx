@@ -291,7 +291,9 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
 
 
                             <div>
-                                <DropdownMenu>
+                                {/* TODO: this is laggy and needs to be replaced */}
+                                {/* See https://github.com/radix-ui/primitives/issues/1634 for info. */}
+                                <DropdownMenu modal={false}>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="outline">Select Transfer Destinations</Button>
                                     </DropdownMenuTrigger>

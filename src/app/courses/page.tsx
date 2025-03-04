@@ -28,7 +28,11 @@ export default async function Page() {
     coursesRes.json(),
   ]);
 
-  const transfers = transfersData.transfers;
+  // always put ubc, sfu, uvic, and tru at the top of the list
+  const transfers = [
+    ...transfersData.transfers.filter(t => ['UBCV', 'SFU', 'UVIC', 'TRU'].includes(t.code)),
+    ...transfersData.transfers.filter(t => !['UBCV', 'SFU', 'UVIC', 'TRU'].includes(t.code))
+  ];
   const subjects = subjectsData.subjects;
   const courses = coursesData.courses;
   
