@@ -5,9 +5,10 @@ interface HeaderProps {
     title: string;
     color?: string;
     navigateTo?: string;
+    hideForm?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, color = '#D3D3D3', navigateTo = '/' }) => {
+const Header: React.FC<HeaderProps> = ({ title, color = '#D3D3D3', navigateTo = '/', hideForm = false }) => {
     return (
         <header className="w-full px-5 py-2 shadow-md" style={{ backgroundColor: color }}>
             <Link href={navigateTo}>
@@ -16,8 +17,9 @@ const Header: React.FC<HeaderProps> = ({ title, color = '#D3D3D3', navigateTo = 
                 </h1>
             </Link>
             <p>Note: this website is a student project and is not affiliated with Langara College.</p>
-            {/* <p>Utilities built by Anderson Tseng and hosted by the Langara Computer Science Club.</p> */}
-            <p>Suggestions? Feedback? Found a bug? Please send a report through <a className="text-blue-800 hover:text-blue-600 underline" href="https://forms.gle/CYKP7xsp2an6gNEK9" target="_blank">this form.</a></p>
+            {!hideForm && (
+                <p>Suggestions? Feedback? Found a bug? Please send a report through <a className="text-blue-800 hover:text-blue-600 underline" href="https://forms.gle/CYKP7xsp2an6gNEK9" target="_blank">this form.</a></p>
+            )}
         </header>
     );
 };
