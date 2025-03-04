@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Langara Course Tools",
-  description: "A web application to search and explore Langara College course offerings",
+  title: "Langara Course Planning Tools",
+  description: "A web application to search and explore Langara College course offerings.",
 };
 
 import Footer from "@/components/shared/footer";
