@@ -14,10 +14,16 @@ export default function Home() {
       <Header title="Langara College Course Planning Tools" color="#F15A22" />
 
       <div className="px-4 py-6 flex flex-col gap-4">
-        <div>
-          <strong>Welcome to the Langara Course Planner!</strong>
-            <p>This is a website that helps you effectively plan and look for courses at Langara College. Check out the <Link href="/about" className="text-blue-800 hover:text-blue-600 underline">about page</Link> for more information.</p>
+
+        <div className="p-4 bg-blue-100 rounded-lg border-4 border-blue-400">
+          <strong>Welcome to v3 of the Langara Course Planner!</strong>
+            <p>Introducing many new features such as an improved timetable generator, and a course and section search.</p>
+            <p>As always, please report bugs or feedback, or leave a testimonial at our <Link href={"https://forms.gle/CYKP7xsp2an6gNEK9"} className="text-blue-800 hover:text-blue-600 underline">feedback form!</Link></p>
+            <p>And if you find this page useful, share it with your friends to save them time with course planning!</p>
         </div>
+
+        <p>This is a free website that helps you effectively plan and look for courses at Langara College. Check out the <Link href="/about" className="text-blue-800 hover:text-blue-600 underline">about page</Link> for more information.</p>
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link href="/planner" className="block">
