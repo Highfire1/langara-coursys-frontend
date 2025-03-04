@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <PlausibleProvider domain="coursys.langaracs.ca" customDomain='https://a.langaracs.ca' trackOutboundLinks selfHosted/>
+        <PlausibleProvider domain="planner.langaracs.ca" customDomain='https://a.langaracs.ca' trackOutboundLinks selfHosted/>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
