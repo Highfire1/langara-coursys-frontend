@@ -80,6 +80,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
                         const data = initialCourses
                         setCourses(data);
                         setLoading(false);
+                        return
                     }
 
                     console.log("CALLED API")
