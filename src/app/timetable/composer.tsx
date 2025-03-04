@@ -87,7 +87,7 @@ export default function Composer() {
         fetchData();
     }, [year, term, searchParams, router]);
 
-    if (isLoading) return <div className='w-[100vw] h-[100vh] p-4'>Loading...</div>;
+    if (isLoading) return <div className=''>Loading...</div>;
     if (error) return <div className='w-[100vw] h-[100vh] p-4'>{error}</div>;
 
     return (
