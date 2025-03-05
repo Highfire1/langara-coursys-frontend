@@ -59,10 +59,10 @@ export default function Home() {
         <div className="p-2 border-black border-2 rounded"> 
           <h3>Testimonials:</h3>
           <div className="py-2 px-4 italic text-gray-600 flex flex-col gap-2">
-            {/* <span>&quot;better than sliced bread&quot; - anonymous</span> */}
+            {/* <span>better than sliced bread; - anonymous</span> */}
             <span>One of the most stressful parts of being a Langarian (besides exams) is course planning and registration. Langara Course Planner makes it a breeze! The planner allows me to efficiently and elegantly plan my semester, compare two different schedules together, look at course transfers, and more! - Karnbir R.</span>
-            <span>&quot;The Langara Course Planner is a fantastic kit of software that is better than SFU&apos;s. It is up, its running, its FOSS, it&apos;s Boss!&quot; - J. Marcato</span>
-            <span>It&quot;s an awesome tool, super easy to use and way freakin&quot; better than trying to get this info from the Langara website! - Brian M.</span>
+            <span>The Langara Course Planner is a fantastic kit of software that is better than SFU&apos;s. It is up, its running, its FOSS, it&apos;s Boss! - J. Marcato</span>
+            <span>It&apos;s an awesome tool, super easy to use and way freakin&apos; better than trying to get this info from the Langara website! - Brian M.</span>
           </div>
         </div>
       </div>
