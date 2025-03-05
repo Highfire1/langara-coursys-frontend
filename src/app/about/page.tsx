@@ -38,7 +38,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold mb-3">How was this website built?</h2>
                 <p>Frontend: Next.js, Tailwind, some components including FullCalendar and shadcn.</p>
                 <p>Backend: Python, bs4, Selenium, FastAPI, Scalar</p>
-                <p>This project is entirely free and <Link href="https://github.com/langaracpsc/CourSys" target="_blank" className="hover:underline text-blue-800">open source</Link>. If you are interested in contributing please reach out.</p>
+                <p>This project is entirely free and <Link href="https://github.com/Highfire1/LangaraCoursePlanner" target="_blank" className="hover:underline text-blue-800">open source</Link>. If you are interested in contributing please reach out.</p>
                 </section>
 
                 <section>
