@@ -8,7 +8,7 @@ on:
 jobs:
       
   docker:
-    runs-on: self-hosted
+    runs-on: ubuntu-24.04-arm
     steps:
         
       - name: Checkout
@@ -32,7 +32,7 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/arm64
           push: true
-          tags: ghcr.io/langaracpsc/coursys:latest
+          tags: ghcr.io/highfire1/langaracourseplanner:latest
 
   deployment: 
     needs: docker
