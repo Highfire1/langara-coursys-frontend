@@ -44,7 +44,7 @@ export default function Home() {
                 <section>
                 <h2 className="text-2xl font-bold mb-3">Can I use the data in my own project?</h2>
                 <p>Yes, you can.</p>
-                <p>Data is freely available through a REST API at <Link href="https://coursesapi.langaracs.ca" target="_blank" className="hover:underline text-blue-800">coursesapi.langaracs.ca</Link>.</p>
+                <p>Data is freely available through a REST API at <Link href="http://168.138.79.49:5010" target="_blank" className="hover:underline text-blue-800">coursesapi.langaracs.ca</Link>.</p>
                 <p>Let me know if you create something using the API so that I can advertise it.</p>
                 </section>
 

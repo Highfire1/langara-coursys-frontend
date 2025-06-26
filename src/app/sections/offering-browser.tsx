@@ -104,8 +104,8 @@ export default function CourseBrowser() {
     useEffect(() => {
         const fetchInitialData = async () => {
             const [semestersRes, subjectsRes] = await Promise.all([
-                fetch('https://coursesapi.langaracs.ca/v1/index/semesters'),
-                fetch('https://coursesapi.langaracs.ca/v1/index/subjects')
+                fetch('http://168.138.79.49:5010/v1/index/semesters'),
+                fetch('http://168.138.79.49:5010/v1/index/subjects')
             ]);
 
             const semestersData = await semestersRes.json();
@@ -134,7 +134,7 @@ export default function CourseBrowser() {
 
                 const start = performance.now();
                 const response = await fetch(
-                    `https://coursesapi.langaracs.ca/v2/search/sections?${queryParams}`
+                    `http://168.138.79.49:5010/v2/search/sections?${queryParams}`
                 );
                 const data = await response.json();
 

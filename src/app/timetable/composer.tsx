@@ -31,7 +31,7 @@ export default function Composer() {
         } else {
             const fetchLatestSemester = async () => {
                 try {
-                    const latestSemesterResponse = await fetch(`https://coursesapi.langaracs.ca/v1/index/latest_semester`);
+                    const latestSemesterResponse = await fetch(`http://168.138.79.49:5010/v1/index/latest_semester`);
                     const latestSemesterData: LatestSemesterResponse = await latestSemesterResponse.json();
 
                     setYear(String(latestSemesterData.year));
@@ -51,8 +51,8 @@ export default function Composer() {
         const fetchData = async () => {
             try {
                 const [coursesResponse, sectionsResponse] = await Promise.all([
-                    fetch(`https://coursesapi.langaracs.ca/v1/semester/${year}/${term}/courses`),
-                    fetch(`https://coursesapi.langaracs.ca/v1/semester/${year}/${term}/sections`)
+                    fetch(`http://168.138.79.49:5010/v1/semester/${year}/${term}/courses`),
+                    fetch(`http://168.138.79.49:5010/v1/semester/${year}/${term}/sections`)
                 ]);
 
                 if (coursesResponse.status !== 200 || sectionsResponse.status !== 200) {
