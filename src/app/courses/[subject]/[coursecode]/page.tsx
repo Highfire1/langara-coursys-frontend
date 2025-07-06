@@ -6,8 +6,8 @@ import Header from "@/components/shared/header";
 // coursecode is the url slug / path parameter
 // course_code is returned by the api
 
-export const revalidate = 1800; // regeneate every 30 minutes
-export const dynamicParams = true;
+// export const revalidate = 1800; // regeneate every 30 minutes
+// export const dynamicParams/ = true;
 
 
 export async function generateMetadata({ params }: { params: expectedParams }) {
