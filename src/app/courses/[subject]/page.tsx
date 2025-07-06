@@ -1,4 +1,5 @@
-import { redirect } from 'next/navigation'
+
+import ClientRedirect from './client-redirect'
 
 interface CourseIndex {
     subject: string;
@@ -32,5 +33,6 @@ type Params = Promise<{ subject: string }>
 // and /courses has all the information that a /courses/[subject] would have
 export default async function CoursePage({ params }: { params: Params }) {
     const { subject } = await params
-    redirect(`/courses?subject=${subject.toUpperCase()}`)
+    
+    return <ClientRedirect subject={subject} />
 }
