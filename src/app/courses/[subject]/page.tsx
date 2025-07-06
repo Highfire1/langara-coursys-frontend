@@ -1,5 +1,30 @@
 import { redirect } from 'next/navigation'
 
+interface CourseIndex {
+    subject: string;
+    course_code: string;
+    title: string;
+    on_langara_website: boolean;
+}
+
+interface CourseIndexList {
+    course_count: number;
+    courses: CourseIndex[];
+}
+
+export async function generateStaticParams() {
+    const courses: CourseIndexList = await fetch('http://168.138.79.49:5010/v1/index/courses').then((res) =>
+        res.json()
+    )
+
+    // Get unique subjects from the course list
+    const uniqueSubjects = [...new Set(courses.courses.map((course) => course.subject))]
+
+    return uniqueSubjects.map((subject) => ({
+        subject: String(subject)
+    }))
+}
+
 type Params = Promise<{ subject: string }>
 
 // TODO: i think this violates html best practices

@@ -43,28 +43,28 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
 // it has to generate ~2800 pages which takes a lot of time on the build server
 // and the request is usually fast so there is no need to pregenerate it
 
-// interface CourseIndex {
-//     subject: string;
-//     course_code: string;
-//     title: string;
-//     on_langara_website: boolean;
-// }
+interface CourseIndex {
+    subject: string;
+    course_code: string;
+    title: string;
+    on_langara_website: boolean;
+}
 
-// interface CourseIndexList {
-//     course_count: number;
-//     courses: CourseIndex[];
-// }
+interface CourseIndexList {
+    course_count: number;
+    courses: CourseIndex[];
+}
 
-// export async function generateStaticParams() {
-//     const courses: CourseIndexList = await fetch('http://168.138.79.49:5010/v1/index/courses').then((res) =>
-//       res.json()
-//     )
+export async function generateStaticParams() {
+    const courses: CourseIndexList = await fetch('http://168.138.79.49:5010/v1/index/courses').then((res) =>
+      res.json()
+    )
 
-//     return courses.courses.map((course) => ({
-//         subject: String(course.subject),
-//         coursecode: String(course.course_code)
-//     }))
-//   }
+    return courses.courses.map((course) => ({
+        subject: String(course.subject),
+        coursecode: String(course.course_code)
+    }))
+  }
 
 
 type expectedParams = Promise<{ subject: string; coursecode: string }>;
