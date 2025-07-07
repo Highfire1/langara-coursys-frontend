@@ -1,30 +1,33 @@
+// you can revert this to a ssg page by using the client-redirect component
 
-import ClientRedirect from './client-redirect'
 
-interface CourseIndex {
-    subject: string;
-    course_code: string;
-    title: string;
-    on_langara_website: boolean;
-}
+// import ClientRedirect from './client-redirect'
+import { redirect } from 'next/navigation'
 
-interface CourseIndexList {
-    course_count: number;
-    courses: CourseIndex[];
-}
+// interface CourseIndex {
+//     subject: string;
+//     course_code: string;
+//     title: string;
+//     on_langara_website: boolean;
+// }
 
-export async function generateStaticParams() {
-    const courses: CourseIndexList = await fetch('http://168.138.79.49:5010/v1/index/courses').then((res) =>
-        res.json()
-    )
+// interface CourseIndexList {
+//     course_count: number;
+//     courses: CourseIndex[];
+// }
 
-    // Get unique subjects from the course list
-    const uniqueSubjects = [...new Set(courses.courses.map((course) => course.subject))]
+// export async function generateStaticParams() {
+//     const courses: CourseIndexList = await fetch('http://168.138.79.49:5010/v1/index/courses').then((res) =>
+//         res.json()
+//     )
 
-    return uniqueSubjects.map((subject) => ({
-        subject: String(subject)
-    }))
-}
+//     // Get unique subjects from the course list
+//     const uniqueSubjects = [...new Set(courses.courses.map((course) => course.subject))]
+
+//     return uniqueSubjects.map((subject) => ({
+//         subject: String(subject)
+//     }))
+// }
 
 type Params = Promise<{ subject: string }>
 
@@ -34,5 +37,6 @@ type Params = Promise<{ subject: string }>
 export default async function CoursePage({ params }: { params: Params }) {
     const { subject } = await params
     
-    return <ClientRedirect subject={subject} />
+    // return <ClientRedirect subject={subject} />
+    redirect(`/courses?subject=${subject.toUpperCase()}`)
 }
