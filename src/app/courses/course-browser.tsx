@@ -87,7 +87,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
 
                     const start = performance.now();
                     const response = await fetch(
-                        `http://168.138.79.49:5010/v2/search/courses?${queryParams}`
+                        `https://api.langaracourses.ca/v2/search/courses?${queryParams}`
                     );
                     const dataRes: v2SearchCoursesResponse = await response.json();
                     const cached = response.headers.get('x-fastapi-cache') === 'HIT';

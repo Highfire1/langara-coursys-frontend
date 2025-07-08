@@ -17,9 +17,9 @@ export const revalidate = 3600 // revalidate every hour
 export default async function Page() {
 
   const [transfersRes, subjectsRes, coursesRes] = await Promise.all([
-    fetch('http://168.138.79.49:5010/v1/index/transfer_destinations'),
-    fetch('http://168.138.79.49:5010/v1/index/subjects'),
-    fetch('http://168.138.79.49:5010/v2/search/courses?on_langara_website=true'),
+    fetch('https://api.langaracourses.ca/v1/index/transfer_destinations'),
+    fetch('https://api.langaracourses.ca/v1/index/subjects'),
+    fetch('https://api.langaracourses.ca/v2/search/courses?on_langara_website=true'),
   ]);
 
   const [transfersData, subjectsData, coursesData] : [v1IndexTransfersResponse, v1IndexSubjectsResponse, v2SearchCoursesResponse] = await Promise.all([

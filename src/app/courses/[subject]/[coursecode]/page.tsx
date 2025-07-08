@@ -14,7 +14,7 @@ export const revalidate = 1800; // regeneate every 30 minutes
 export async function generateMetadata({ params }: { params: expectedParams }) {
     const { subject, coursecode: coursecode } = await params;
 
-    const courseRes = await fetch(`http://168.138.79.49:5010/v1/courses/${subject}/${coursecode}`);
+    const courseRes = await fetch(`https://api.langaracourses.ca/v1/courses/${subject}/${coursecode}`);
 
     if (!courseRes.ok) { return { title: `Error ${courseRes.status}`}}
 
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
 // }
 
 // export async function generateStaticParams() {
-//     const courses: CourseIndexList = await fetch('http://168.138.79.49:5010/v1/index/courses').then((res) =>
+//     const courses: CourseIndexList = await fetch('https://api.langaracourses.ca/v1/index/courses').then((res) =>
 //       res.json()
 //     )
 
@@ -78,7 +78,7 @@ export default async function Page({
 ) {
     const { subject, coursecode: coursecode } = await searchParams;
 
-    const response = await fetch(`http://168.138.79.49:5010/v1/courses/${subject}/${coursecode}`);
+    const response = await fetch(`https://api.langaracourses.ca/v1/courses/${subject}/${coursecode}`);
     if (!response.ok) {
         return (
             <div className="w-full h-full">

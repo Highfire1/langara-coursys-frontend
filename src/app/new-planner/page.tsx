@@ -28,8 +28,8 @@ function PageContent() {
     const fetchData = async () => {
       try {
         const [coursesResponse, sectionsResponse] = await Promise.all([
-          fetch(`http://168.138.79.49:5010/v1/semester/${year}/${term}/courses`),
-          fetch(`http://168.138.79.49:5010/v1/semester/${year}/${term}/sections`)
+          fetch(`https://api.langaracourses.ca/v1/semester/${year}/${term}/courses`),
+          fetch(`https://api.langaracourses.ca/v1/semester/${year}/${term}/sections`)
         ]);
 
         const coursesData: CoursesResponse = await coursesResponse.json();

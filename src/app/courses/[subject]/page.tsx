@@ -17,7 +17,7 @@ import { redirect } from 'next/navigation'
 // }
 
 // export async function generateStaticParams() {
-//     const courses: CourseIndexList = await fetch('http://168.138.79.49:5010/v1/index/courses').then((res) =>
+//     const courses: CourseIndexList = await fetch('https://api.langaracourses.ca/v1/index/courses').then((res) =>
 //         res.json()
 //     )
 
