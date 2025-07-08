@@ -404,7 +404,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                         <Link
                           href={`/courses/${section.subject}/${section.course_code}`}
                           target='_blank'
-                          className="hover:underline"
+                          className="hover:text-blue-700 hover:underline"
                         >
                           {section.subject} {section.course_code} {section.section}: {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || ''}
                         </Link>
