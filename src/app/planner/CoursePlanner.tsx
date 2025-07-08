@@ -266,14 +266,14 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   const calendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: 'timeGridWeek',
-    headerToolbar: false,
+    headerToolbar: false as const, // this is truly a typescript moment
     slotMinTime: '07:00:00',
     slotMaxTime: '22:00:00',
     hiddenDays: saturdayCoursesCount > 0 ? [0] : [0, 6],
     initialDate: semesterStart,
     rerenderDelay: 10,
     allDaySlot: false,
-    dayHeaderFormat: { weekday: 'long' },
+    dayHeaderFormat: { weekday: "long" as const },
     height: '100%',
     events: generateCalendarEvents(),
     eventClick: (clickInfo: EventClickArg) => {

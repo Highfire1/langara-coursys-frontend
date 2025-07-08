@@ -3,7 +3,7 @@ export const metadata = {
     description: "Plan your Langara course schedule efficiently with an intuitive and visual planner. Easily search, select, and organize courses for upcoming semesters.",
   };
 
-import CoursePlanner from "@/app/planner/CoursePlanner";
+import CoursePlanner from "./CoursePlanner";
 // import Header from "@/components/shared/header";
 
 const PlannerPage = () => {
