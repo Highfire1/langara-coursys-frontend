@@ -44,7 +44,7 @@ export default function CourseList({ loading, courses }: CourseListProps): JSX.E
     };
 
     return (
-        <div className="mt-4">
+        <div className="mt-4 overflow-x-scroll">
             <table className="w-full table-fixed relative min-w-[1000px]">
                 <thead className=" bg-white z-10">
                     <tr className="bg-gray-100 text-left text-xs md:text-sm">

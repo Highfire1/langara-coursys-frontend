@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { debounce } from 'lodash';
 import { useSearchParams } from 'next/navigation';
@@ -39,6 +39,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
     const [courses, setCourses] = useState<CourseMax[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [requestInfo, setRequestInfo] = useState<{ time?: number; cached?: boolean }>({});
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const initialSearchParams: SearchParams = {
         subject: searchParams.get('subject') || '',
@@ -59,53 +60,59 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
 
     const [currentSearchParams, setCurrentSearchParams] = useState<SearchParams>(initialSearchParams);
 
+    const performSearch = useCallback(async (params: SearchParams) => {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== '' && value !== false) {
+                if (Array.isArray(value)) {
+                    value.forEach(v => queryParams.append(key, v));
+                } else {
+                    queryParams.append(key, value.toString());
+                }
+            }
+        });
+
+        if (queryParams.toString() === 'on_langara_website=true') {
+            console.log("USED SERVER SIDE CALLED DATA")
+            const data = initialCourses
+            setCourses(data);
+            setLoading(false);
+            setRequestInfo({});
+            return
+        }
+
+        console.log("CALLED API")
+
+        const start = performance.now();
+        const response = await fetch(
+            `https://api.langaracourses.ca/v2/search/courses?${queryParams}`
+        );
+        const dataRes: v2SearchCoursesResponse = await response.json();
+        const cached = response.headers.get('x-fastapi-cache') === 'HIT';
+        const time = Math.round(performance.now() - start);
+
+        setRequestInfo({ time, cached });
+        setCourses(dataRes.courses);
+        setLoading(false);
+    }, [initialCourses]);
+
     const debouncedSearch = useMemo(
-        () =>
-            debounce(
-                async (params: SearchParams) => {
-                    const queryParams = new URLSearchParams();
-                    Object.entries(params).forEach(([key, value]) => {
-                        if (value !== undefined && value !== '' && value !== false) {
-                            if (Array.isArray(value)) {
-                                value.forEach(v => queryParams.append(key, v));
-                            } else {
-                                queryParams.append(key, value.toString());
-                            }
-                        }
-                    });
-
-                    if (queryParams.toString() === 'on_langara_website=true') {
-                        console.log("USED SERVER SIDE CALLED DATA")
-                        const data = initialCourses
-                        setCourses(data);
-                        setLoading(false);
-                        setRequestInfo({ });
-                        return
-                    }
-
-                    console.log("CALLED API")
-
-                    const start = performance.now();
-                    const response = await fetch(
-                        `https://api.langaracourses.ca/v2/search/courses?${queryParams}`
-                    );
-                    const dataRes: v2SearchCoursesResponse = await response.json();
-                    const cached = response.headers.get('x-fastapi-cache') === 'HIT';
-                    const time = Math.round(performance.now() - start);
-
-                    setRequestInfo({ time, cached });
-                    setCourses(dataRes.courses);
-                    setLoading(false);
-                },
-                400,
-            ),
-        [initialCourses]
+        () => debounce(performSearch, 400),
+        [performSearch]
     );
 
     useEffect(() => {
         setLoading(true);
-        debouncedSearch(currentSearchParams);
-    }, [currentSearchParams, debouncedSearch]);
+
+        if (isInitialLoad) {
+            // Run immediately on initial load
+            performSearch(currentSearchParams);
+            setIsInitialLoad(false);
+        } else {
+            // Use debounced search for subsequent searches
+            debouncedSearch(currentSearchParams);
+        }
+    }, [currentSearchParams, debouncedSearch, isInitialLoad, performSearch]);
 
     const handleInputChange = (key: keyof SearchParams, value: string | boolean | string[]) => {
         setCurrentSearchParams(prev => ({ ...prev, [key]: value }));
@@ -293,10 +300,16 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
                             <div>
                                 {/* TODO: this is laggy and needs to be replaced */}
                                 {/* See https://github.com/radix-ui/primitives/issues/1634 for info. */}
-                                <DropdownMenu modal={false}>
+                                <DropdownMenu modal={true}>
+
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline">Select Transfer Destinations</Button>
+                                        <Button variant="outline" className="break-words w-fit py-6 sm:py-0">
+                                            <p className='break-words'>
+                                                Select Transfer <br className="sm:hidden" />Destinations
+                                            </p>
+                                        </Button>
                                     </DropdownMenuTrigger>
+
                                     <DropdownMenuContent align="end" className="w-56 bg-white overflow-y-scroll h-64" >
                                         {/* <DropdownMenuLabel>Appearance</DropdownMenuLabel>
                                         <DropdownMenuSeparator /> */}
@@ -380,7 +393,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
 
             <CourseList loading={loading} courses={courses || []} />
 
-            
+
 
         </div>
     );
