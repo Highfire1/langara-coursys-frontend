@@ -646,11 +646,12 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: 'timeGridWeek',
     headerToolbar: false as const, // this is truly a typescript moment
-    slotMinTime: '07:00:00',
+    slotMinTime: '08:00:00', // todo: make this dynamic
     slotMaxTime: '22:00:00',
     hiddenDays: saturdayCoursesCount > 0 ? [0] : [0, 6],
     initialDate: semesterStart,
     rerenderDelay: 10,
+    aspectRatio: 1.5,
     allDaySlot: false,
     dayHeaderFormat: { weekday: "long" as const },
     height: '100%',
@@ -763,7 +764,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     const crns = getCurrentCRNs();
 
     if (crns.length === 0) {
-      alert('No courses selected to share');
+      alert('Select some courses before sharing!');
       return;
     }
 
