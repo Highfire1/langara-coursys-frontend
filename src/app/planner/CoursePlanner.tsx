@@ -968,7 +968,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         <p className="text-gray-500 pb-[2px]">
           Please report bugs or feedback at{" "}
           <Link
-            href="https://forms.gle/your-google-form-link"
+            href="https://forms.gle/CYKP7xsp2an6gNEK9"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:underline"
