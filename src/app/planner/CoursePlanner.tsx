@@ -38,6 +38,7 @@ const SaveBar = ({
   currentScheduleId,
   onScheduleSelect,
   onInitialScheduleSet,
+  hasInitialized,
   className = ""
 }: {
   currentYear: number;
@@ -47,14 +48,18 @@ const SaveBar = ({
   currentScheduleId: string | null;
   onScheduleSelect: (scheduleId: string) => void;
   onInitialScheduleSet: (scheduleId: string) => void;
+  hasInitialized: boolean;
   className?: string;
 }) => {
   const [savedSchedules, setSavedSchedules] = useState<SavedSchedule[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
 
-  // Load saved schedules from localStorage and create default schedule if needed
+  // Load saved schedules from localStorage and create default if none exist
   useEffect(() => {
+    // Only proceed after initialization is complete
+    if (!hasInitialized) return;
+
     const saved = localStorage.getItem('langara-saved-schedules');
     let schedules: SavedSchedule[] = [];
 
@@ -66,8 +71,9 @@ const SaveBar = ({
       }
     }
 
-    // If no schedules exist, create a default "Schedule 1" with current semester
+    // If no schedules exist, create a default schedule with the current semester
     if (schedules.length === 0) {
+      console.log('No schedules found, creating default schedule for:', currentYear, currentTerm);
       const defaultSchedule: SavedSchedule = {
         id: 'default-1',
         name: 'Schedule 1',
@@ -78,18 +84,14 @@ const SaveBar = ({
       };
       schedules = [defaultSchedule];
       localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
+      
+      // Set this as the current schedule
+      onInitialScheduleSet(defaultSchedule.id);
+      localStorage.setItem('langara-current-schedule-id', defaultSchedule.id);
     }
 
     setSavedSchedules(schedules);
-
-    // Auto-select the first schedule if none is selected
-    if (!currentScheduleId && schedules.length > 0) {
-      // Just set the schedule ID without triggering a reload
-      onInitialScheduleSet(schedules[0].id);
-      // Also save to localStorage
-      localStorage.setItem('langara-current-schedule-id', schedules[0].id);
-    }
-  }, [currentYear, currentTerm, currentScheduleId, onInitialScheduleSet]);
+  }, [hasInitialized, currentYear, currentTerm, onInitialScheduleSet]);
 
   // Save schedules to localStorage
   const saveToLocalStorage = (schedules: SavedSchedule[]) => {
@@ -281,41 +283,112 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     }))
   );
 
-  // Initialize semester if no saved schedules exist
+  // Single initialization effect - determines semester and schedules
   useEffect(() => {
-    const initializeSemester = async () => {
+    const initialize = async () => {
       if (hasInitialized) return;
 
-      // Check if there are any saved schedules
-      const saved = localStorage.getItem('langara-saved-schedules');
-      let hasSchedules = false;
+      let targetYear = currentYear;
+      let targetTerm = currentTerm;
+      let targetScheduleId: string | null = null;
 
+      // Check for existing schedules first
+      const saved = localStorage.getItem('langara-saved-schedules');
+      const currentId = localStorage.getItem('langara-current-schedule-id');
+      
+      let existingSchedules: SavedSchedule[] = [];
       if (saved) {
         try {
-          const schedules: SavedSchedule[] = JSON.parse(saved);
-          hasSchedules = schedules.length > 0;
+          existingSchedules = JSON.parse(saved);
         } catch (e) {
           console.error('Failed to parse saved schedules:', e);
         }
       }
 
-      // If no schedules exist and no initial state, use latest semester
-      if (!hasSchedules && !initialState) {
+      if (existingSchedules.length > 0) {
+        // We have existing schedules - use the current schedule's semester
+        let scheduleToUse = existingSchedules[0]; // default to first
+        
+        if (currentId) {
+          const foundSchedule = existingSchedules.find(s => s.id === currentId);
+          if (foundSchedule) {
+            scheduleToUse = foundSchedule;
+          }
+        }
+        
+        targetYear = scheduleToUse.year;
+        targetTerm = scheduleToUse.term;
+        targetScheduleId = scheduleToUse.id;
+        
+        console.log('Using existing schedule:', scheduleToUse);
+      } else if (!initialState) {
+        // No existing schedules - get latest semester and we'll create a default schedule
         try {
           const latestSemester = await plannerApi.getLatestSemester();
-          console.log('Setting current semester to latest:', latestSemester);
-          setCurrentYear(latestSemester.year);
-          setCurrentTerm(latestSemester.term);
+          targetYear = latestSemester.year;
+          targetTerm = latestSemester.term;
+          console.log('No schedules found, will use latest semester:', latestSemester);
         } catch (error) {
           console.error('Failed to get latest semester, using defaults:', error);
         }
       }
 
+      // Set the determined semester
+      setCurrentYear(targetYear);
+      setCurrentTerm(targetTerm);
+      
+      // Set the current schedule if we found one
+      if (targetScheduleId) {
+        setCurrentScheduleId(targetScheduleId);
+        localStorage.setItem('langara-current-schedule-id', targetScheduleId);
+      }
+
       setHasInitialized(true);
     };
 
-    initializeSemester();
-  }, [hasInitialized, initialState]);
+    initialize();
+  }, [hasInitialized, initialState, currentYear, currentTerm]);
+
+  // Load a saved schedule
+  const loadSavedSchedule = useCallback(async (year: number, term: number, crns: string[]) => {
+    try {
+      console.log('Loading saved schedule:', { year, term, crns });
+      setLoading(true);
+      setCurrentYear(year);
+      setCurrentTerm(term);
+
+      // Clear current selection first
+      setSelectedSections(new Set());
+
+      // Load courses for the specified semester
+      const coursesData = await plannerApi.getCoursesForSemester(year, term);
+      setCourses(coursesData.courses);
+
+      // Find sections by CRN and select them
+      const foundSections = new Set<string>();
+      coursesData.courses.forEach(course => {
+        course.sections.forEach(section => {
+          if (crns.includes(section.crn.toString())) {
+            // console.log('Found matching section:', section.crn, section.id);
+            foundSections.add(section.id);
+          }
+        });
+      });
+
+      // console.log('Selected sections:', foundSections);
+      setSelectedSections(foundSections);
+
+      // Load all sections for search
+      const searchResults = await plannerApi.searchSections('', year, term);
+      setFilteredSections(searchResults.sections);
+
+      console.log('Saved schedule loaded successfully');
+    } catch (error) {
+      console.error('Failed to load saved schedule:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Load initial data
   useEffect(() => {
@@ -354,8 +427,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           const schedules: SavedSchedule[] = JSON.parse(saved);
           const schedule = schedules.find(s => s.id === currentScheduleId);
           if (schedule && schedule.crns.length > 0) {
-            // console.log('Loading sections for current schedule after courses loaded:', schedule);
-            // Find sections by CRN and select them
+            // The courses should already be loaded for the correct semester by now
+            // Just find sections by CRN and select them
             const foundSections = new Set<string>();
 
             courses.forEach(course => {
@@ -367,9 +440,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
               });
             });
 
-            // console.log(foundSections.size, 'sections found for current schedule:', currentScheduleId);
-
-            // console.log('Setting sections on refresh:', foundSections);
+            console.log('Setting sections on refresh:', foundSections);
             setSelectedSections(foundSections);
           }
         } catch (e) {
@@ -651,7 +722,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     hiddenDays: saturdayCoursesCount > 0 ? [0] : [0, 6],
     initialDate: semesterStart,
     rerenderDelay: 10,
-    aspectRatio: 1.5,
+    // aspectRatio: 10,
     allDaySlot: false,
     dayHeaderFormat: { weekday: "long" as const },
     height: '100%',
@@ -781,47 +852,6 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       .filter((crn): crn is string => Boolean(crn));
   };
 
-  // Load a saved schedule
-  const loadSavedSchedule = async (year: number, term: number, crns: string[]) => {
-    try {
-      console.log('Loading saved schedule:', { year, term, crns });
-      setLoading(true);
-      setCurrentYear(year);
-      setCurrentTerm(term);
-
-      // Clear current selection first
-      setSelectedSections(new Set());
-
-      // Load courses for the specified semester
-      const coursesData = await plannerApi.getCoursesForSemester(year, term);
-      setCourses(coursesData.courses);
-
-      // Find sections by CRN and select them
-      const foundSections = new Set<string>();
-      coursesData.courses.forEach(course => {
-        course.sections.forEach(section => {
-          if (crns.includes(section.crn.toString())) {
-            // console.log('Found matching section:', section.crn, section.id);
-            foundSections.add(section.id);
-          }
-        });
-      });
-
-      // console.log('Selected sections:', foundSections);
-      setSelectedSections(foundSections);
-
-      // Load all sections for search
-      const searchResults = await plannerApi.searchSections('', year, term);
-      setFilteredSections(searchResults.sections);
-
-      console.log('Saved schedule loaded successfully');
-    } catch (error) {
-      console.error('Failed to load saved schedule:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Memoize filtered sections for better performance
   const visibleSections = useMemo(() =>
     allSections.filter(section => filteredSections.includes(section.id)),
@@ -940,6 +970,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           currentScheduleId={currentScheduleId}
           onScheduleSelect={handleScheduleSelect}
           onInitialScheduleSet={setCurrentScheduleId}
+          hasInitialized={hasInitialized}
         />
       ) : (
         <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
