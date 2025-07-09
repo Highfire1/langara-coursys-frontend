@@ -23,11 +23,11 @@ export default function Home() {
           <p>If you find this page useful, share it with your friends to help them save time with course planning!</p>
         </div>
 
-        <p>This is a free website that helps you effectively plan and look for courses at Langara College. Check out the <Link href="/about" className="text-blue-800 hover:text-blue-600 underline">about page</Link> for more information.</p>
+        {/* <p>This is a free website that helps you effectively plan and look for courses at Langara College. Check out the <Link href="/about" className="text-blue-800 hover:text-blue-600 underline">about page</Link> for more information.</p> */}
 
 
         <div>
-          <h2 className="text-lg">Main tools:</h2>
+          <h2 className="font-bold">Main tools:</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Link href="/planner" className="block">
               <div className="bg-[#BDEDBD] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
@@ -46,7 +46,7 @@ export default function Home() {
           </div>
         </div>
         <div>
-          <h2 className="text-lg">Other tools:</h2>
+          <h2 className="font-bold">Other tools:</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <Link href="/timetable" className="block">
