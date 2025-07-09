@@ -84,7 +84,7 @@ const SaveBar = ({
       };
       schedules = [defaultSchedule];
       localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
-      
+
       // Set this as the current schedule
       onInitialScheduleSet(defaultSchedule.id);
       localStorage.setItem('langara-current-schedule-id', defaultSchedule.id);
@@ -295,7 +295,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       // Check for existing schedules first
       const saved = localStorage.getItem('langara-saved-schedules');
       const currentId = localStorage.getItem('langara-current-schedule-id');
-      
+
       let existingSchedules: SavedSchedule[] = [];
       if (saved) {
         try {
@@ -308,18 +308,18 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       if (existingSchedules.length > 0) {
         // We have existing schedules - use the current schedule's semester
         let scheduleToUse = existingSchedules[0]; // default to first
-        
+
         if (currentId) {
           const foundSchedule = existingSchedules.find(s => s.id === currentId);
           if (foundSchedule) {
             scheduleToUse = foundSchedule;
           }
         }
-        
+
         targetYear = scheduleToUse.year;
         targetTerm = scheduleToUse.term;
         targetScheduleId = scheduleToUse.id;
-        
+
         console.log('Using existing schedule:', scheduleToUse);
       } else if (!initialState) {
         // No existing schedules - get latest semester and we'll create a default schedule
@@ -336,7 +336,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       // Set the determined semester
       setCurrentYear(targetYear);
       setCurrentTerm(targetTerm);
-      
+
       // Set the current schedule if we found one
       if (targetScheduleId) {
         setCurrentScheduleId(targetScheduleId);
@@ -959,6 +959,25 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
   return (
     <div className=" h-screen bg-gray-50 max-h-screen block">
+
+      <div className="h-10 bg-orange-200 border-b shadow-sm px-4 pt-2 pb-1 flex flex-row items-end space-x-4 align-bottom">
+        <Link href={"/"}>
+          <h1 className="text-lg font-bold">Langara Course Planner.</h1>
+        </Link>
+        <p className="text-gray-500 pb-[2px]">This website is a student project and is not affiliated with Langara College.</p>
+        <p className="text-gray-500 pb-[2px]">
+          Please report bugs or feedback at{" "}
+          <Link
+            href="https://forms.gle/your-google-form-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            this form
+          </Link>!
+        </p>
+      </div>
+
       {/* Save Bar */}
       {hasInitialized ? (
         <SaveBar
@@ -976,17 +995,17 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
       )}
 
-      <div className="flex flex-1 flex-grow h-[calc(100vh-48px)]">
+      <div className="flex flex-1 flex-grow h-[calc(100vh-48px-40px)]">
 
         {/* Sidebar */}
         <div className="max-w-[30rem] bg-white shadow-lg flex flex-col flex-1 h-full">
           {/* Header */}
           <div className="p-4 border-b">
-            <Link href={"/"}>
+            {/* <Link href={"/"}>
               <h1 className="text-xs text-gray-600 mb-2">
-                {`← back to main page`}
+                {`Langara Course Planner`}
               </h1>
-            </Link>
+            </Link> */}
 
             {/* Term Selector */}
             <div className="mb-2">
