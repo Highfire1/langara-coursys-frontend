@@ -712,7 +712,6 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   let { start: semesterStart } = getSemesterDates(currentYear, currentTerm);
   semesterStart = new Date(semesterStart);
   semesterStart.setDate(semesterStart.getDate() + 7);
-
   const calendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: 'timeGridWeek',
@@ -724,7 +723,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     rerenderDelay: 10,
     // aspectRatio: 10,
     allDaySlot: false,
-    dayHeaderFormat: { weekday: "long" as const },
+    dayHeaderFormat: { weekday: window.innerWidth < 900 ? "short" : "long" } as const,
     height: '100%',
     events: generateCalendarEvents(),
     eventClick: (clickInfo: EventClickArg) => {
@@ -930,8 +929,9 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             <div className="mt-2">
               <table className="w-full text-xs">
                 <tbody>
-                  {section.schedule.map((schedule: Schedule, idx: number) => (
-                    <tr key={idx} className="text-gray-500 align-top">
+                    {section.schedule.map((schedule: Schedule, idx: number) => (
+                    <React.Fragment key={idx}>
+                      <tr className="text-gray-500 align-top">
                       <td className="min-w-14 font-mono align-top">
                         {schedule.days}
                       </td>
@@ -942,10 +942,19 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                         {schedule.type}
                       </td>
                       <td className="w-full font-mono align-top">
-                        {schedule.instructor}
+                        {window.innerWidth > 768 ? schedule.instructor : ''}
                       </td>
-                    </tr>
-                  ))}
+                      </tr>
+                      {window.innerWidth <= 768 && (
+                      <tr className="text-gray-500 align-top">
+                        <td colSpan={4} className="w-full font-mono align-top text-left">
+                        {schedule.instructor}
+                        </td>
+                      </tr>
+                      )}
+                    </React.Fragment>
+                    ))}
+
                 </tbody>
               </table>
             </div>
@@ -960,7 +969,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   return (
     <div className=" h-screen bg-gray-50 max-h-screen block">
 
-      <div className="h-10 bg-orange-200 border-b shadow-sm px-4 pt-2 pb-1 flex flex-row items-end space-x-4 align-bottom">
+      <div className="h-10 bg-orange-200 border-b shadow-sm px-4 pt-2 pb-1 flex flex-row items-end space-x-4 align-bottom whitespace-nowrap overflow-x-scroll">
         <Link href={"/"}>
           <h1 className="text-lg font-bold">Langara Course Planner.</h1>
         </Link>
@@ -998,7 +1007,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       <div className="flex flex-1 flex-grow h-[calc(100vh-48px-40px)]">
 
         {/* Sidebar */}
-        <div className="max-w-[30rem] bg-white shadow-lg flex flex-col flex-1 h-full">
+        <div className="max-w-[15rem] md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
           {/* Header */}
           <div className="p-4 border-b">
             {/* <Link href={"/"}>
@@ -1111,7 +1120,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         </div>
 
         {/* Calendar and Online Courses */}
-        <div className="flex-1 p-4 flex flex-col">
+        <div className="flex-1 p-2 flex flex-col">
           {/* Calendar */}
           <div className="flex-1 bg-white rounded-lg shadow mb-4">
             <FullCalendar
@@ -1123,7 +1132,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           {/* Online Courses */}
           <div className="h-36 bg-white rounded-lg shadow">
             <div className="pl-3 pt-3">
-              <h3 className="text-lg font-semibold text-gray-800">Online Courses:</h3>
+              <h3 className="md:text-lg font-semibold text-gray-800">Online Courses:</h3>
             </div>
 
             <div className="p-3 overflow-y-auto h-[calc(100%-3rem)]">
