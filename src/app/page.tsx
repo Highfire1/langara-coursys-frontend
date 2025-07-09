@@ -11,52 +11,64 @@ export default function Home() {
   return (
     <div className="w-full h-full">
 
-      <Header title="Langara College Course Planning Tools" color="#F15A22" hideForm/>
+      <Header title="Langara College Course Planning Tools" color="#F15A22" hideForm />
 
       <div className="px-4 py-6 flex flex-col gap-4">
 
         <div className="p-4 bg-blue-100 rounded-lg border-4 border-blue-400">
-          <strong>Welcome to v3 of the Langara Course Planner!</strong>
-            <p>Introducing many new features such as an improved timetable generator, and a course and section search.</p>
-            <p>As always, please report bugs or feedback, or leave a testimonial at our <Link href={"https://forms.gle/CYKP7xsp2an6gNEK9"} className="text-blue-800 hover:text-blue-600 underline">feedback form!</Link></p>
-            <p>If you find this page useful, share it with your friends to help them save time with course planning!</p>
+          <strong>Welcome to v4 of the Langara Course Planner!</strong>
+          <p>We are now on a new domain! bookmark langaracourses.ca and share it with your friends!</p>
+          <p>The course planner has been updated to a new framework and should now work more seamlessly with the rest of the website.</p>
+          <p>As always, please report bugs or feedback, or leave a testimonial at our <Link href={"https://forms.gle/CYKP7xsp2an6gNEK9"} className="text-blue-800 hover:text-blue-600 underline">feedback form!</Link></p>
+          <p>If you find this page useful, share it with your friends to help them save time with course planning!</p>
         </div>
 
         <p>This is a free website that helps you effectively plan and look for courses at Langara College. Check out the <Link href="/about" className="text-blue-800 hover:text-blue-600 underline">about page</Link> for more information.</p>
 
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/planner" className="block">
-            <div className="bg-[#BDEDBD] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
-              <h2 className="text-xl font-bold mb-2">Course Planner</h2>
-              <p className="text-sm max-w-[300px]">Plan your courses for a semester using the original visual course planner.</p>
-            </div>
-          </Link>
+        <div>
+          <h2 className="text-lg">Main tools:</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link href="/planner" className="block">
+              <div className="bg-[#BDEDBD] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
+                <h2 className="text-xl font-bold mb-2">Course Planner</h2>
+                <p className="text-sm max-w-[300px]">Plan your courses for a semester using the original visual course planner.</p>
+              </div>
+            </Link>
 
-          <Link href="/timetable" className="block">
-            <div className="bg-[#b38cb3] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
-              <h2 className="text-xl font-bold mb-2">Timetable Generator (BETA)</h2>
-              <p className="text-sm max-w-[300px]">Explore all possible combinations of a list of selected courses.</p>
-            </div>
-          </Link>
+            <Link href="/courses" className="block">
+              <div className="bg-[#F1B5CB] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
+                <h2 className="text-xl font-bold mb-2">Course Search</h2>
+                <p className="text-sm max-w-[300px]">Explore every single course at Langara. Search by attribute, transfer destinations, and more.</p>
+              </div>
+            </Link>
 
-          <Link href="/courses" className="block">
-            <div className="bg-[#F1B5CB] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
-              <h2 className="text-xl font-bold mb-2">Course Search</h2>
-              <p className="text-sm max-w-[300px]">Explore every single course at Langara. Search by attribute, transfer destinations, and more.</p>
-            </div>
-          </Link>
+          </div>
+        </div>
+        <div>
+          <h2 className="text-lg">Other tools:</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          <Link href="/sections" className="block">
-            <div className="bg-[#FEB95F] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
-              <h2 className="text-xl font-bold mb-2">Course Offerings</h2>
-              <p className="text-sm max-w-[300px]">Explore every single course offering at Langara. View historical data of previous sections, and filter by waitlist, open seats, or on other parameters.</p>
-            </div>
-          </Link>
+            <Link href="/timetable" className="block">
+              <div className="bg-[#b38cb3] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
+                <h2 className="text-xl font-bold mb-2">Timetable Generator (BETA)</h2>
+                <p className="text-sm max-w-[300px]">Explore all possible combinations of a list of selected courses.</p>
+              </div>
+            </Link>
+
+
+
+            <Link href="/sections" className="block">
+              <div className="bg-[#FEB95F] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
+                <h2 className="text-xl font-bold mb-2">Course Offerings</h2>
+                <p className="text-sm max-w-[300px]">Explore every single course offering at Langara. View historical data of previous sections, and filter by waitlist, open seats, or on other parameters.</p>
+              </div>
+            </Link>
+          </div>
         </div>
 
         <br></br>
-        <div className="p-2 border-black border-2 rounded"> 
+        <div className="p-2 border-black border-2 rounded">
           <h3>Testimonials:</h3>
           <div className="py-2 px-4 italic text-gray-600 flex flex-col gap-2">
             {/* <span>better than sliced bread; - anonymous</span> */}
