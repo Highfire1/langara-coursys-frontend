@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -12,30 +12,262 @@ import {
   Section,
   PlannerCourse,
   Semester,
-  Schedule
+  Schedule,
+  SavedSchedule
 } from '@/types/Planner2';
 import Link from 'next/link';
+import { Virtuoso } from 'react-virtuoso';
 
 interface PlannerProps {
   initialYear?: number;
   initialTerm?: number;
+  initialState?: {
+    year?: number;
+    term?: number;
+    selectedSections?: Set<string>;
+    scheduleId?: string;
+  } | null;
 }
+
+// Save bar component
+const SaveBar = ({
+  currentYear,
+  currentTerm,
+  selectedSections,
+  allSections,
+  currentScheduleId,
+  onScheduleSelect,
+  onInitialScheduleSet,
+  className = ""
+}: {
+  currentYear: number;
+  currentTerm: number;
+  selectedSections: Set<string>;
+  allSections: Section[];
+  currentScheduleId: string | null;
+  onScheduleSelect: (scheduleId: string) => void;
+  onInitialScheduleSet: (scheduleId: string) => void;
+  className?: string;
+}) => {
+  const [savedSchedules, setSavedSchedules] = useState<SavedSchedule[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
+
+  // Load saved schedules from localStorage and create default schedule if needed
+  useEffect(() => {
+    const saved = localStorage.getItem('langara-saved-schedules');
+    let schedules: SavedSchedule[] = [];
+
+    if (saved) {
+      try {
+        schedules = JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to load saved schedules:', e);
+      }
+    }
+
+    // If no schedules exist, create a default "Schedule 1" with current semester
+    if (schedules.length === 0) {
+      const defaultSchedule: SavedSchedule = {
+        id: 'default-1',
+        name: 'Schedule 1',
+        year: currentYear,
+        term: currentTerm,
+        crns: [],
+        createdAt: Date.now()
+      };
+      schedules = [defaultSchedule];
+      localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
+    }
+
+    setSavedSchedules(schedules);
+
+    // Auto-select the first schedule if none is selected
+    if (!currentScheduleId && schedules.length > 0) {
+      // Just set the schedule ID without triggering a reload
+      onInitialScheduleSet(schedules[0].id);
+      // Also save to localStorage
+      localStorage.setItem('langara-current-schedule-id', schedules[0].id);
+    }
+  }, [currentYear, currentTerm, currentScheduleId, onInitialScheduleSet]);
+
+  // Save schedules to localStorage
+  const saveToLocalStorage = (schedules: SavedSchedule[]) => {
+    localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
+    setSavedSchedules(schedules);
+  };
+
+  // Get current CRNs
+  const getCurrentCRNs = (): string[] => {
+    return Array.from(selectedSections)
+      .map(sectionId => {
+        const section = allSections.find(s => s.id === sectionId);
+        return section?.crn.toString();
+      })
+      .filter((crn): crn is string => Boolean(crn));
+  };
+
+  // Save current schedule as a new one
+  const saveCurrentSchedule = () => {
+    const crns = getCurrentCRNs();
+
+    const newSchedule: SavedSchedule = {
+      id: Date.now().toString(),
+      name: `Schedule ${savedSchedules.length + 1}`,
+      year: currentYear,
+      term: currentTerm,
+      crns,
+      createdAt: Date.now()
+    };
+
+    const updated = [...savedSchedules, newSchedule].slice(0, 50); // Cap at 50
+    saveToLocalStorage(updated);
+
+    // Auto-select the new schedule
+    onScheduleSelect(newSchedule.id);
+  };
+
+  // Load a saved schedule (clicked from SaveBar)
+  const loadSchedule = (schedule: SavedSchedule) => {
+    onScheduleSelect(schedule.id);
+  };
+
+  // Delete a schedule
+  const deleteSchedule = (id: string) => {
+    if (confirm('Are you sure you want to delete this schedule?')) {
+      const updated = savedSchedules.filter(s => s.id !== id);
+      saveToLocalStorage(updated);
+
+      // If we deleted the current schedule, select the first remaining one
+      if (currentScheduleId === id) {
+        if (updated.length > 0) {
+          onScheduleSelect(updated[0].id);
+        } else {
+          // No schedules left, clear the current schedule from localStorage
+          localStorage.removeItem('langara-current-schedule-id');
+        }
+      }
+    }
+  };
+
+  // Start editing name
+  const startEditing = (schedule: SavedSchedule) => {
+    setEditingId(schedule.id);
+    setEditingName(schedule.name);
+  };
+
+  // Save name edit
+  const saveNameEdit = () => {
+    if (editingId && editingName.trim()) {
+      const updated = savedSchedules.map(s =>
+        s.id === editingId ? { ...s, name: editingName.trim() } : s
+      );
+      saveToLocalStorage(updated);
+    }
+    setEditingId(null);
+    setEditingName('');
+  };
+
+  // Cancel name edit
+  const cancelNameEdit = () => {
+    setEditingId(null);
+    setEditingName('');
+  };
+
+  return (
+    <div className={`bg-white border-b shadow-sm px-4 py-2 ${className}`}>
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {savedSchedules.map(schedule => (
+          <div
+            key={schedule.id}
+            className={`flex items-center gap-1 rounded px-3 py-1 min-w-0 flex-shrink-0 ${currentScheduleId === schedule.id
+              ? 'bg-blue-200 border-2 border-blue-400'
+              : 'bg-gray-100'
+              }`}
+          >
+            {editingId === schedule.id ? (
+              <div className="flex items-center gap-1">
+                <input
+                  type="text"
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveNameEdit();
+                    if (e.key === 'Escape') cancelNameEdit();
+                  }}
+                  onBlur={saveNameEdit}
+                  className="text-sm border rounded px-1 w-36"
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => currentScheduleId === schedule.id ? startEditing(schedule) : loadSchedule(schedule)}
+                  className={`text-sm truncate max-w-40 ${currentScheduleId === schedule.id
+                    ? 'text-blue-800 font-medium hover:text-blue-900'
+                    : 'hover:text-blue-600'
+                    }`}
+                  title={currentScheduleId === schedule.id
+                    ? `Click to rename: ${schedule.name} (${schedule.year} ${schedule.term === 10 ? 'Spring' : schedule.term === 20 ? 'Summer' : 'Fall'})`
+                    : `${schedule.name} (${schedule.year} ${schedule.term === 10 ? 'Spring' : schedule.term === 20 ? 'Summer' : 'Fall'})`
+                  }
+                >
+                  {schedule.name}
+                </button>
+                <button
+                  onClick={() => startEditing(schedule)}
+                  className="text-xs text-gray-500 hover:text-gray-700"
+                  title="Rename"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={() => deleteSchedule(schedule.id)}
+                  className="text-xs text-gray-500 hover:text-red-600"
+                  title="Delete"
+                >
+                  ✕
+                </button>
+              </>
+            )}
+          </div>
+        ))}
+
+        <button
+          onClick={saveCurrentSchedule}
+          className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 whitespace-nowrap"
+          title="Create new schedule"
+        >
+          + New
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const CoursePlanner: React.FC<PlannerProps> = ({
   initialYear = 2025,
-  initialTerm = 10
+  initialTerm = 10,
+  initialState = null
 }) => {
   // State
   const [courses, setCourses] = useState<PlannerCourse[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [currentYear, setCurrentYear] = useState(initialYear);
-  const [currentTerm, setCurrentTerm] = useState(initialTerm);
+  const [currentYear, setCurrentYear] = useState(initialState?.year || initialYear);
+  const [currentTerm, setCurrentTerm] = useState(initialState?.term || initialTerm);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredSections, setFilteredSections] = useState<string[]>([]);
-  const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set());
+  const [selectedSections, setSelectedSections] = useState<Set<string>>(initialState?.selectedSections || new Set());
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saturdayCoursesCount, setSaturdayCoursesCount] = useState(0);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [currentScheduleId, setCurrentScheduleId] = useState<string | null>(
+    initialState?.scheduleId ||
+    (typeof window !== 'undefined' ? localStorage.getItem('langara-current-schedule-id') : null)
+  );
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Refs
   const calendarRef = useRef<FullCalendar>(null);
@@ -49,8 +281,46 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     }))
   );
 
+  // Initialize semester if no saved schedules exist
+  useEffect(() => {
+    const initializeSemester = async () => {
+      if (hasInitialized) return;
+
+      // Check if there are any saved schedules
+      const saved = localStorage.getItem('langara-saved-schedules');
+      let hasSchedules = false;
+
+      if (saved) {
+        try {
+          const schedules: SavedSchedule[] = JSON.parse(saved);
+          hasSchedules = schedules.length > 0;
+        } catch (e) {
+          console.error('Failed to parse saved schedules:', e);
+        }
+      }
+
+      // If no schedules exist and no initial state, use latest semester
+      if (!hasSchedules && !initialState) {
+        try {
+          const latestSemester = await plannerApi.getLatestSemester();
+          console.log('Setting current semester to latest:', latestSemester);
+          setCurrentYear(latestSemester.year);
+          setCurrentTerm(latestSemester.term);
+        } catch (error) {
+          console.error('Failed to get latest semester, using defaults:', error);
+        }
+      }
+
+      setHasInitialized(true);
+    };
+
+    initializeSemester();
+  }, [hasInitialized, initialState]);
+
   // Load initial data
   useEffect(() => {
+    if (!hasInitialized) return;
+
     const loadInitialData = async () => {
       try {
         setLoading(true);
@@ -73,7 +343,95 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     };
 
     loadInitialData();
-  }, [currentYear, currentTerm]);
+  }, [currentYear, currentTerm, hasInitialized]);
+
+  // Load current schedule's sections after courses are loaded (for page refresh)
+  useEffect(() => {
+    if (!loading && currentScheduleId && courses.length > 0) {
+      const saved = localStorage.getItem('langara-saved-schedules');
+      if (saved) {
+        try {
+          const schedules: SavedSchedule[] = JSON.parse(saved);
+          const schedule = schedules.find(s => s.id === currentScheduleId);
+          if (schedule && schedule.crns.length > 0) {
+            // console.log('Loading sections for current schedule after courses loaded:', schedule);
+            // Find sections by CRN and select them
+            const foundSections = new Set<string>();
+
+            courses.forEach(course => {
+              course.sections.forEach(section => {
+                if (schedule.crns.includes(section.crn.toString())) {
+                  console.log('Found section on refresh:', section.crn, section.id);
+                  foundSections.add(section.id);
+                }
+              });
+            });
+
+            // console.log(foundSections.size, 'sections found for current schedule:', currentScheduleId);
+
+            // console.log('Setting sections on refresh:', foundSections);
+            setSelectedSections(foundSections);
+          }
+        } catch (e) {
+          console.error('Failed to load current schedule sections:', e);
+        }
+      }
+    }
+  }, [loading, currentScheduleId, courses]);
+
+  // Handle schedule selection
+  const handleScheduleSelect = (scheduleId: string) => {
+    console.log('Selecting schedule:', scheduleId);
+    setCurrentScheduleId(scheduleId);
+
+    // Save current schedule ID to localStorage
+    localStorage.setItem('langara-current-schedule-id', scheduleId);
+
+    // Always load the schedule's data to ensure consistency
+    const saved = localStorage.getItem('langara-saved-schedules');
+    if (saved) {
+      try {
+        const schedules: SavedSchedule[] = JSON.parse(saved);
+        const schedule = schedules.find(s => s.id === scheduleId);
+        if (schedule) {
+          // Always reload to ensure we have the correct data
+          loadSavedSchedule(schedule.year, schedule.term, schedule.crns);
+        }
+      } catch (e) {
+        console.error('Failed to load schedule:', e);
+      }
+    }
+  };
+
+  // Handle schedule updates (when courses are added/removed)
+  const handleScheduleUpdate = (scheduleId: string, year: number, term: number, crns: string[]) => {
+    const saved = localStorage.getItem('langara-saved-schedules');
+    if (saved) {
+      try {
+        const schedules: SavedSchedule[] = JSON.parse(saved);
+        const updatedSchedules = schedules.map(s =>
+          s.id === scheduleId ? { ...s, year, term, crns } : s
+        );
+        localStorage.setItem('langara-saved-schedules', JSON.stringify(updatedSchedules));
+      } catch (e) {
+        console.error('Failed to update schedule:', e);
+      }
+    }
+  };
+
+  // Update current schedule when selections change (but not during loading)
+  useEffect(() => {
+    if (currentScheduleId && !loading) {
+      const crns = Array.from(selectedSections)
+        .map(sectionId => {
+          const section = allSections.find(s => s.id === sectionId);
+          return section?.crn.toString();
+        })
+        .filter((crn): crn is string => Boolean(crn));
+      console.log('Updating schedule', currentScheduleId, 'with CRNs:', crns);
+      handleScheduleUpdate(currentScheduleId, currentYear, currentTerm, crns);
+    }
+  }, [selectedSections, currentScheduleId, currentYear, currentTerm, allSections, loading]);
 
   // Simple search functionality with debounce (keep this - it's actually helpful)
   const handleSearch = useCallback(async (query: string) => {
@@ -129,6 +487,26 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     return '#00c951'; // blue-500
   };
 
+  // Helper function to identify online sections
+  const isOnlineSection = (section: Section): boolean => {
+    // Check if section ends with 'W'
+    if (section.section.endsWith('W')) return true;
+
+    // Check if all non-exam schedules have no meeting times
+    const nonExamSchedules = section.schedule.filter(s => s.type !== 'Exam');
+    if (nonExamSchedules.length === 0) return false;
+
+    return nonExamSchedules.every(s => s.days === '-------');
+  };
+
+  // Get selected online sections (for the online courses display)
+  const getSelectedOnlineSections = () => {
+    return allSections
+      .filter(section =>
+        selectedSections.has(section.id) && isOnlineSection(section)
+      );
+  };
+
   // Simple calendar events generation
   const generateCalendarEvents = (): EventInput[] => {
     const events: EventInput[] = [];
@@ -141,6 +519,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
       section.schedule.forEach((schedule: Schedule) => {
         if (schedule.days === '-------' || schedule.days.trim() === '') return;
+        if (schedule.type === 'Exam') return; // Skip exam schedules
 
         const days = parseDays(schedule.days);
         if (days.length === 0) return;
@@ -176,10 +555,10 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       });
     });
 
-    // Add hovered section (gray preview events)
+    // Add hovered section (gray preview events for in-person courses)
     if (hoveredSection && !selectedSections.has(hoveredSection)) {
       const section = allSections.find(s => s.id === hoveredSection);
-      if (section) {
+      if (section && !isOnlineSection(section)) {
         section.schedule.forEach((schedule: Schedule) => {
           if (schedule.days === '-------' || schedule.days.trim() === '') return;
 
@@ -223,8 +602,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     return events;
   };
 
-  // Simple event handlers
-  const toggleSection = (sectionId: string) => {
+  // Simple event handlers - memoized to prevent unnecessary rerenders
+  const toggleSection = useCallback((sectionId: string) => {
     const newSelected = new Set(selectedSections);
     if (newSelected.has(sectionId)) {
       newSelected.delete(sectionId);
@@ -237,13 +616,13 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       newSelected.add(sectionId);
 
       const section = allSections.find(s => s.id === sectionId);
-      if (section?.schedule.some((s: Schedule) => s.days.includes('S'))) {
+      if (section?.schedule.some((s: Schedule) => s.type !== 'Exam' && s.days.includes('S'))) {
         section.weekends = true;
         setSaturdayCoursesCount(prev => prev + 1);
       }
     }
     setSelectedSections(newSelected);
-  };
+  }, [selectedSections, allSections]);
 
   const clearAllSections = () => {
     setSelectedSections(new Set());
@@ -288,174 +667,503 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       const { start } = getSemesterDates(currentYear, currentTerm);
       const newDate = new Date(start);
       newDate.setDate(newDate.getDate() + 7); // Add a week
-      
+
       const calendarApi = calendarRef.current.getApi();
       calendarApi.gotoDate(newDate);
     }
   }, [currentYear, currentTerm, loading]);
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="w-96 bg-white shadow-lg flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b">
-          <Link href={"/"}>
-          <h1 className="text-xs text-gray-600 mb-2">
-            {`← back to main page`}
-          </h1>
-          </Link>
+  // Share modal component
+  const ShareModal = ({
+    isOpen,
+    onClose,
+    year,
+    term,
+    crns
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    year: number;
+    term: number;
+    crns: string[];
+  }) => {
+    const [copied, setCopied] = useState(false);
 
-          {/* Term Selector */}
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Select Term:
-            </label>
-            <select
-              className="w-full p-2 border border-gray-300 rounded-md"
-              value={`${currentYear}-${currentTerm}`}
-              onChange={(e) => {
-                const [year, term] = e.target.value.split('-');
-                setCurrentYear(parseInt(year));
-                setCurrentTerm(parseInt(term));
-              }}
-            >
-              {semesters.map(semester => (
-                <option
-                  key={semester.id}
-                  value={`${semester.year}-${semester.term}`}
-                >
-                  {semester.year} {termToSeason(semester.term)}
-                </option>
-              ))}
-            </select>
+    if (!isOpen) return null;
+
+    const shareUrl = `${window.location.origin}/planner?y=${year}&t=${term}&crns=${crns.join(',')}`;
+
+    const copyToClipboard = async () => {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    };
+
+    return (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={onClose}
+      >
+
+        <div
+          className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Share Schedule</h3>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              ✕
+            </button>
           </div>
 
-          {/* Search */}
-          <div className="mb-2">
+          <p className="text-sm text-gray-600 mb-3">
+            Share this link to let others view your schedule:
+          </p>
+
+          <div className="flex gap-2 mb-4">
             <input
               type="text"
-              placeholder="Search courses..."
-              value={searchQuery}
-              onChange={onSearchChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              value={shareUrl}
+              readOnly
+              className="flex-1 p-2 border rounded text-sm bg-gray-50"
             />
+            <button
+              onClick={copyToClipboard}
+              className={`px-3 py-2 rounded text-sm ${copied
+                ? 'bg-green-500 text-white'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+
+          <div className="text-xs text-gray-500">
+            This link includes {crns.length} course{crns.length !== 1 ? 's' : ''} for {year} {term === 10 ? 'Spring' : term === 20 ? 'Summer' : 'Fall'}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Share current schedule
+  const shareCurrentSchedule = () => {
+    const crns = getCurrentCRNs();
+
+    if (crns.length === 0) {
+      alert('No courses selected to share');
+      return;
+    }
+
+    setIsShareModalOpen(true);
+  };
+
+  // Get current CRNs for sharing
+  const getCurrentCRNs = (): string[] => {
+    return Array.from(selectedSections)
+      .map(sectionId => {
+        const section = allSections.find(s => s.id === sectionId);
+        return section?.crn.toString();
+      })
+      .filter((crn): crn is string => Boolean(crn));
+  };
+
+  // Load a saved schedule
+  const loadSavedSchedule = async (year: number, term: number, crns: string[]) => {
+    try {
+      console.log('Loading saved schedule:', { year, term, crns });
+      setLoading(true);
+      setCurrentYear(year);
+      setCurrentTerm(term);
+
+      // Clear current selection first
+      setSelectedSections(new Set());
+
+      // Load courses for the specified semester
+      const coursesData = await plannerApi.getCoursesForSemester(year, term);
+      setCourses(coursesData.courses);
+
+      // Find sections by CRN and select them
+      const foundSections = new Set<string>();
+      coursesData.courses.forEach(course => {
+        course.sections.forEach(section => {
+          if (crns.includes(section.crn.toString())) {
+            // console.log('Found matching section:', section.crn, section.id);
+            foundSections.add(section.id);
+          }
+        });
+      });
+
+      // console.log('Selected sections:', foundSections);
+      setSelectedSections(foundSections);
+
+      // Load all sections for search
+      const searchResults = await plannerApi.searchSections('', year, term);
+      setFilteredSections(searchResults.sections);
+
+      console.log('Saved schedule loaded successfully');
+    } catch (error) {
+      console.error('Failed to load saved schedule:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Memoize filtered sections for better performance
+  const visibleSections = useMemo(() =>
+    allSections.filter(section => filteredSections.includes(section.id)),
+    [allSections, filteredSections]
+  );
+
+  // Create memoized callbacks using a map to prevent recreating on every render
+  const toggleCallbacks = useMemo(() => {
+    const callbacks = new Map<string, () => void>();
+    visibleSections.forEach(section => {
+      callbacks.set(section.id, () => toggleSection(section.id));
+    });
+    return callbacks;
+  }, [visibleSections, toggleSection]);
+
+  const mouseEnterCallbacks = useMemo(() => {
+    const callbacks = new Map<string, () => void>();
+    visibleSections.forEach(section => {
+      callbacks.set(section.id, () => setHoveredSection(section.id));
+    });
+    return callbacks;
+  }, [visibleSections]);
+
+  const mouseLeaveCallback = useCallback(() => setHoveredSection(null), []);
+
+  // Course item component for simple rendering - memoized to prevent unnecessary rerenders
+  const CourseItem = React.memo(({
+    section,
+    courses,
+    isSelected,
+    isHovered,
+    onToggle,
+    onMouseEnter,
+    onMouseLeave
+  }: {
+    section: Section;
+    courses: PlannerCourse[];
+    isSelected: boolean;
+    isHovered: boolean;
+    onToggle: () => void;
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+  }) => {
+    return (
+      <div className="px-4">
+        <div
+          onClick={onToggle}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          className={`p-3 rounded-lg border cursor-pointer transition-colors mb-2 ${isSelected
+            ? 'bg-blue-100 border-blue-300'
+            : isHovered
+              ? 'bg-gray-100 border-gray-300'
+              : 'bg-white border-gray-200 hover:bg-gray-50'
+            } ${(parseInt(section.seats) <= 0 || section.seats === 'Cancel') || (section.waitlist && parseInt(section.waitlist?.toString()) > 10)
+              ? 'border-l-6 border-l-red-500'
+              : parseInt(section.seats) <= 10
+                ? 'border-l-6 border-l-yellow-500'
+                : 'border-l-6 border-l-green-500'
+            }`}
+        >
+          <div className="font-medium">
+            <Link
+              href={`/courses/${section.subject}/${section.course_code}`}
+              target='_blank'
+              className="hover:text-blue-700 hover:underline"
+            >
+              {section.subject} {section.course_code} {section.section}: {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || ''}
+            </Link>
+          </div>
+          <div className="text-sm text-gray-600">
+            CRN: {section.crn} • Seats: {section.seats}
+            {section.waitlist && section.waitlist !== " " && ` • Waitlist: ${section.waitlist}`}
+          </div>
+          {section.schedule.length > 0 && (
+            <div className="mt-2">
+              <table className="w-full text-xs">
+                <tbody>
+                  {section.schedule.map((schedule: Schedule, idx: number) => (
+                    <tr key={idx} className="text-gray-500 align-top">
+                      <td className="min-w-14 font-mono align-top">
+                        {schedule.days}
+                      </td>
+                      <td className="min-w-14 pr-1 font-mono align-top">
+                        {schedule.time}
+                      </td>
+                      <td className="min-w-12 w-min align-top">
+                        {schedule.type}
+                      </td>
+                      <td className="w-full font-mono align-top">
+                        {schedule.instructor}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  });
+
+  CourseItem.displayName = 'CourseItem';
+
+  return (
+    <div className=" h-screen bg-gray-50 max-h-screen block">
+      {/* Save Bar */}
+      {hasInitialized ? (
+        <SaveBar
+          className="block"
+          currentYear={currentYear}
+          currentTerm={currentTerm}
+          selectedSections={selectedSections}
+          allSections={allSections}
+          currentScheduleId={currentScheduleId}
+          onScheduleSelect={handleScheduleSelect}
+          onInitialScheduleSet={setCurrentScheduleId}
+        />
+      ) : (
+        <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
+      )}
+
+      <div className="flex flex-1 flex-grow h-[calc(100vh-48px)]">
+
+        {/* Sidebar */}
+        <div className="max-w-[30rem] bg-white shadow-lg flex flex-col flex-1 h-full">
+          {/* Header */}
+          <div className="p-4 border-b">
+            <Link href={"/"}>
+              <h1 className="text-xs text-gray-600 mb-2">
+                {`← back to main page`}
+              </h1>
+            </Link>
+
+            {/* Term Selector */}
+            <div className="mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Select Term:
+              </label>
+              <select
+                className="w-full p-2 border border-gray-300 rounded-md"
+                value={`${currentYear}-${currentTerm}`}
+                onChange={(e) => {
+                  const [year, term] = e.target.value.split('-');
+                  setCurrentYear(parseInt(year));
+                  setCurrentTerm(parseInt(term));
+                }}
+              >
+                {semesters.map(semester => (
+                  <option
+                    key={semester.id}
+                    value={`${semester.year}-${semester.term}`}
+                  >
+                    {semester.year} {termToSeason(semester.term)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Search */}
+            <div className="mb-2">
+              <input
+                type="text"
+                placeholder="Search courses..."
+                value={searchQuery}
+                onChange={onSearchChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              />
+              {loading ? (
+                <p className="text-sm text-gray-600 mt-1">
+                  Loading...
+                </p>
+              ) : (
+
+                <p className="text-sm text-gray-600 mt-1">
+                  Found {filteredSections.length} sections.
+                </p>
+              )
+              }
+
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-2">
+              <button
+                onClick={selectAllVisibleSections}
+                className="flex-1 px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Show All Visible
+              </button>
+              <button
+                onClick={clearAllSections}
+                className="flex-1 px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Clear All
+              </button>
+              <button
+                onClick={shareCurrentSchedule}
+                className="px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                title="Share schedule"
+              >
+                Share
+              </button>
+            </div>
+
+          </div>
+
+          {/* Course List */}
+          <div className="flex-1 h-full">
             {loading ? (
-              <p className="text-sm text-gray-600 mt-1">
-                Loading...
-              </p>
+              <div className="flex items-center justify-center h-32">
+                <div className="text-gray-500">Loading courses...</div>
+              </div>
+            ) : visibleSections.length === 0 ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="text-gray-500">No courses found</div>
+              </div>
             ) : (
-
-              <p className="text-sm text-gray-600 mt-1">
-                Found {filteredSections.length} sections.
-              </p>
-            )
-            }
-
+              <Virtuoso
+                style={{ height: '100%' }}
+                data={visibleSections}
+                itemContent={(index, section) => (
+                  <CourseItem
+                    section={section}
+                    courses={courses}
+                    isSelected={selectedSections.has(section.id)}
+                    isHovered={hoveredSection === section.id}
+                    onToggle={toggleCallbacks.get(section.id)!}
+                    onMouseEnter={mouseEnterCallbacks.get(section.id)!}
+                    onMouseLeave={mouseLeaveCallback}
+                  />
+                )}
+              />
+            )}
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex space-x-2">
-            <button
-              onClick={selectAllVisibleSections}
-              className="flex-1 px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Show All Visible
-            </button>
-            <button
-              onClick={clearAllSections}
-              className="flex-1 px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Clear All
-            </button>
-          </div>
-
         </div>
 
-        {/* Course List */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="text-gray-500">Loading courses...</div>
+        {/* Calendar and Online Courses */}
+        <div className="flex-1 p-4 flex flex-col">
+          {/* Calendar */}
+          <div className="flex-1 bg-white rounded-lg shadow mb-4">
+            <FullCalendar
+              ref={calendarRef}
+              {...calendarOptions}
+            />
+          </div>
+
+          {/* Online Courses */}
+          <div className="h-36 bg-white rounded-lg shadow">
+            <div className="pl-3 pt-3">
+              <h3 className="text-lg font-semibold text-gray-800">Online Courses:</h3>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {allSections
-                .filter(section => filteredSections.includes(section.id))
-                .map(section => (
+
+            <div className="p-3 overflow-y-auto h-[calc(100%-3rem)]">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {/* Show selected online courses */}
+                {getSelectedOnlineSections().map(section => (
                   <div
                     key={section.id}
                     onClick={() => toggleSection(section.id)}
                     onMouseEnter={() => setHoveredSection(section.id)}
                     onMouseLeave={() => setHoveredSection(null)}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedSections.has(section.id)
-                        ? 'bg-blue-100 border-blue-300'
-                        : hoveredSection === section.id
-                          ? 'bg-gray-100 border-gray-300'
-                          : 'bg-white border-gray-200 hover:bg-gray-50'
-                      } ${(parseInt(section.seats) <= 0 || section.seats === 'Cancel') || (section.waitlist && parseInt(section.waitlist?.toString()) > 10)
-                        ? 'border-l-6 border-l-red-500'
+                    className={`p-2 rounded border cursor-pointer transition-colors text-sm ${hoveredSection === section.id
+                      ? 'bg-gray-100 border-gray-300'
+                      : 'bg-blue-100 border-blue-300'
+                      } ${(parseInt(section.seats) <= 0 || section.seats === 'Cancel') ||
+                        (section.waitlist && parseInt(section.waitlist?.toString()) > 10)
+                        ? 'border-l-4 border-l-red-500'
                         : parseInt(section.seats) <= 10
-                          ? 'border-l-6 border-l-yellow-500'
-                          : 'border-l-6 border-l-green-500'
+                          ? 'border-l-4 border-l-yellow-500'
+                          : 'border-l-4 border-l-green-500'
                       }`}
                   >
                     <div className="font-medium">
-                        <Link
-                          href={`/courses/${section.subject}/${section.course_code}`}
-                          target='_blank'
-                          className="hover:text-blue-700 hover:underline"
-                        >
-                          {section.subject} {section.course_code} {section.section}: {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || ''}
-                        </Link>
+                      <Link
+                        href={`/courses/${section.subject}/${section.course_code}`}
+                        target='_blank'
+                        className="hover:text-blue-700 hover:underline"
+                      >
+                        {section.subject} {section.course_code} {section.section}
+                      </Link>
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-xs text-gray-600">
                       CRN: {section.crn} • Seats: {section.seats}
                       {section.waitlist && section.waitlist !== " " && ` • Waitlist: ${section.waitlist}`}
                     </div>
-                    {section.schedule.length > 0 && (
-                      <div className="mt-2">
-                        <table className="w-full text-xs">
-                          <tbody>
-                            {section.schedule.map((schedule: Schedule, idx: number) => (
-                                <tr key={idx} className="text-gray-500 align-top">
-                                <td className="min-w-14 font-mono align-top">
-                                  {schedule.days}
-                                </td>
-                                <td className="min-w-14 pr-1 font-mono align-top">
-                                  {schedule.time}
-                                </td>
-                                <td className="min-w-12 w-min align-top">
-                                  {schedule.type}
-                                </td>
-                                {/* <td className="font-mono align-top">
-                                  {schedule.room}
-                                </td> */}
-                                <td className="w-full font-mono align-top">
-                                  {schedule.instructor}
-                                </td>
-                                </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+                    <div className="text-xs text-gray-500 mt-1">
+                      {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || 'Online Course'}
+                    </div>
                   </div>
                 ))}
+
+                {/* Show hovered online course as preview (if not already selected) */}
+                {hoveredSection && !selectedSections.has(hoveredSection) &&
+                  (() => {
+                    const section = allSections.find(s => s.id === hoveredSection);
+                    return section && isOnlineSection(section) ? (
+                      <div
+                        key={`preview-${section.id}`}
+                        className={`p-2 rounded border text-sm opacity-70 border-dashed ${(parseInt(section.seats) <= 0 || section.seats === 'Cancel') ||
+                          (section.waitlist && parseInt(section.waitlist?.toString()) > 10)
+                          ? 'bg-red-50 border-red-300 border-l-4 border-l-red-500'
+                          : parseInt(section.seats) <= 10
+                            ? 'bg-yellow-50 border-yellow-300 border-l-4 border-l-yellow-500'
+                            : 'bg-green-50 border-green-300 border-l-4 border-l-green-500'
+                          }`}
+                      >
+                        <div className="font-medium">
+                          {section.subject} {section.course_code} {section.section}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          CRN: {section.crn} • Seats: {section.seats}
+                          {section.waitlist && section.waitlist !== " " && ` • Waitlist: ${section.waitlist}`}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || 'Online Course'}
+                        </div>
+                        {/* <div className="text-xs text-gray-400 mt-1 italic">Preview</div> */}
+                      </div>
+                    ) : null;
+                  })()
+                }
+
+                {getSelectedOnlineSections().length === 0 && !hoveredSection && (
+                  <div className="col-span-full text-center text-gray-500 py-8">
+                    No online courses selected
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Calendar */}
-      <div className="flex-1 p-4">
-        <div className="h-full bg-white rounded-lg shadow">
-          <FullCalendar
-            ref={calendarRef}
-            {...calendarOptions}
-          />
-        </div>
-      </div>
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        year={currentYear}
+        term={currentTerm}
+        crns={getCurrentCRNs()}
+      />
     </div>
   );
 };

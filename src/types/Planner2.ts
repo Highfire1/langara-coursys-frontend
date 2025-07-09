@@ -17,7 +17,7 @@ export interface Section {
   course_code: string;
   section: string;
   title: string;
-  crn: string;
+  crn: number;
   seats: string;
   waitlist?: string;
   schedule: Schedule[];
@@ -26,6 +26,15 @@ export interface Section {
   selected?: boolean;
   ghost?: boolean;
   weekends?: boolean;
+}
+
+export interface SavedSchedule {
+  id: string;
+  name: string;
+  year: number;
+  term: number;
+  crns: string[];
+  createdAt: number;
 }
 
 export interface PlannerCourse {

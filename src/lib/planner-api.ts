@@ -21,8 +21,6 @@ export const plannerApi = {
       sectionsRes.json()
     ]);
 
-    console.log(coursesData.courses)
-
     // Map sections to courses like in the original Flask code
     const sectionsDict: { [key: string]: Section[] } = {};
 
@@ -39,8 +37,6 @@ export const plannerApi = {
       ...course,
       sections: sectionsDict[`${course.subject}-${course.course_code}`] ?? []
     }));
-
-    console.log(coursesWithSections)
 
     return { courses: coursesWithSections };
   },
