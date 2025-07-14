@@ -24,7 +24,7 @@ export default function Home() {
 
                 <section>
                 <h2 className="text-2xl font-bold mb-3">How long has this been in development?</h2>
-                <p>The first version of the website went live on October 24th, 2023. Development has continued ever since, and we are now on the third version of this website.</p>
+                <p>The first version of the website went live on October 24th, 2023. Development has continued ever since, and we are now on the fourth version of this website.</p>
                 </section>
 
                 <section>
@@ -44,7 +44,7 @@ export default function Home() {
                 <section>
                 <h2 className="text-2xl font-bold mb-3">Can I use the data in my own project?</h2>
                 <p>Yes, you can.</p>
-                <p>Data is freely available through a REST API at <Link href="https://api.langaracourses.ca" target="_blank" className="hover:underline text-blue-800">coursesapi.langaracs.ca</Link>.</p>
+                <p>Data is freely available through a REST API at <Link href="https://api.langaracourses.ca" target="_blank" className="hover:underline text-blue-800">api.langaracourses.ca</Link>.</p>
                 <p>Let me know if you create something using the API so that I can advertise it.</p>
                 </section>
 
