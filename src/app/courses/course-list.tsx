@@ -83,7 +83,7 @@ export default function CourseList({ loading, courses }: CourseListProps): JSX.E
                             <tr key={course.id} className={`border-b align-top ${course.on_langara_website ? '' : 'bg-red-200'}`}>
                                 <td className={`p-2 break-words text-white text-center ${course.on_langara_website ? 'bg-green-800' : 'bg-red-600'}`}></td>
                                 <td className="p-2 break-words">
-                                    <Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={`/courses/${course.subject.toLowerCase()}/${course.course_code}`}>
+                                    <Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={`/courses/${course.subject.toLowerCase()}-${course.course_code.toLowerCase()}`}>
                                         {course.subject} {course.course_code}
                                     </Link>
                                     <p>{course.title ? course.title : course.abbreviated_title}</p>
