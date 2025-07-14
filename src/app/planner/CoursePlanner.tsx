@@ -1,6 +1,7 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -21,12 +22,6 @@ import { Virtuoso } from 'react-virtuoso';
 interface PlannerProps {
   initialYear?: number;
   initialTerm?: number;
-  initialState?: {
-    year?: number;
-    term?: number;
-    selectedSections?: Set<string>;
-    scheduleId?: string;
-  } | null;
 }
 
 // Save bar component
@@ -54,6 +49,7 @@ const SaveBar = ({
   const [savedSchedules, setSavedSchedules] = useState<SavedSchedule[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [schedulesLoaded, setSchedulesLoaded] = useState(false);
 
   // Load saved schedules from localStorage and create default if none exist
   useEffect(() => {
@@ -91,6 +87,7 @@ const SaveBar = ({
     }
 
     setSavedSchedules(schedules);
+    setSchedulesLoaded(true);
   }, [hasInitialized, currentYear, currentTerm, onInitialScheduleSet]);
 
   // Save schedules to localStorage
@@ -178,102 +175,191 @@ const SaveBar = ({
 
   return (
     <div className={`bg-white border-b shadow-sm px-4 py-2 ${className}`}>
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {savedSchedules.map(schedule => (
-          <div
-            key={schedule.id}
-            className={`flex items-center gap-1 rounded px-3 py-1 min-w-0 flex-shrink-0 ${currentScheduleId === schedule.id
-              ? 'bg-blue-200 border-2 border-blue-400'
-              : 'bg-gray-100'
-              }`}
-          >
-            {editingId === schedule.id ? (
-              <div className="flex items-center gap-1">
-                <input
-                  type="text"
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') saveNameEdit();
-                    if (e.key === 'Escape') cancelNameEdit();
-                  }}
-                  onBlur={saveNameEdit}
-                  className="text-sm border rounded px-1 w-36"
-                  autoFocus
-                />
-              </div>
-            ) : (
-              <>
-                <button
-                  onClick={() => currentScheduleId === schedule.id ? startEditing(schedule) : loadSchedule(schedule)}
-                  className={`text-sm truncate max-w-40 ${currentScheduleId === schedule.id
-                    ? 'text-blue-800 font-medium hover:text-blue-900'
-                    : 'hover:text-blue-600'
-                    }`}
-                  title={currentScheduleId === schedule.id
-                    ? `Click to rename: ${schedule.name} (${schedule.year} ${schedule.term === 10 ? 'Spring' : schedule.term === 20 ? 'Summer' : 'Fall'})`
-                    : `${schedule.name} (${schedule.year} ${schedule.term === 10 ? 'Spring' : schedule.term === 20 ? 'Summer' : 'Fall'})`
-                  }
-                >
-                  {schedule.name}
-                </button>
-                <button
-                  onClick={() => startEditing(schedule)}
-                  className="text-xs text-gray-500 hover:text-gray-700"
-                  title="Rename"
-                >
-                  ✏️
-                </button>
-                <button
-                  onClick={() => deleteSchedule(schedule.id)}
-                  className="text-xs text-gray-500 hover:text-red-600"
-                  title="Delete"
-                >
-                  ✕
-                </button>
-              </>
-            )}
-          </div>
-        ))}
+      {schedulesLoaded ? (
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          {savedSchedules.map(schedule => (
+            <div
+              key={schedule.id}
+              className={`flex items-center gap-1 rounded px-3 py-1 min-w-0 flex-shrink-0 ${currentScheduleId === schedule.id
+                ? 'bg-blue-200 border-2 border-blue-400'
+                : 'bg-gray-100'
+                }`}
+            >
+              {editingId === schedule.id ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveNameEdit();
+                      if (e.key === 'Escape') cancelNameEdit();
+                    }}
+                    onBlur={saveNameEdit}
+                    className="text-sm border rounded px-1 w-36"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => currentScheduleId === schedule.id ? startEditing(schedule) : loadSchedule(schedule)}
+                    className={`text-sm truncate max-w-40 ${currentScheduleId === schedule.id
+                      ? 'text-blue-800 font-medium hover:text-blue-900'
+                      : 'hover:text-blue-600'
+                      }`}
+                    title={currentScheduleId === schedule.id
+                      ? `Click to rename: ${schedule.name} (${schedule.year} ${schedule.term === 10 ? 'Spring' : schedule.term === 20 ? 'Summer' : 'Fall'})`
+                      : `${schedule.name} (${schedule.year} ${schedule.term === 10 ? 'Spring' : schedule.term === 20 ? 'Summer' : 'Fall'})`
+                    }
+                  >
+                    {schedule.name}
+                  </button>
+                  <button
+                    onClick={() => startEditing(schedule)}
+                    className="text-xs text-gray-500 hover:text-gray-700"
+                    title="Rename"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => deleteSchedule(schedule.id)}
+                    className="text-xs text-gray-500 hover:text-red-600"
+                    title="Delete"
+                  >
+                    ✕
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
 
-        <button
-          onClick={saveCurrentSchedule}
-          className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 whitespace-nowrap"
-          title="Create new schedule"
-        >
-          + New
-        </button>
-      </div>
+          <button
+            onClick={saveCurrentSchedule}
+            className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 whitespace-nowrap"
+            title="Create new schedule"
+          >
+            + New
+          </button>
+        </div>
+      ) : (
+          <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
+
+        // <div className="flex items-center">
+        //   {/* <div className="text-sm text-gray-500">Loading schedules...</div> */}
+        // </div>
+      )}
     </div>
   );
 };
 
 const CoursePlanner: React.FC<PlannerProps> = ({
   initialYear = 2025,
-  initialTerm = 10,
-  initialState = null
+  initialTerm = 10
 }) => {
+  // URL handling
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
   // State
   const [courses, setCourses] = useState<PlannerCourse[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [currentYear, setCurrentYear] = useState(initialState?.year || initialYear);
-  const [currentTerm, setCurrentTerm] = useState(initialState?.term || initialTerm);
+  const [currentYear, setCurrentYear] = useState(initialYear);
+  const [currentTerm, setCurrentTerm] = useState(initialTerm);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredSections, setFilteredSections] = useState<string[]>([]);
-  const [selectedSections, setSelectedSections] = useState<Set<string>>(initialState?.selectedSections || new Set());
+  const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set());
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saturdayCoursesCount, setSaturdayCoursesCount] = useState(0);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [currentScheduleId, setCurrentScheduleId] = useState<string | null>(
-    initialState?.scheduleId ||
-    (typeof window !== 'undefined' ? localStorage.getItem('langara-current-schedule-id') : null)
+    typeof window !== 'undefined' ? localStorage.getItem('langara-current-schedule-id') : null
   );
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [isProcessingUrl, setIsProcessingUrl] = useState(true);
 
   // Refs
   const calendarRef = useRef<FullCalendar>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // URL processing effect - handle shared links
+  useEffect(() => {
+    const processUrlParams = async () => {
+      const urlYear = searchParams.get('y');
+      const urlTerm = searchParams.get('t');
+      const urlCrns = searchParams.get('crns');
+
+      if (urlYear && urlTerm && urlCrns) {
+        try {
+          const year = parseInt(urlYear);
+          const term = parseInt(urlTerm);
+          const crns = urlCrns.split(',').filter(Boolean);
+          
+          console.log('Processing shared link:', { year, term, crns });
+          
+          // Load courses for the specified semester
+          const coursesData = await plannerApi.getCoursesForSemester(year, term);
+          
+          // Find sections by CRN
+          const foundSections = new Set<string>();
+          coursesData.courses.forEach(course => {
+            course.sections.forEach(section => {
+              if (crns.includes(section.crn.toString())) {
+                console.log('Found matching section:', section.crn, section.id);
+                foundSections.add(section.id);
+              }
+            });
+          });
+          
+          console.log('Found sections to select:', foundSections);
+          
+          // Create a new schedule for the shared link
+          const newSchedule: SavedSchedule = {
+            id: `shared-${Date.now()}`,
+            name: `Shared Schedule`,
+            year,
+            term,
+            crns,
+            createdAt: Date.now()
+          };
+          
+          // Save the new schedule to localStorage
+          const saved = localStorage.getItem('langara-saved-schedules');
+          let schedules: SavedSchedule[] = [];
+          if (saved) {
+            try {
+              schedules = JSON.parse(saved);
+            } catch (e) {
+              console.error('Failed to load saved schedules:', e);
+            }
+          }
+          
+          schedules.push(newSchedule);
+          localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
+          
+          // Set the state for the shared schedule
+          setCurrentYear(year);
+          setCurrentTerm(term);
+          setSelectedSections(foundSections);
+          setCurrentScheduleId(newSchedule.id);
+          localStorage.setItem('langara-current-schedule-id', newSchedule.id);
+          
+          // Clean up URL parameters
+          router.replace('/planner', { scroll: false });
+          
+          console.log('Shared schedule processed successfully with', foundSections.size, 'sections');
+          
+        } catch (error) {
+          console.error('Failed to process shared schedule:', error);
+        }
+      }
+      
+      setIsProcessingUrl(false);
+    };
+
+    processUrlParams();
+  }, [searchParams, router]);
 
   // Get all sections from courses (simple, no pre-processing)
   const allSections = courses.flatMap(course =>
@@ -321,7 +407,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         targetScheduleId = scheduleToUse.id;
 
         console.log('Using existing schedule:', scheduleToUse);
-      } else if (!initialState) {
+      } else {
         // No existing schedules - get latest semester and we'll create a default schedule
         try {
           const latestSemester = await plannerApi.getLatestSemester();
@@ -347,7 +433,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     };
 
     initialize();
-  }, [hasInitialized, initialState, currentYear, currentTerm]);
+  }, [hasInitialized, currentYear, currentTerm]);
 
   // Load a saved schedule
   const loadSavedSchedule = useCallback(async (year: number, term: number, crns: string[]) => {
@@ -723,7 +809,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     rerenderDelay: 10,
     // aspectRatio: 10,
     allDaySlot: false,
-    dayHeaderFormat: { weekday: window.innerWidth < 900 ? "short" : "long" } as const,
+    dayHeaderFormat: { weekday: typeof window !== 'undefined' && window.innerWidth < 900 ? "short" : "long" } as const,
     height: '100%',
     events: generateCalendarEvents(),
     eventClick: (clickInfo: EventClickArg) => {
@@ -822,7 +908,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           </div>
 
           <div className="text-xs text-gray-500">
-            This link includes {crns.length} course{crns.length !== 1 ? 's' : ''} for {year} {term === 10 ? 'Spring' : term === 20 ? 'Summer' : 'Fall'}
+            This link includes {crns.length} course{crns.length !== 1 ? 's' : ''} for {term === 10 ? 'Spring' : term === 20 ? 'Summer' : 'Fall'} {year}
           </div>
         </div>
       </div>
@@ -916,7 +1002,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             <Link
               href={`/courses/${section.subject.toLowerCase()}-${section.course_code.toLowerCase()}`}
               target='_blank'
-              className="hover:text-blue-700 hover:underline"
+              className="hover:text-blue-700 hover:underline w-fit"
             >
               {section.subject} {section.course_code} {section.section}: {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || ''}
             </Link>
@@ -942,10 +1028,10 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                         {schedule.type}
                       </td>
                       <td className="w-full font-mono align-top">
-                        {window.innerWidth > 768 ? schedule.instructor : ''}
+                        {typeof window !== 'undefined' && window.innerWidth > 768 ? schedule.instructor : ''}
                       </td>
                       </tr>
-                      {window.innerWidth <= 768 && (
+                      {typeof window !== 'undefined' && window.innerWidth <= 768 && (
                       <tr className="text-gray-500 align-top">
                         <td colSpan={4} className="w-full font-mono align-top text-left">
                         {schedule.instructor}
@@ -965,6 +1051,15 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   });
 
   CourseItem.displayName = 'CourseItem';
+
+  // Show loading state while processing URL params
+  // if (isProcessingUrl) {
+  //   return (
+  //     <div className="w-full h-full flex items-center justify-center">
+  //       <div className="text-lg">Loading...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className=" h-screen bg-gray-50 max-h-screen block">
@@ -988,9 +1083,9 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       </div>
 
       {/* Save Bar */}
-      {hasInitialized ? (
+      {hasInitialized && !isProcessingUrl ? (
         <SaveBar
-          className="block"
+          className="block max-h-12"
           currentYear={currentYear}
           currentTerm={currentTerm}
           selectedSections={selectedSections}
