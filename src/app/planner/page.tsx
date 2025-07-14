@@ -1,14 +1,9 @@
 import { Suspense } from 'react';
 import CoursePlanner from "./CoursePlanner";
 
-const PlannerContent = () => {
-  return (
-    <div className="w-full h-screen">
-      <div>
-        <CoursePlanner />
-      </div>
-    </div>
-  );
+export const metadata = {
+  title: "Langara Course Planner",
+  description: " Plan your Langara course schedule efficiently with an intuitive and visual planner.",
 };
 
 const PlannerPage = () => {
@@ -18,7 +13,7 @@ const PlannerPage = () => {
         <div className="text-lg">Loading...</div>
       </div>
     }>
-      <PlannerContent />
+      <CoursePlanner />
     </Suspense>
   );
 };

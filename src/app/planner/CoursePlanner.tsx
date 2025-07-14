@@ -18,6 +18,7 @@ import {
 } from '@/types/Planner2';
 import Link from 'next/link';
 import { Virtuoso } from 'react-virtuoso';
+import Header from '@/components/shared/header';
 
 interface PlannerProps {
   initialYear?: number;
@@ -1064,23 +1065,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   return (
     <div className=" h-screen bg-gray-50 max-h-screen block">
 
-      <div className="h-10 bg-orange-200 border-b shadow-sm px-4 pt-2 pb-1 flex flex-row items-end space-x-4 align-bottom whitespace-nowrap overflow-x-scroll">
-        <Link href={"/"}>
-          <h1 className="text-lg font-bold">Langara Course Planner.</h1>
-        </Link>
-        <p className="text-gray-500 pb-[2px]">This website is a student project and is not affiliated with Langara College.</p>
-        <p className="text-gray-500 pb-[2px]">
-          Please report bugs or feedback at{" "}
-          <Link
-            href="https://forms.gle/CYKP7xsp2an6gNEK9"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            this form
-          </Link>!
-        </p>
-      </div>
+      {/* Header */}
+      <Header title={'Langara Course Planner'}/>
 
       {/* Save Bar */}
       {hasInitialized && !isProcessingUrl ? (
@@ -1103,7 +1089,6 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
         {/* Sidebar */}
         <div className="max-w-[15rem] md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
-          {/* Header */}
           <div className="p-4 border-b">
             {/* <Link href={"/"}>
               <h1 className="text-xs text-gray-600 mb-2">

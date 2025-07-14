@@ -10,17 +10,27 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title, color = '#D3D3D3', navigateTo = '/', hideForm = false }) => {
     return (
-        <header className="w-full px-5 py-2 shadow-md" style={{ backgroundColor: color }}>
+        <div className="h-10 bg-orange-200 border-b shadow-sm px-4 pt-2 pb-1 flex flex-row items-end space-x-2 align-bottom whitespace-nowrap overflow-x-scroll" style={{ backgroundColor: color }}>
             <Link href={navigateTo}>
-                <h1 className="font-bold text-xl m-0">
-                    {title}
-                </h1>
+                <h1 className="text-lg font-bold">{title}</h1>
             </Link>
-            <p>Note: this website is a student project and is not affiliated with Langara College.</p>
+
+            <p className="text-gray-800 pb-[2px]">This website is a student project and is not affiliated with Langara College.</p>
+
             {!hideForm && (
-                <p>Suggestions? Feedback? Found a bug? Please send a report through <a className="text-blue-800 hover:text-blue-600 underline" href="https://forms.gle/CYKP7xsp2an6gNEK9" target="_blank">this form.</a></p>
+                <p className="text-gray-800 pb-[2px]">
+                    Please report bugs or feedback at{" "}
+                    <Link
+                        href="https://forms.gle/CYKP7xsp2an6gNEK9"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                    >
+                        this form
+                    </Link>!
+                </p>
             )}
-        </header>
+        </div>
     );
 };
 
