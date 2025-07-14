@@ -914,7 +914,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         >
           <div className="font-medium">
             <Link
-              href={`/courses/${section.subject.toLowerCase()}/${section.course_code}`}
+              href={`/courses/${section.subject.toLowerCase()}-${section.course_code.toLowerCase()}`}
               target='_blank'
               className="hover:text-blue-700 hover:underline"
             >
@@ -1157,7 +1157,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                   >
                     <div className="font-medium">
                       <Link
-                        href={`/courses/${section.subject.toLowerCase()}/${section.course_code}`}
+                        href={`/courses/${section.subject.toLowerCase()}-${section.course_code.toLowerCase()}`}
                         target='_blank'
                         className="hover:text-blue-700 hover:underline"
                       >

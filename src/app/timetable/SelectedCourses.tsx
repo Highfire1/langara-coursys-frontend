@@ -118,7 +118,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
 
 
-                <Link href={`/courses/${course.subject.toLowerCase()}/${course.course_code}`} className='font-semibold hover:text-orange-700 hover:underline' target='_blank'>
+                <Link href={`/courses/${course.subject.toLowerCase()}-${course.course_code.toLowerCase()}`} className='font-semibold hover:text-orange-700 hover:underline' target='_blank'>
                   {`${course.subject} ${course.course_code}: ${course.attributes.abbreviated_title}`}
                 </Link>
                 <p className='text-sm'>{course.attributes.title} ({course.attributes.credits} credits)</p>

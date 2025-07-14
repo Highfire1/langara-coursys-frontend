@@ -71,7 +71,7 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
             <div className='border-2 border-gray-200 rounded p-2 flex gap-2 flex-col'>
                 <h1 className="text-2xl font-bold">
                     {course.attributes.on_langara_website ? (
-                        <Link href={`https://langara.ca/programs-courses/${course.subject.toLowerCase()}-${course.course_code}`} className="text-[#f15a22] transition-colors duration-200 ease-in hover:text-black hover:underline">
+                        <Link href={`https://langara.ca/programs-courses/${course.subject.toLowerCase()}-${course.course_code.toLowerCase()}`} className="text-[#f15a22] transition-colors duration-200 ease-in hover:text-black hover:underline">
                             <p>{course.subject} {course.course_code}{course.attributes.title ? `: ${course.attributes.title}` : course.attributes.abbreviated_title ? `: ${course.attributes.abbreviated_title}` : ''}</p>
 
                         </Link>

@@ -1,6 +1,7 @@
 import { Course } from "@/types/Course";
 import CourseInfo from "./course-info";
 import Header from "@/components/shared/header";
+import { notFound, permanentRedirect } from "next/navigation";
 
 // warning: note the difference between course_code and coursecode
 // coursecode is the url slug / path parameter
@@ -9,11 +10,28 @@ import Header from "@/components/shared/header";
 export const revalidate = 1800; // regeneate every 30 minutes
 // export const dynamicParams/ = true;
 
+const courses: {
+    course_count: number;
+    courses: {
+        course_code: string;
+        on_langara_website: boolean;
+        subject: string;
+        title: string;
+    }[];
+    subject_count: number;
+} = await fetch('https://api.langaracourses.ca/v1/index/courses').then((res) => res.json());
 
+const courseList = courses.courses.map(
+    (course) => `${course.subject}-${course.course_code}`.toLowerCase()
+);
+
+
+type expectedParams = Promise<{ course: string }>;
 
 export async function generateMetadata({ params }: { params: expectedParams }) {
-    const { subject, coursecode: coursecode } = await params;
+    const { course: courseParam } = await params;
 
+    const [subject, coursecode] = courseParam.toUpperCase().split("-");
     const courseRes = await fetch(`https://api.langaracourses.ca/v1/courses/${subject}/${coursecode}`);
 
     if (!courseRes.ok) { return { title: `Error ${courseRes.status}`}}
@@ -68,38 +86,41 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
 //   }
 
 
-type expectedParams = Promise<{ subject: string; coursecode: string }>;
+export default async function Page( {params}: {params: expectedParams} ) {
+    const { course: course } = await params;
 
-export default async function Page({
-    params: searchParams
-}: {
-    params: expectedParams
-}
-) {
-    const { subject, coursecode: coursecode } = await searchParams;
+    // subject should be lowercase.
+    if (course !== course.toLowerCase() && courseList.includes(course.toLowerCase())) {
+        permanentRedirect(`/courses/${course.toLowerCase()}`);
+    } 
 
+    // 404 if subject is not in the course list
+    if (!courseList.includes(`${course}`)) {
+        notFound();
+    }
+
+    const [subject, coursecode] = course.toUpperCase().split("-");
     const response = await fetch(`https://api.langaracourses.ca/v1/courses/${subject}/${coursecode}`);
+    
     if (!response.ok) {
         return (
             <div className="w-full h-full">
                 <Header title="Langara Course Information" color="#A7C7E7"></Header>
 
-                <div className="md:px-10 py-2">Failed to fetch course data for {subject} {coursecode}: {response.status} {response.statusText}</div>
+                <div className="md:px-10 py-2">
+                    Failed to fetch course data for {subject} {coursecode}: {response.status} {response.statusText}
+                </div>
             </div>
         )
     }
 
-
-
-    const course: Course = await response.json();
-
-
+    const courseJSON: Course = await response.json();
     return (
         <div className="w-full h-full">
             <Header title="Langara Course Information" color="#A7C7E7"></Header>
 
             <div className="md:px-10 py-2">
-                <CourseInfo course={course} />
+                <CourseInfo course={courseJSON} />
             </div>
         </div>
     );

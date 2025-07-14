@@ -33,7 +33,7 @@ export function addLinksToCourseDescription(text: string): JSX.Element {
                 parts.push(
                     <a
                         key={`${index}-${word}`}
-                        href={`/courses/${currentSubject.toLowerCase()}/${word}`}
+                        href={`/courses/${currentSubject.toLowerCase()}-${word.toLowerCase()}`}
                         className="text-black hover:text-[#f15a22] underline transition-colors duration-200 ease-in"
                     >
                         {currentSubject} {word}
@@ -44,7 +44,7 @@ export function addLinksToCourseDescription(text: string): JSX.Element {
                 parts.push(
                     <a
                         key={`${index}-${word}`}
-                        href={`/courses/${currentSubject.toLowerCase()}/${word}`}
+                        href={`/courses/${currentSubject.toLowerCase()}-${word.toLowerCase()}`}
                         className="text-black hover:text-[#f15a22] underline transition-colors duration-200 ease-in"
                     >
                         {word}
