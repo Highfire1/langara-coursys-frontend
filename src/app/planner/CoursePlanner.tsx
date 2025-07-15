@@ -19,6 +19,7 @@ import {
 import Link from 'next/link';
 import { Virtuoso } from 'react-virtuoso';
 import Header from '@/components/shared/header';
+// import ScheduleDebugger from '@/app/planner/ScheduleDebugger';
 
 interface PlannerProps {
   initialYear?: number;
@@ -47,26 +48,50 @@ const SaveBar = ({
   hasInitialized: boolean;
   className?: string;
 }) => {
-  const [savedSchedules, setSavedSchedules] = useState<SavedSchedule[]>([]);
+  // State for UI reactivity - localStorage is the source of truth
+  const [schedulesForRender, setSchedulesForRender] = useState<SavedSchedule[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [schedulesLoaded, setSchedulesLoaded] = useState(false);
+
+  // localStorage utility functions - always use these for data operations
+  const loadSchedulesFromStorage = (): SavedSchedule[] => {
+    try {
+      const saved = localStorage.getItem('langara-saved-schedules');
+      if (!saved) return [];
+      return JSON.parse(saved);
+    } catch (error) {
+      console.error('Failed to load schedules from localStorage:', error);
+      return [];
+    }
+  };
+
+  const saveSchedulesToStorage = (schedules: SavedSchedule[]): void => {
+    try {
+      localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
+      // Update state to trigger re-render
+      setSchedulesForRender([...schedules]);
+    } catch (error) {
+      console.error('Failed to save schedules to localStorage:', error);
+    }
+  };
+
+
+
+  const setCurrentScheduleInStorage = (scheduleId: string): void => {
+    try {
+      localStorage.setItem('langara-current-schedule-id', scheduleId);
+    } catch (error) {
+      console.error('Failed to set current schedule in localStorage:', error);
+    }
+  };
 
   // Load saved schedules from localStorage and create default if none exist
   useEffect(() => {
     // Only proceed after initialization is complete
     if (!hasInitialized) return;
 
-    const saved = localStorage.getItem('langara-saved-schedules');
-    let schedules: SavedSchedule[] = [];
-
-    if (saved) {
-      try {
-        schedules = JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to load saved schedules:', e);
-      }
-    }
+    let schedules = loadSchedulesFromStorage();
 
     // If no schedules exist, create a default schedule with the current semester
     if (schedules.length === 0) {
@@ -80,24 +105,20 @@ const SaveBar = ({
         createdAt: Date.now()
       };
       schedules = [defaultSchedule];
-      localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
+      saveSchedulesToStorage(schedules);
 
       // Set this as the current schedule
       onInitialScheduleSet(defaultSchedule.id);
-      localStorage.setItem('langara-current-schedule-id', defaultSchedule.id);
+      setCurrentScheduleInStorage(defaultSchedule.id);
+    } else {
+      // Just update the render state with existing schedules
+      setSchedulesForRender([...schedules]);
     }
 
-    setSavedSchedules(schedules);
     setSchedulesLoaded(true);
   }, [hasInitialized, currentYear, currentTerm, onInitialScheduleSet]);
 
-  // Save schedules to localStorage
-  const saveToLocalStorage = (schedules: SavedSchedule[]) => {
-    localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
-    setSavedSchedules(schedules);
-  };
-
-  // Get current CRNs
+  // Get current CRNs from selected sections
   const getCurrentCRNs = (): string[] => {
     return Array.from(selectedSections)
       .map(sectionId => {
@@ -107,21 +128,64 @@ const SaveBar = ({
       .filter((crn): crn is string => Boolean(crn));
   };
 
-  // Save current schedule as a new one
+  // Create a new empty schedule
   const saveCurrentSchedule = () => {
-    const crns = getCurrentCRNs();
-
+    const existingSchedules = loadSchedulesFromStorage();
+    
     const newSchedule: SavedSchedule = {
       id: Date.now().toString(),
-      name: `Schedule ${savedSchedules.length + 1}`,
+      name: `Schedule ${existingSchedules.length + 1}`,
       year: currentYear,
       term: currentTerm,
-      crns,
+      crns: [], // New schedule should start empty
       createdAt: Date.now()
     };
 
-    const updated = [...savedSchedules, newSchedule].slice(0, 50); // Cap at 50
-    saveToLocalStorage(updated);
+    const updated = [...existingSchedules, newSchedule].slice(0, 50); // Cap at 50
+
+    console.log('Creating new schedule:', newSchedule);
+    saveSchedulesToStorage(updated);
+
+    // Auto-select the new schedule
+    onScheduleSelect(newSchedule.id);
+  };
+
+  // const createNewSchedule = () => {
+  //   const newSchedule: SavedSchedule = {
+  //     id: Date.now().toString(),
+  //     name: `New Schedule`,
+  //     year: currentYear,
+  //     term: currentTerm,
+  //     crns: [], // Start with no courses
+  //     createdAt: Date.now()
+  //   };
+
+  //   const updated = [...savedSchedules, newSchedule].slice(0, 50); // Cap at 50
+  //   setSavedSchedules
+  //   saveToLocalStorage(updated);
+
+  //   // Auto-select the new schedule
+  //   onScheduleSelect(newSchedule.id);
+  // }
+
+  // Copy current schedule as a new one with current selections
+  const copyCurrentSchedule = () => {
+    const existingSchedules = loadSchedulesFromStorage();
+    const crns = getCurrentCRNs();
+    const currentSchedule = existingSchedules.find(s => s.id === currentScheduleId);
+
+    const newSchedule: SavedSchedule = {
+      id: Date.now().toString(),
+      name: `${currentSchedule?.name || 'Schedule'} Copy`,
+      year: currentYear,
+      term: currentTerm,
+      crns, // Copy current courses
+      createdAt: Date.now()
+    };
+
+    const updated = [...existingSchedules, newSchedule].slice(0, 50); // Cap at 50
+    saveSchedulesToStorage(updated);
+    console.log("Created schedule copy:", newSchedule);
 
     // Auto-select the new schedule
     onScheduleSelect(newSchedule.id);
@@ -132,11 +196,12 @@ const SaveBar = ({
     onScheduleSelect(schedule.id);
   };
 
-  // Delete a schedule
+  // Delete a schedule from localStorage
   const deleteSchedule = (id: string) => {
     if (confirm('Are you sure you want to delete this schedule?')) {
-      const updated = savedSchedules.filter(s => s.id !== id);
-      saveToLocalStorage(updated);
+      const existingSchedules = loadSchedulesFromStorage();
+      const updated = existingSchedules.filter(s => s.id !== id);
+      saveSchedulesToStorage(updated);
 
       // If we deleted the current schedule, select the first remaining one
       if (currentScheduleId === id) {
@@ -144,25 +209,31 @@ const SaveBar = ({
           onScheduleSelect(updated[0].id);
         } else {
           // No schedules left, clear the current schedule from localStorage
-          localStorage.removeItem('langara-current-schedule-id');
+          try {
+            localStorage.removeItem('langara-current-schedule-id');
+          } catch (error) {
+            console.error('Failed to clear current schedule ID:', error);
+          }
         }
       }
     }
   };
 
-  // Start editing name
+  // Start editing a schedule name
   const startEditing = (schedule: SavedSchedule) => {
     setEditingId(schedule.id);
     setEditingName(schedule.name);
   };
 
-  // Save name edit
+  // Save name edit to localStorage
   const saveNameEdit = () => {
     if (editingId && editingName.trim()) {
-      const updated = savedSchedules.map(s =>
+      const existingSchedules = loadSchedulesFromStorage();
+      const updated = existingSchedules.map(s =>
         s.id === editingId ? { ...s, name: editingName.trim() } : s
       );
-      saveToLocalStorage(updated);
+      saveSchedulesToStorage(updated);
+      console.log('Updated schedule name:', editingId, editingName.trim());
     }
     setEditingId(null);
     setEditingName('');
@@ -178,7 +249,7 @@ const SaveBar = ({
     <div className={`bg-white border-b shadow-sm px-4 py-2 ${className}`}>
       {schedulesLoaded ? (
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-          {savedSchedules.map(schedule => (
+          {schedulesForRender.map((schedule: SavedSchedule) => (
             <div
               key={schedule.id}
               className={`flex items-center gap-1 rounded px-3 py-1 min-w-0 flex-shrink-0 ${currentScheduleId === schedule.id
@@ -236,9 +307,16 @@ const SaveBar = ({
           ))}
 
           <button
+            onClick={copyCurrentSchedule}
+            className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 whitespace-nowrap"
+            title="Copy current schedule"
+          >
+            Copy
+          </button>
+          <button
             onClick={saveCurrentSchedule}
             className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 whitespace-nowrap"
-            title="Create new schedule"
+            title="Create new empty schedule"
           >
             + New
           </button>
@@ -279,10 +357,39 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   );
   const [hasInitialized, setHasInitialized] = useState(false);
   const [isProcessingUrl, setIsProcessingUrl] = useState(true);
+  // const [isDebugOpen, setIsDebugOpen] = useState(false);
 
   // Refs
   const calendarRef = useRef<FullCalendar>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // localStorage utility functions - centralized data management
+  const loadSchedulesFromStorage = (): SavedSchedule[] => {
+    try {
+      const saved = localStorage.getItem('langara-saved-schedules');
+      if (!saved) return [];
+      return JSON.parse(saved);
+    } catch (error) {
+      console.error('Failed to load schedules from localStorage:', error);
+      return [];
+    }
+  };
+
+  const saveSchedulesToStorage = (schedules: SavedSchedule[]): void => {
+    try {
+      localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
+    } catch (error) {
+      console.error('Failed to save schedules to localStorage:', error);
+    }
+  };
+
+  const setCurrentScheduleInStorage = (scheduleId: string): void => {
+    try {
+      localStorage.setItem('langara-current-schedule-id', scheduleId);
+    } catch (error) {
+      console.error('Failed to set current schedule in localStorage:', error);
+    }
+  };
 
   // URL processing effect - handle shared links
   useEffect(() => {
@@ -326,25 +433,16 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           };
           
           // Save the new schedule to localStorage
-          const saved = localStorage.getItem('langara-saved-schedules');
-          let schedules: SavedSchedule[] = [];
-          if (saved) {
-            try {
-              schedules = JSON.parse(saved);
-            } catch (e) {
-              console.error('Failed to load saved schedules:', e);
-            }
-          }
-          
-          schedules.push(newSchedule);
-          localStorage.setItem('langara-saved-schedules', JSON.stringify(schedules));
+          const existingSchedules = loadSchedulesFromStorage();
+          const updatedSchedules = [...existingSchedules, newSchedule];
+          saveSchedulesToStorage(updatedSchedules);
           
           // Set the state for the shared schedule
           setCurrentYear(year);
           setCurrentTerm(term);
           setSelectedSections(foundSections);
           setCurrentScheduleId(newSchedule.id);
-          localStorage.setItem('langara-current-schedule-id', newSchedule.id);
+          setCurrentScheduleInStorage(newSchedule.id);
           
           // Clean up URL parameters
           router.replace('/planner', { scroll: false });
@@ -380,17 +478,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       let targetScheduleId: string | null = null;
 
       // Check for existing schedules first
-      const saved = localStorage.getItem('langara-saved-schedules');
+      const existingSchedules = loadSchedulesFromStorage();
       const currentId = localStorage.getItem('langara-current-schedule-id');
-
-      let existingSchedules: SavedSchedule[] = [];
-      if (saved) {
-        try {
-          existingSchedules = JSON.parse(saved);
-        } catch (e) {
-          console.error('Failed to parse saved schedules:', e);
-        }
-      }
 
       if (existingSchedules.length > 0) {
         // We have existing schedules - use the current schedule's semester
@@ -427,7 +516,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       // Set the current schedule if we found one
       if (targetScheduleId) {
         setCurrentScheduleId(targetScheduleId);
-        localStorage.setItem('langara-current-schedule-id', targetScheduleId);
+        setCurrentScheduleInStorage(targetScheduleId);
       }
 
       setHasInitialized(true);
@@ -508,31 +597,33 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   // Load current schedule's sections after courses are loaded (for page refresh)
   useEffect(() => {
     if (!loading && currentScheduleId && courses.length > 0) {
-      const saved = localStorage.getItem('langara-saved-schedules');
-      if (saved) {
+      // Get current schedule from localStorage
+      const currentSchedule = (() => {
         try {
-          const schedules: SavedSchedule[] = JSON.parse(saved);
-          const schedule = schedules.find(s => s.id === currentScheduleId);
-          if (schedule && schedule.crns.length > 0) {
-            // The courses should already be loaded for the correct semester by now
-            // Just find sections by CRN and select them
-            const foundSections = new Set<string>();
-
-            courses.forEach(course => {
-              course.sections.forEach(section => {
-                if (schedule.crns.includes(section.crn.toString())) {
-                  console.log('Found section on refresh:', section.crn, section.id);
-                  foundSections.add(section.id);
-                }
-              });
-            });
-
-            console.log('Setting sections on refresh:', foundSections);
-            setSelectedSections(foundSections);
-          }
-        } catch (e) {
-          console.error('Failed to load current schedule sections:', e);
+          const schedules = loadSchedulesFromStorage();
+          return schedules.find(s => s.id === currentScheduleId) || null;
+        } catch (error) {
+          console.error('Failed to get current schedule:', error);
+          return null;
         }
+      })();
+
+      if (currentSchedule && currentSchedule.crns.length > 0) {
+        // The courses should already be loaded for the correct semester by now
+        // Just find sections by CRN and select them
+        const foundSections = new Set<string>();
+
+        courses.forEach(course => {
+          course.sections.forEach(section => {
+            if (currentSchedule.crns.includes(section.crn.toString())) {
+              console.log('Found section on refresh:', section.crn, section.id);
+              foundSections.add(section.id);
+            }
+          });
+        });
+
+        console.log('Setting sections on refresh:', foundSections);
+        setSelectedSections(foundSections);
       }
     }
   }, [loading, currentScheduleId, courses]);
@@ -543,37 +634,22 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     setCurrentScheduleId(scheduleId);
 
     // Save current schedule ID to localStorage
-    localStorage.setItem('langara-current-schedule-id', scheduleId);
+    setCurrentScheduleInStorage(scheduleId);
 
     // Always load the schedule's data to ensure consistency
-    const saved = localStorage.getItem('langara-saved-schedules');
-    if (saved) {
+    const selectedSchedule = (() => {
       try {
-        const schedules: SavedSchedule[] = JSON.parse(saved);
-        const schedule = schedules.find(s => s.id === scheduleId);
-        if (schedule) {
-          // Always reload to ensure we have the correct data
-          loadSavedSchedule(schedule.year, schedule.term, schedule.crns);
-        }
-      } catch (e) {
-        console.error('Failed to load schedule:', e);
+        const schedules = loadSchedulesFromStorage();
+        return schedules.find(s => s.id === scheduleId) || null;
+      } catch (error) {
+        console.error('Failed to load schedule for selection:', error);
+        return null;
       }
-    }
-  };
+    })();
 
-  // Handle schedule updates (when courses are added/removed)
-  const handleScheduleUpdate = (scheduleId: string, year: number, term: number, crns: string[]) => {
-    const saved = localStorage.getItem('langara-saved-schedules');
-    if (saved) {
-      try {
-        const schedules: SavedSchedule[] = JSON.parse(saved);
-        const updatedSchedules = schedules.map(s =>
-          s.id === scheduleId ? { ...s, year, term, crns } : s
-        );
-        localStorage.setItem('langara-saved-schedules', JSON.stringify(updatedSchedules));
-      } catch (e) {
-        console.error('Failed to update schedule:', e);
-      }
+    if (selectedSchedule) {
+      // Always reload to ensure we have the correct data
+      loadSavedSchedule(selectedSchedule.year, selectedSchedule.term, selectedSchedule.crns);
     }
   };
 
@@ -586,8 +662,18 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           return section?.crn.toString();
         })
         .filter((crn): crn is string => Boolean(crn));
-      console.log('Updating schedule', currentScheduleId, 'with CRNs:', crns);
-      handleScheduleUpdate(currentScheduleId, currentYear, currentTerm, crns);
+      
+      // Update schedule in localStorage immediately
+      try {
+        const schedules = loadSchedulesFromStorage();
+        const updatedSchedules = schedules.map(s =>
+          s.id === currentScheduleId ? { ...s, year: currentYear, term: currentTerm, crns } : s
+        );
+        saveSchedulesToStorage(updatedSchedules);
+        console.log('Updated schedule in localStorage:', currentScheduleId, 'with CRNs:', crns);
+      } catch (error) {
+        console.error('Failed to update schedule in localStorage:', error);
+      }
     }
   }, [selectedSections, currentScheduleId, currentYear, currentTerm, allSections, loading]);
 
@@ -1089,12 +1175,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
         {/* Sidebar */}
         <div className="max-w-[15rem] md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
-          <div className="p-4 border-b">
-            {/* <Link href={"/"}>
-              <h1 className="text-xs text-gray-600 mb-2">
-                {`Langara Course Planner`}
-              </h1>
-            </Link> */}
+          
+          <div className="px-4 py-2 border-b">
 
             {/* Term Selector */}
             <div className="mb-2">
@@ -1165,8 +1247,15 @@ const CoursePlanner: React.FC<PlannerProps> = ({
               >
                 Share
               </button>
-            </div>
 
+              {/* <button
+                onClick={() => setIsDebugOpen(true)}
+                className="w-min px-3 py-2 text-sm bg-purple-500 text-white rounded hover:bg-purple-600"
+                title="Debug schedule information"
+              >
+                🐛
+              </button> */}
+            </div>
           </div>
 
           {/* Course List */}
@@ -1304,6 +1393,17 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         term={currentTerm}
         crns={getCurrentCRNs()}
       />
+
+      {/* Schedule Debugger */}
+      {/* <ScheduleDebugger
+        isOpen={isDebugOpen}
+        onClose={() => setIsDebugOpen(false)}
+        currentScheduleId={currentScheduleId}
+        selectedSections={selectedSections}
+        allSections={allSections}
+        currentYear={currentYear}
+        currentTerm={currentTerm}
+      /> */}
     </div>
   );
 };
