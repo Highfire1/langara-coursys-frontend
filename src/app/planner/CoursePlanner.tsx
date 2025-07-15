@@ -1484,13 +1484,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                             }`}
                         >
                           <div className="font-medium">
-                            <Link
-                              href={`/courses/${section.subject.toLowerCase()}-${section.course_code.toLowerCase()}`}
-                              target='_blank'
-                              className="hover:text-blue-700 hover:underline"
-                            >
-                              {section.subject} {section.course_code} {section.section}
-                            </Link>
+                            {section.subject} {section.course_code} {section.section}
                           </div>
                           <div className="text-xs text-gray-600">
                             CRN: {section.crn} • Seats: {section.seats}
