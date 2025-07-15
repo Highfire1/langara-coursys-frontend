@@ -1451,8 +1451,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                         <div
                           key={isPreview ? `preview-${section.id}` : section.id}
                           onClick={() => handleOnlineCourseClick(section)}
-                          onMouseEnter={() => setHoveredSection(section.id)}
-                          onMouseLeave={() => setHoveredSection(null)}
+                          // onMouseEnter={() => setHoveredSection(section.id)}
+                          // onMouseLeave={() => setHoveredSection(null)}
                           className={`p-2 rounded border cursor-pointer transition-colors text-sm ${isPreview
                             ? `opacity-70 border-dashed ${(
                               section.seats === 'Cancel' ||
