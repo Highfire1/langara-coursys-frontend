@@ -1239,7 +1239,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   // }
 
   return (
-    <div className=" h-screen bg-gray-50 max-h-screen block">
+    <div className=" h-screen bg-gray-50 max-h-screen block min-w-2xl">
 
       {/* Header */}
       <Header title={'Langara Course Planner'} />
@@ -1261,7 +1261,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
       )}
 
-      <div className="flex flex-1 flex-grow h-[calc(100vh-48px-40px)] flex-col-reverse sm:flex-row ">
+      <div className="flex flex-1 flex-grow h-[calc(100vh-48px-40px)]">
 
         {/* Sidebar */}
         <div className="max-w-full md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
@@ -1339,13 +1339,13 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             <div className="flex space-x-2">
               <button
                 onClick={selectAllVisibleSections}
-                className="flex-1 px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="flex-5 px-1 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Show All Visible
               </button>
               <button
                 onClick={clearAllSections}
-                className="flex-1 px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                className="flex-4 px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Clear All
               </button>
