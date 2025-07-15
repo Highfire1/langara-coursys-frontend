@@ -1261,10 +1261,10 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
       )}
 
-      <div className="flex flex-1 flex-grow h-[calc(100vh-48px-40px)]">
+      <div className="flex flex-1 flex-grow h-[calc(100vh-48px-40px)] flex-col-reverse sm:flex-row ">
 
         {/* Sidebar */}
-        <div className="max-w-[15rem] md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
+        <div className="max-w-full md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
 
           <div className="px-4 py-2 border-b">
 
@@ -1409,11 +1409,11 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
           {/* Online Courses */}
           <div className="h-36 bg-white rounded-lg shadow">
-            <div className="pl-3 pt-3">
-              <h3 className="md:text-lg font-semibold text-gray-800">Online Courses:</h3>
+            <div className="pl-3 pt-2 md:pt-3">
+              <h3 className="sm:text-lg font-semibold text-gray-800">Online Courses:</h3>
             </div>
 
-            <div className="p-3 overflow-y-auto h-[calc(100%-3rem)]">
+            <div className="px-3 py-1 md:py-3 overflow-y-auto h-[calc(100%-3rem)]">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {/* Show online courses (selected and hovered) in alphabetical order */}
                 {(() => {
