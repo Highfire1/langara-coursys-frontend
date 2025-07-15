@@ -19,6 +19,7 @@ import {
 import Link from 'next/link';
 import { Virtuoso } from 'react-virtuoso';
 import Header from '@/components/shared/header';
+import EventDetailsPopup from '@/app/planner/EventDetailsPopup';
 // import ScheduleDebugger from '@/app/planner/ScheduleDebugger';
 
 interface PlannerProps {
@@ -357,6 +358,19 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   );
   const [hasInitialized, setHasInitialized] = useState(false);
   const [isProcessingUrl, setIsProcessingUrl] = useState(true);
+  const [eventDetailsPopup, setEventDetailsPopup] = useState<{
+    isOpen: boolean;
+    eventData: {
+      courseCode: string;
+      title: string;
+      sectionNumber: string;
+      crn: string;
+      room: string;
+    } | null;
+  }>({
+    isOpen: false,
+    eventData: null
+  });
   // const [isDebugOpen, setIsDebugOpen] = useState(false);
 
   // Refs
@@ -791,7 +805,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
         events.push({
           id: `${section.id}-${schedule.id}`,
-          title: `${section.subject} ${section.course_code} ${section.section}`,
+          title: `${section.subject} ${section.course_code} ${section.section} ${schedule.type}`,
           startRecur: eventStart,
           endRecur: eventEnd,
           daysOfWeek: days,
@@ -799,12 +813,12 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           endTime,
           backgroundColor: getSectionColor(section),
           extendedProps: {
+            course: `${section.subject}-${section.course_code}`.toLowerCase(),
+            title: section.title,
             sectionId: section.id,
             courseCode: `${section.subject} ${section.course_code}`,
             sectionNumber: section.section,
             crn: section.crn,
-            scheduleType: schedule.type,
-            room: schedule.room,
             isPreview: false
           }
         });
@@ -832,7 +846,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
           events.push({
             id: `preview-${section.id}-${schedule.id}`,
-            title: `${section.subject} ${section.course_code} ${section.section}`,
+            title: `${section.subject} ${section.course_code} ${section.section} ${schedule.type}`,
             startRecur: eventStart,
             endRecur: eventEnd,
             daysOfWeek: days,
@@ -842,12 +856,12 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             borderColor: '#6b7280',
             opacity: 0.7,
             extendedProps: {
+              course: `${section.subject}-${section.course_code}`.toLowerCase(),
+              title: section.title,
               sectionId: section.id,
               courseCode: `${section.subject} ${section.course_code}`,
               sectionNumber: section.section,
               crn: section.crn,
-              scheduleType: schedule.type,
-              room: schedule.room,
               isPreview: true
             }
           });
@@ -912,8 +926,17 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     height: '100%',
     events: generateCalendarEvents(),
     eventClick: (clickInfo: EventClickArg) => {
-      const { courseCode, sectionNumber, crn, scheduleType, room } = clickInfo.event.extendedProps;
-      alert(`${courseCode} ${sectionNumber}\nCRN: ${crn}\nType: ${scheduleType}\nRoom: ${room}`);
+      const { courseCode, title, sectionNumber, crn, room } = clickInfo.event.extendedProps;
+      setEventDetailsPopup({
+        isOpen: true,
+        eventData: {
+          courseCode,
+          title,
+          sectionNumber,
+          crn,
+          room
+        }
+      });
     }
   };
 
@@ -969,7 +992,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
     return (
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50"
+        style={{ backgroundColor: 'rgba(249, 250, 251, 0.5)' }}
         onClick={onClose}
       >
 
@@ -1007,7 +1031,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           </div>
 
           <div className="text-xs text-gray-500">
-            This link includes {crns.length} course{crns.length !== 1 ? 's' : ''} for {term === 10 ? 'Spring' : term === 20 ? 'Summer' : 'Fall'} {year}
+            This link includes {crns.length} course{crns.length !== 1 ? 's' : ''} for {term === 10 ? 'Spring' : term === 20 ? 'Summer' : 'Fall'} {year}.
           </div>
         </div>
       </div>
@@ -1104,7 +1128,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       } else if ((section.waitlist && parseInt(section.waitlist) <= 10) || section.seats === '0') {
         return isSelected ? 'bg-yellow-300' : isHovered ? 'bg-yellow-200' : 'bg-yellow-100';
       } else {
-        return isSelected ? 'bg-green-400' : isHovered ? 'bg-green-300' : 'bg-green-100';
+        return isSelected ? 'bg-green-300' : isHovered ? 'bg-green-200' : 'bg-green-100';
       }
     }, [section, isHovered, isSelected]);
 
@@ -1114,13 +1138,13 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         section.waitlist === 'Full' ||
         (parseInt(section.seats) <= 0 && section.waitlist && parseInt(section.waitlist?.toString()) > 10)
       ) {
-        return 'bg-red-50 border-red-300';
+        return isSelected ? 'border-red-500' : isHovered ? 'border-red-400' : 'border-red-300';
       } else if ((section.waitlist && parseInt(section.waitlist) <= 10) || section.seats === '0') {
-        return 'bg-yellow-50 border-yellow-300';
+        return isSelected ? 'border-yellow-500' : isHovered ? 'border-yellow-400' : 'border-yellow-300';
       } else {
-        return 'bg-green-50 border-green-300';
+        return isSelected ? 'border-green-500' : isHovered ? 'border-green-400' : 'border-green-300';
       }
-    }, [section]);
+    }, [section, isHovered, isSelected]);
 
 
     return (
@@ -1189,6 +1213,22 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
   CourseItem.displayName = 'CourseItem';
 
+  // Handle opening event details popup for online courses
+  const handleOnlineCourseClick = (section: Section) => {
+    // For online courses, we need to create event data from the section
+    // Since online courses don't have traditional schedule data, we'll use online-specific info
+    setEventDetailsPopup({
+      isOpen: true,
+      eventData: {
+        courseCode: `${section.subject} ${section.course_code}`,
+        title: section.title,
+        sectionNumber: section.section,
+        crn: section.crn.toString(),
+        room: 'Online Learning'
+      }
+    });
+  };
+
   // Show loading state while processing URL params
   // if (isProcessingUrl) {
   //   return (
@@ -1238,8 +1278,27 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                 value={`${currentYear}-${currentTerm}`}
                 onChange={(e) => {
                   const [year, term] = e.target.value.split('-');
-                  setCurrentYear(parseInt(year));
-                  setCurrentTerm(parseInt(term));
+                  const newYear = parseInt(year);
+                  const newTerm = parseInt(term);
+                  
+                  // Check if there are selected courses and we're changing terms
+                  if (selectedSections.size > 0 && (newYear !== currentYear || newTerm !== currentTerm)) {
+                    const confirmed = confirm(
+                      `You have ${selectedSections.size} course${selectedSections.size !== 1 ? 's' : ''} selected. ` +
+                      `Changing terms will clear your current selections. Are you sure you want to continue?`
+                    );
+                    
+                    if (!confirmed) {
+                      return; // Don't change the term if user cancels
+                    }
+                    
+                    // Clear selected courses if user confirms
+                    setSelectedSections(new Set());
+                    setSaturdayCoursesCount(0);
+                  }
+                  
+                  setCurrentYear(newYear);
+                  setCurrentTerm(newTerm);
                 }}
               >
                 {semesters.map(semester => (
@@ -1384,7 +1443,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                     return (
                       <div
                         key={isPreview ? `preview-${section.id}` : section.id}
-                        onClick={() => toggleSection(section.id)}
+                        onClick={() => handleOnlineCourseClick(section)}
                         onMouseEnter={() => setHoveredSection(section.id)}
                         onMouseLeave={() => setHoveredSection(null)}
                         className={`p-2 rounded border cursor-pointer transition-colors text-sm ${isPreview
@@ -1456,6 +1515,14 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         year={currentYear}
         term={currentTerm}
         crns={getCurrentCRNs()}
+      />
+
+      {/* Event Details Popup */}
+      <EventDetailsPopup
+        isOpen={eventDetailsPopup.isOpen}
+        onClose={() => setEventDetailsPopup({ isOpen: false, eventData: null })}
+        eventData={eventDetailsPopup.eventData}
+        allSections={allSections}
       />
 
       {/* Schedule Debugger */}

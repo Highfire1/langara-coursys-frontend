@@ -17,6 +17,7 @@ export interface Section {
   course_code: string;
   section: string;
   title: string;
+  abbreviated_title?: string;
   crn: number;
   seats: string;
   waitlist?: string;
