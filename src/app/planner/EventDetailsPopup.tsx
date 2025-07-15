@@ -118,23 +118,28 @@ const EventDetailsPopup: React.FC<EventDetailsPopupProps> = ({
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h5 className="text-gray-800 mb-3">Schedule:</h5>
                   <div className="space-y-3">
-                    {section.schedule.map((schedule: Schedule, idx: number) => (
-                      <div key={idx} className="border-l-4 border-blue-400 pl-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="font-mono text-sm text-gray-800">
-                              {schedule.days} {schedule.time}
-                            </div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              {schedule.type} • {schedule.room || 'TBA'}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-600 mt-2">
-                          {schedule.instructor}
-                        </div>
-                      </div>
-                    ))}
+                    <table className="table-auto w-full text-sm text-left text-gray-800">
+                      <thead>
+                      <tr className="bg-gray-200">
+                        <th className="px-2 py-2">Days</th>
+                        <th className="px-2 py-2">Time</th>
+                        <th className="px-2 py-2">Room</th>
+                        <th className="px-2 py-2">Type</th>
+                        <th className="px-2 py-2">Instructor</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {section.schedule.map((schedule: Schedule, idx: number) => (
+                        <tr key={idx} className="border-t">
+                        <td className="px-2 py-2 text-nowrap font-mono">{schedule.days}</td>
+                        <td className="px-2 py-2 font-mono">{schedule.time}</td>
+                        <td className="px-2 py-2">{schedule.room}</td>
+                        <td className="px-2 py-2">{schedule.type}</td>
+                        <td className="px-2 py-2">{schedule.instructor}</td>
+                        </tr>
+                      ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
