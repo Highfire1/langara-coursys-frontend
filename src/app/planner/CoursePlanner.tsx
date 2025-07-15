@@ -151,24 +151,6 @@ const SaveBar = ({
     onScheduleSelect(newSchedule.id);
   };
 
-  // const createNewSchedule = () => {
-  //   const newSchedule: SavedSchedule = {
-  //     id: Date.now().toString(),
-  //     name: `New Schedule`,
-  //     year: currentYear,
-  //     term: currentTerm,
-  //     crns: [], // Start with no courses
-  //     createdAt: Date.now()
-  //   };
-
-  //   const updated = [...savedSchedules, newSchedule].slice(0, 50); // Cap at 50
-  //   setSavedSchedules
-  //   saveToLocalStorage(updated);
-
-  //   // Auto-select the new schedule
-  //   onScheduleSelect(newSchedule.id);
-  // }
-
   // Copy current schedule as a new one with current selections
   const copyCurrentSchedule = () => {
     const existingSchedules = loadSchedulesFromStorage();
@@ -251,9 +233,10 @@ const SaveBar = ({
       {schedulesLoaded ? (
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
           {schedulesForRender.map((schedule: SavedSchedule) => (
+            
             <div
               key={schedule.id}
-              className={`flex items-center gap-1 rounded px-3 py-1 min-w-0 flex-shrink-0 ${currentScheduleId === schedule.id
+              className={`flex items-center rounded px-1 min-w-0 flex-shrink-0 ${currentScheduleId === schedule.id
                 ? 'bg-blue-200 border-2 border-blue-400'
                 : 'bg-gray-100'
                 }`}
@@ -269,7 +252,7 @@ const SaveBar = ({
                       if (e.key === 'Escape') cancelNameEdit();
                     }}
                     onBlur={saveNameEdit}
-                    className="text-sm border rounded px-1 w-36"
+                    className="p-1 text-sm border rounded px-1 w-36"
                     autoFocus
                   />
                 </div>
@@ -277,8 +260,8 @@ const SaveBar = ({
                 <>
                   <button
                     onClick={() => currentScheduleId === schedule.id ? startEditing(schedule) : loadSchedule(schedule)}
-                    className={`text-sm truncate max-w-40 ${currentScheduleId === schedule.id
-                      ? 'text-blue-800 font-medium hover:text-blue-900'
+                    className={`p-1 text-sm truncate max-w-40 ${currentScheduleId === schedule.id
+                      ? 'text-blue-800 font-medium hover:text-blue-900 cursor-pointer'
                       : 'hover:text-blue-600'
                       }`}
                     title={currentScheduleId === schedule.id
@@ -290,14 +273,14 @@ const SaveBar = ({
                   </button>
                   <button
                     onClick={() => startEditing(schedule)}
-                    className="text-xs text-gray-500 hover:text-gray-700"
+                    className="p-1 cursor-pointer text-xs text-gray-500 hover:text-gray-700"
                     title="Rename"
                   >
                     ✏️
                   </button>
                   <button
                     onClick={() => deleteSchedule(schedule.id)}
-                    className="text-xs text-gray-500 hover:text-red-600"
+                    className="p-1 cursor-pointer text-xs text-gray-500 hover:text-red-600"
                     title="Delete"
                   >
                     ✕
@@ -309,14 +292,14 @@ const SaveBar = ({
 
           <button
             onClick={copyCurrentSchedule}
-            className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 whitespace-nowrap"
+            className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 whitespace-nowrap cursor-pointer"
             title="Copy current schedule"
           >
             Copy
           </button>
           <button
             onClick={saveCurrentSchedule}
-            className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 whitespace-nowrap"
+            className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 whitespace-nowrap cursor-pointer"
             title="Create new empty schedule"
           >
             + New
@@ -1343,19 +1326,19 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             <div className="flex space-x-2">
               <button
                 onClick={selectAllVisibleSections}
-                className="flex-5 px-1 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="flex-5 px-1 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
               >
                 Show All Visible
               </button>
               <button
                 onClick={clearAllSections}
-                className="flex-4 px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                className="flex-4 px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
               >
                 Clear All
               </button>
               <button
                 onClick={shareCurrentSchedule}
-                className="px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                className="px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600 cursor-pointer"
                 title="Share schedule"
               >
                 Share
