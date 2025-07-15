@@ -31,6 +31,10 @@ const Calendar = ({ currentTimetable }: CalendarProps) => {
         displayEventTime={true}
         hiddenDays={hiddenDays}
         allDaySlot={false}
+        headerToolbar={false}
+        slotDuration={'00:60:00'}
+        expandRows={true}
+        dayHeaderFormat={{ weekday: 'long' }}
         events={events}
         eventContent={(eventInfo) => {
           return (
