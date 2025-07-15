@@ -131,7 +131,7 @@ const SaveBar = ({
   // Create a new empty schedule
   const saveCurrentSchedule = () => {
     const existingSchedules = loadSchedulesFromStorage();
-    
+
     const newSchedule: SavedSchedule = {
       id: Date.now().toString(),
       name: `Schedule ${existingSchedules.length + 1}`,
@@ -322,7 +322,7 @@ const SaveBar = ({
           </button>
         </div>
       ) : (
-          <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
+        <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
 
         // <div className="flex items-center">
         //   {/* <div className="text-sm text-gray-500">Loading schedules...</div> */}
@@ -339,7 +339,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   // URL handling
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   // State
   const [courses, setCourses] = useState<PlannerCourse[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
@@ -403,12 +403,12 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           const year = parseInt(urlYear);
           const term = parseInt(urlTerm);
           const crns = urlCrns.split(',').filter(Boolean);
-          
+
           console.log('Processing shared link:', { year, term, crns });
-          
+
           // Load courses for the specified semester
           const coursesData = await plannerApi.getCoursesForSemester(year, term);
-          
+
           // Find sections by CRN
           const foundSections = new Set<string>();
           coursesData.courses.forEach(course => {
@@ -419,9 +419,9 @@ const CoursePlanner: React.FC<PlannerProps> = ({
               }
             });
           });
-          
+
           console.log('Found sections to select:', foundSections);
-          
+
           // Create a new schedule for the shared link
           const newSchedule: SavedSchedule = {
             id: `shared-${Date.now()}`,
@@ -431,29 +431,29 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             crns,
             createdAt: Date.now()
           };
-          
+
           // Save the new schedule to localStorage
           const existingSchedules = loadSchedulesFromStorage();
           const updatedSchedules = [...existingSchedules, newSchedule];
           saveSchedulesToStorage(updatedSchedules);
-          
+
           // Set the state for the shared schedule
           setCurrentYear(year);
           setCurrentTerm(term);
           setSelectedSections(foundSections);
           setCurrentScheduleId(newSchedule.id);
           setCurrentScheduleInStorage(newSchedule.id);
-          
+
           // Clean up URL parameters
           router.replace('/planner', { scroll: false });
-          
+
           console.log('Shared schedule processed successfully with', foundSections.size, 'sections');
-          
+
         } catch (error) {
           console.error('Failed to process shared schedule:', error);
         }
       }
-      
+
       setIsProcessingUrl(false);
     };
 
@@ -662,7 +662,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           return section?.crn.toString();
         })
         .filter((crn): crn is string => Boolean(crn));
-      
+
       // Update schedule in localStorage immediately
       try {
         const schedules = loadSchedulesFromStorage();
@@ -723,11 +723,23 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     return result;
   };
 
+  // fullcalendar will support tailwind with the v7 release
+  // which is coming in august 2025
   const getSectionColor = (section: Section): string => {
-    const seats = typeof section.seats === 'string' ? parseInt(section.seats) : section.seats || 0;
-    const waitlist = section.waitlist ? parseInt(section.waitlist.toString()) : 0;
-    if (seats <= 0 || waitlist > 10) return '#ef4444'; // red-500
-    if (seats <= 10) return '#eab308'; // yellow-500
+    // const seats = typeof section.seats === 'string' ? parseInt(section.seats) : section.seats || 0;
+    // const waitlist = section.waitlist ? parseInt(section.waitlist.toString()) : 0;
+
+    if (
+      section.seats === 'Cancel' ||
+      section.waitlist === 'Full' ||
+      (
+        parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
+      )
+    )
+      return '#ef4444'; // red-500
+
+    if ((section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0')
+      return '#eab308'; // yellow-500
     return '#00c951'; // blue-500
   };
 
@@ -1067,23 +1079,61 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     onMouseEnter: () => void;
     onMouseLeave: () => void;
   }) => {
+
+    const borderColor = useMemo(() => {
+      if (
+        section.seats === 'Cancel' ||
+        section.waitlist === 'Full' ||
+        (parseInt(section.seats) <= 0 && section.waitlist && parseInt(section.waitlist?.toString()) > 10)
+      ) {
+        return 'border-l-red-500';
+      } else if ((section.waitlist && parseInt(section.waitlist) <= 10) || section.seats === '0') {
+        return 'border-l-yellow-500';
+      } else {
+        return 'border-l-green-500';
+      }
+    }, [section]);
+
+    const bgColor = useMemo(() => {
+      if (
+        section.seats === 'Cancel' ||
+        section.waitlist === 'Full' ||
+        (parseInt(section.seats) <= 0 && section.waitlist && parseInt(section.waitlist?.toString()) > 10)
+      ) {
+        return isSelected ? 'bg-red-300' : isHovered ? 'bg-red-200' : 'bg-red-100';
+      } else if ((section.waitlist && parseInt(section.waitlist) <= 10) || section.seats === '0') {
+        return isSelected ? 'bg-yellow-300' : isHovered ? 'bg-yellow-200' : 'bg-yellow-100';
+      } else {
+        return isSelected ? 'bg-green-400' : isHovered ? 'bg-green-300' : 'bg-green-100';
+      }
+    }, [section, isHovered, isSelected]);
+
+    const bgBorder = useMemo(() => {
+      if (
+        section.seats === 'Cancel' ||
+        section.waitlist === 'Full' ||
+        (parseInt(section.seats) <= 0 && section.waitlist && parseInt(section.waitlist?.toString()) > 10)
+      ) {
+        return 'bg-red-50 border-red-300';
+      } else if ((section.waitlist && parseInt(section.waitlist) <= 10) || section.seats === '0') {
+        return 'bg-yellow-50 border-yellow-300';
+      } else {
+        return 'bg-green-50 border-green-300';
+      }
+    }, [section]);
+
+
     return (
       <div className="px-4">
         <div
           onClick={onToggle}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
-          className={`p-3 rounded-lg border cursor-pointer transition-colors mb-2 ${isSelected
-            ? 'bg-blue-100 border-blue-300'
-            : isHovered
-              ? 'bg-gray-100 border-gray-300'
-              : 'bg-white border-gray-200 hover:bg-gray-50'
-            } ${(parseInt(section.seats) <= 0 || section.seats === 'Cancel') || (section.waitlist && parseInt(section.waitlist?.toString()) > 10)
-              ? 'border-l-6 border-l-red-500'
-              : parseInt(section.seats) <= 10
-                ? 'border-l-6 border-l-yellow-500'
-                : 'border-l-6 border-l-green-500'
-            }`}
+          className={`p-3 rounded-lg border cursor-pointer transition-colors mb-2 
+            border-l-6 ${borderColor} ${bgColor} ${bgBorder}
+            `}
+
+
         >
           <div className="font-medium">
             <Link
@@ -1102,31 +1152,31 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             <div className="mt-2">
               <table className="w-full text-xs">
                 <tbody>
-                    {section.schedule.map((schedule: Schedule, idx: number) => (
+                  {section.schedule.map((schedule: Schedule, idx: number) => (
                     <React.Fragment key={idx}>
                       <tr className="text-gray-500 align-top">
-                      <td className="min-w-14 font-mono align-top">
-                        {schedule.days}
-                      </td>
-                      <td className="min-w-14 pr-1 font-mono align-top">
-                        {schedule.time}
-                      </td>
-                      <td className="min-w-12 w-min align-top">
-                        {schedule.type}
-                      </td>
-                      <td className="w-full font-mono align-top">
-                        {typeof window !== 'undefined' && window.innerWidth > 768 ? schedule.instructor : ''}
-                      </td>
-                      </tr>
-                      {typeof window !== 'undefined' && window.innerWidth <= 768 && (
-                      <tr className="text-gray-500 align-top">
-                        <td colSpan={4} className="w-full font-mono align-top text-left">
-                        {schedule.instructor}
+                        <td className="min-w-14 font-mono align-top">
+                          {schedule.days}
+                        </td>
+                        <td className="min-w-14 pr-1 font-mono align-top">
+                          {schedule.time}
+                        </td>
+                        <td className="min-w-12 w-min align-top">
+                          {schedule.type}
+                        </td>
+                        <td className="w-full font-mono align-top">
+                          {typeof window !== 'undefined' && window.innerWidth > 768 ? schedule.instructor : ''}
                         </td>
                       </tr>
+                      {typeof window !== 'undefined' && window.innerWidth <= 768 && (
+                        <tr className="text-gray-500 align-top">
+                          <td colSpan={4} className="w-full font-mono align-top text-left">
+                            {schedule.instructor}
+                          </td>
+                        </tr>
                       )}
                     </React.Fragment>
-                    ))}
+                  ))}
 
                 </tbody>
               </table>
@@ -1152,7 +1202,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     <div className=" h-screen bg-gray-50 max-h-screen block">
 
       {/* Header */}
-      <Header title={'Langara Course Planner'}/>
+      <Header title={'Langara Course Planner'} />
 
       {/* Save Bar */}
       {hasInitialized && !isProcessingUrl ? (
@@ -1175,7 +1225,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
         {/* Sidebar */}
         <div className="max-w-[15rem] md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
-          
+
           <div className="px-4 py-2 border-b">
 
             {/* Term Selector */}
@@ -1309,55 +1359,63 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                 {/* Show online courses (selected and hovered) in alphabetical order */}
                 {(() => {
                   const selectedOnlineSections = getSelectedOnlineSections();
-                  const hoveredOnlineSection = hoveredSection && !selectedSections.has(hoveredSection) 
+                  const hoveredOnlineSection = hoveredSection && !selectedSections.has(hoveredSection)
                     ? allSections.find(s => s.id === hoveredSection && isOnlineSection(s))
                     : null;
-                  
+
                   // Combine selected and hovered sections
                   const allOnlineSections = [...selectedOnlineSections];
                   if (hoveredOnlineSection) {
                     allOnlineSections.push(hoveredOnlineSection);
                   }
-                  
+
                   // Sort alphabetically by subject and course code
                   const sortedSections = allOnlineSections.sort((a, b) => {
                     const aCode = `${a.subject} ${a.course_code} ${a.section}`;
                     const bCode = `${b.subject} ${b.course_code} ${b.section}`;
                     return aCode.localeCompare(bCode);
                   });
-                  
+
                   return sortedSections.map(section => {
                     const isSelected = selectedSections.has(section.id);
                     const isHovered = hoveredSection === section.id;
                     const isPreview = !isSelected;
-                    
+
                     return (
                       <div
                         key={isPreview ? `preview-${section.id}` : section.id}
                         onClick={() => toggleSection(section.id)}
                         onMouseEnter={() => setHoveredSection(section.id)}
                         onMouseLeave={() => setHoveredSection(null)}
-                        className={`p-2 rounded border cursor-pointer transition-colors text-sm ${
-                          isPreview 
-                            ? `opacity-70 border-dashed ${
-                                (parseInt(section.seats) <= 0 || section.seats === 'Cancel') ||
-                                (section.waitlist && parseInt(section.waitlist?.toString()) > 10)
-                                  ? 'bg-red-50 border-red-300 border-l-4 border-l-red-500'
-                                  : parseInt(section.seats) <= 10
-                                    ? 'bg-yellow-50 border-yellow-300 border-l-4 border-l-yellow-500'
-                                    : 'bg-green-50 border-green-300 border-l-4 border-l-green-500'
-                              }`
-                            : `${isHovered
-                                ? 'bg-gray-100 border-gray-300'
-                                : 'bg-blue-100 border-blue-300'
-                              } ${(parseInt(section.seats) <= 0 || section.seats === 'Cancel') ||
-                                (section.waitlist && parseInt(section.waitlist?.toString()) > 10)
-                                ? 'border-l-4 border-l-red-500'
-                                : parseInt(section.seats) <= 10
-                                  ? 'border-l-4 border-l-yellow-500'
-                                  : 'border-l-4 border-l-green-500'
-                              }`
-                        }`}
+                        className={`p-2 rounded border cursor-pointer transition-colors text-sm ${isPreview
+                          ? `opacity-70 border-dashed ${(
+                            section.seats === 'Cancel' ||
+                            section.waitlist === 'Full' ||
+                            (
+                              parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
+                            )
+                          )
+                            ? 'bg-red-50 border-red-300 border-l-4 border-l-red-500'
+                            : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
+                              ? 'bg-yellow-50 border-yellow-300 border-l-4 border-l-yellow-500'
+                              : 'bg-green-50 border-green-300 border-l-4 border-l-green-500'
+                          }`
+                          : `${isHovered
+                            ? 'bg-gray-100 border-gray-300'
+                            : 'bg-blue-100 border-blue-300'
+                          } ${(
+                            section.seats === 'Cancel' ||
+                            section.waitlist === 'Full' ||
+                            (
+                              parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
+                            )
+                          )
+                            ? 'border-l-4 border-l-red-500'
+                            : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
+                              ? 'border-l-4 border-l-yellow-500'
+                              : 'border-l-4 border-l-green-500'
+                          }`
+                          }`}
                       >
                         <div className="font-medium">
                           <Link
