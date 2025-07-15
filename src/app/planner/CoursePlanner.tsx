@@ -920,6 +920,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     hiddenDays: saturdayCoursesCount > 0 ? [0] : [0, 6],
     initialDate: semesterStart,
     rerenderDelay: 10,
+    slotDuration: '00:60:00',
+    expandRows: true,
     // aspectRatio: 10,
     allDaySlot: false,
     dayHeaderFormat: { weekday: typeof window !== 'undefined' && window.innerWidth < 900 ? "short" : "long" } as const,
