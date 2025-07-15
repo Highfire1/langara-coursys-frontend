@@ -750,11 +750,11 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
       )
     )
-      return '#ef4444'; // red-500
+      return '#ffa2a2'; // red-300
 
     if ((section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0')
-      return '#eab308'; // yellow-500
-    return '#00c951'; // blue-500
+      return '#ffdf20'; // yellow-300
+    return '#7bf1a8'; // green-300
   };
 
   // Helper function to identify online sections
@@ -812,6 +812,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           startTime,
           endTime,
           backgroundColor: getSectionColor(section),
+          textColor: '#000000',
           extendedProps: {
             course: `${section.subject}-${section.course_code}`.toLowerCase(),
             title: section.title,
@@ -854,6 +855,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             endTime,
             backgroundColor: '#9ca3af',
             borderColor: '#6b7280',
+            textColor: '#000000',
             opacity: 0.7,
             extendedProps: {
               course: `${section.subject}-${section.course_code}`.toLowerCase(),
