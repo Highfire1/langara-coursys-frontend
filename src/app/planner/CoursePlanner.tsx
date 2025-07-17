@@ -904,7 +904,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     slotMaxTime: '22:00:00',
     hiddenDays: saturdayCoursesCount > 0 ? [0] : [0, 6],
     initialDate: semesterStart,
-    rerenderDelay: 10,
+    // rerenderDelay: 1,
     slotDuration: '00:60:00',
     expandRows: true,
     // aspectRatio: 10,
@@ -1328,7 +1328,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                 onClick={selectAllVisibleSections}
                 className="flex-5 px-1 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
               >
-                Show All Visible
+                Select all in Results
               </button>
               <button
                 onClick={clearAllSections}
@@ -1394,107 +1394,114 @@ const CoursePlanner: React.FC<PlannerProps> = ({
             />
           </div>
 
-          {/* Online Courses */}
+          {/* Online Courses 
 
-          {getSelectedOnlineSections().length === 0 && (!hoveredSection || !allSections.some(s => s.id === hoveredSection && isOnlineSection(s)))
-            ?
-            "" // <p className='pl-3'>None.</p>
-            :
-            <div className="h-fit max-h-30 sm:h-36 pb-2 bg-white rounded-lg shadow">
-
-              <div className="pl-3 pt-2 md:pt-3">
-                <h3 className="sm:text-lg font-semibold text-gray-800">Online Courses:</h3>
-              </div>
-
-
-              <div className="px-3 py-1 md:py-3 overflow-y-auto h-[calc(100%-3rem)]">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {/* Show online courses (selected and hovered) in alphabetical order */}
-                  {(() => {
-                    const selectedOnlineSections = getSelectedOnlineSections();
-                    const hoveredOnlineSection = hoveredSection && !selectedSections.has(hoveredSection)
-                      ? allSections.find(s => s.id === hoveredSection && isOnlineSection(s))
-                      : null;
-
-                    // Combine selected and hovered sections
-                    const allOnlineSections = [...selectedOnlineSections];
-                    if (hoveredOnlineSection) {
-                      allOnlineSections.push(hoveredOnlineSection);
-                    }
-
-                    // Sort alphabetically by subject and course code
-                    const sortedSections = allOnlineSections.sort((a, b) => {
-                      const aCode = `${a.subject} ${a.course_code} ${a.section}`;
-                      const bCode = `${b.subject} ${b.course_code} ${b.section}`;
-                      return aCode.localeCompare(bCode);
-                    });
-
-                    return sortedSections.map(section => {
-                      const isSelected = selectedSections.has(section.id);
-                      const isHovered = hoveredSection === section.id;
-                      const isPreview = !isSelected;
-
-                      return (
-                        <div
-                          key={isPreview ? `preview-${section.id}` : section.id}
-                          onClick={() => handleOnlineCourseClick(section)}
-                          // onMouseEnter={() => setHoveredSection(section.id)}
-                          // onMouseLeave={() => setHoveredSection(null)}
-                          className={`p-2 rounded border cursor-pointer transition-colors text-sm ${isPreview
-                            ? `opacity-70 border-dashed ${(
-                              section.seats === 'Cancel' ||
-                              section.waitlist === 'Full' ||
-                              (
-                                parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
-                              )
-                            )
-                              ? 'bg-red-50 border-red-300 border-l-4 border-l-red-500'
-                              : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
-                                ? 'bg-yellow-50 border-yellow-300 border-l-4 border-l-yellow-500'
-                                : 'bg-green-50 border-green-300 border-l-4 border-l-green-500'
-                            }`
-                            : `${isHovered
-                              ? 'bg-gray-100 border-gray-300'
-                              : 'bg-blue-100 border-blue-300'
-                            } ${(
-                              section.seats === 'Cancel' ||
-                              section.waitlist === 'Full' ||
-                              (
-                                parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
-                              )
-                            )
-                              ? 'border-l-4 border-l-red-500'
-                              : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
-                                ? 'border-l-4 border-l-yellow-500'
-                                : 'border-l-4 border-l-green-500'
-                            }`
-                            }`}
-                        >
-                          <div className="font-medium">
-                            {section.subject} {section.course_code} {section.section}
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            CRN: {section.crn} • Seats: {section.seats}
-                            {section.waitlist && section.waitlist !== " " && ` • Waitlist: ${section.waitlist}`}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || 'Online Course'}
-                          </div>
-                        </div>
-                      );
-                    });
-                  })()}
-
-                  {getSelectedOnlineSections().length === 0 && !hoveredSection && (
-                    <div className="col-span-full text-center text-gray-500 py-8">
-                      No online courses selected
-                    </div>
-                  )}
-                </div>
-              </div>
-
+          ideally this would be laid out a bit better
+          and not have hardcoded heights
+          alas, i am only human
+          
+          */}
+          {/* im very good at coding */}
+          <div className={`h-fit min-h-42 max-h-50  md:max-h-72 pb-2 bg-white rounded-lg shadow overflow-y-scroll ${
+            // (window && window.outerWidth > 900) || 
+            (getSelectedOnlineSections().length === 0 && (!hoveredSection || !allSections.some(s => s.id === hoveredSection && isOnlineSection(s))))
+            ? 'hidden sm:block' 
+            : 'block'
+          }`}>
+            <div className="pl-3 pt-2 md:pt-3">
+              <h3 className="sm:text-lg font-semibold text-gray-800">Online Courses:</h3>
             </div>
-          }
+
+            <div className="px-3 py-1 md:pb-3 h-fit">
+              {/* <div></div> */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 h-fit">
+                {/* Show online courses (selected and hovered) in alphabetical order */}
+                {(() => {
+                  const selectedOnlineSections = getSelectedOnlineSections();
+                  const hoveredOnlineSection = hoveredSection && !selectedSections.has(hoveredSection)
+                    ? allSections.find(s => s.id === hoveredSection && isOnlineSection(s))
+                    : null;
+
+                  // Combine selected and hovered sections
+                  const allOnlineSections = [...selectedOnlineSections];
+                  if (hoveredOnlineSection) {
+                    allOnlineSections.push(hoveredOnlineSection);
+                  }
+
+                  // Sort alphabetically by subject and course code
+                  const sortedSections = allOnlineSections.sort((a, b) => {
+                    const aCode = `${a.subject} ${a.course_code} ${a.section}`;
+                    const bCode = `${b.subject} ${b.course_code} ${b.section}`;
+                    return aCode.localeCompare(bCode);
+                  });
+
+                  return sortedSections.map(section => {
+                    const isSelected = selectedSections.has(section.id);
+                    const isHovered = hoveredSection === section.id;
+                    const isPreview = !isSelected;
+
+                    return (
+                      <div
+                        key={isPreview ? `preview-${section.id}` : section.id}
+                        onClick={() => handleOnlineCourseClick(section)}
+                        // onMouseEnter={() => setHoveredSection(section.id)}
+                        // onMouseLeave={() => setHoveredSection(null)}
+                        className={`p-2 rounded border cursor-pointer transition-colors text-sm ${isPreview
+                          ? `opacity-70 border-dashed ${(
+                            section.seats === 'Cancel' ||
+                            section.waitlist === 'Full' ||
+                            (
+                              parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
+                            )
+                          )
+                            ? 'bg-red-50 border-red-300 border-l-4 border-l-red-500'
+                            : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
+                              ? 'bg-yellow-50 border-yellow-300 border-l-4 border-l-yellow-500'
+                              : 'bg-green-50 border-green-300 border-l-4 border-l-green-500'
+                          }`
+                          : `${isHovered
+                            ? 'bg-gray-100 border-gray-300'
+                            : 'bg-blue-100 border-blue-300'
+                          } ${(
+                            section.seats === 'Cancel' ||
+                            section.waitlist === 'Full' ||
+                            (
+                              parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
+                            )
+                          )
+                            ? 'border-l-4 border-l-red-500'
+                            : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
+                              ? 'border-l-4 border-l-yellow-500'
+                              : 'border-l-4 border-l-green-500'
+                          }`
+                          }`}
+                      >
+                        <div className="font-medium">
+                          {section.subject} {section.course_code} {section.section}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          CRN: {section.crn} • Seats: {section.seats}
+                          {section.waitlist && section.waitlist !== " " && ` • Waitlist: ${section.waitlist}`}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || 'Online Course'}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+
+                {getSelectedOnlineSections().length === 0 && 
+                (!hoveredSection || !allSections.some(s => s.id === hoveredSection && isOnlineSection(s))) &&
+                // !hoveredSection && 
+                (
+                  <div className="col-span-full text-gray-500">
+                    No online courses selected.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
 
