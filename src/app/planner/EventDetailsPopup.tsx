@@ -115,9 +115,9 @@ const EventDetailsPopup: React.FC<EventDetailsPopupProps> = ({
           {section && (
             <>
               {section.schedule && section.schedule.length > 0 && (
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-1 sm:p-4 rounded-lg">
                   <h5 className="text-gray-800 mb-3">Schedule:</h5>
-                  <div className="space-y-3">
+                  <div className="space-y-3 overflow-x-scroll">
                     <table className="table-auto w-full text-sm text-left text-gray-800">
                       <thead>
                       <tr className="bg-gray-200">
@@ -128,14 +128,14 @@ const EventDetailsPopup: React.FC<EventDetailsPopupProps> = ({
                         <th className="px-2 py-2">Instructor</th>
                       </tr>
                       </thead>
-                      <tbody>
+                      <tbody className=' align-text-top'>
                       {section.schedule.map((schedule: Schedule, idx: number) => (
                         <tr key={idx} className="border-t">
                         <td className="px-2 py-2 text-nowrap font-mono">{schedule.days}</td>
                         <td className="px-2 py-2 font-mono">{schedule.time}</td>
                         <td className="px-2 py-2">{schedule.room}</td>
                         <td className="px-2 py-2">{schedule.type}</td>
-                        <td className="px-2 py-2">{schedule.instructor}</td>
+                        <td className="px-2 py-2 align-text-top">{schedule.instructor}</td>
                         </tr>
                       ))}
                       </tbody>
