@@ -1165,6 +1165,21 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                 <tbody>
                   {section.schedule.map((schedule: Schedule, idx: number) => (
                     <React.Fragment key={idx}>
+                      { 
+                      (schedule.start || schedule.end) && (
+                        <tr className="text-gray-500 align-top">
+                          <td colSpan={4} className="w-full align-top text-left">
+                            {schedule.start && schedule.end
+                              ? `⚠️ Non-standard start: ${new Date(schedule.start).toLocaleDateString()} • End: ${new Date(schedule.end).toLocaleDateString()}`
+                              : schedule.start
+                              ? `⚠️ Non-standard start: : ${new Date(schedule.start).toLocaleDateString()}`
+                              : schedule.end
+                              ? `⚠️ Non-standard end: ${new Date(schedule.end).toLocaleDateString()}`
+                              : null}
+                          </td>
+                        </tr>
+                      )
+                      }
                       <tr className="text-gray-500 align-top">
                         <td className="min-w-14 font-mono align-top">
                           {schedule.days}
@@ -1176,16 +1191,18 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                           {schedule.type}
                         </td>
                         <td className="w-full font-mono align-top">
-                          {typeof window !== 'undefined' && window.innerWidth > 768 ? schedule.instructor : ''}
+                          {/* if screen is too small we make a newline */}
+                          {schedule.instructor}
+                          {/* {typeof window !== 'undefined' && window.innerWidth > 768 ? schedule.instructor : ''} */}
                         </td>
                       </tr>
-                      {typeof window !== 'undefined' && window.innerWidth <= 768 && (
+                      {/* {typeof window !== 'undefined' && window.innerWidth <= 768 && (
                         <tr className="text-gray-500 align-top">
                           <td colSpan={4} className="w-full font-mono align-top text-left">
                             {schedule.instructor}
                           </td>
                         </tr>
-                      )}
+                      )} */}
                     </React.Fragment>
                   ))}
 
