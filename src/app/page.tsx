@@ -64,6 +64,13 @@ export default function Home() {
                 <p className="text-sm max-w-[300px]">Explore every single course offering at Langara. View historical data of previous sections, and filter by waitlist, open seats, or on other parameters.</p>
               </div>
             </Link>
+
+            <Link href="/transfers" className="block">
+              <div className="bg-[#A3C4F3] p-6 h-64 flex flex-col items-center justify-center text-center rounded-lg hover:brightness-[0.8] transition-all">
+                <h2 className="text-xl font-bold mb-2">Transfer Explorer</h2>
+                <p className="text-sm max-w-[300px]">Discover transfer destinations for Langara courses. Search by institution, course, or program.</p>
+              </div>
+            </Link>
           </div>
         </div>
 
@@ -81,6 +88,6 @@ export default function Home() {
 
       <Footer></Footer>
 
-    </div>
+    </div >
   );
 }
