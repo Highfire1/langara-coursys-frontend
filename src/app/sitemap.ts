@@ -14,24 +14,53 @@ interface CourseIndexList {
     courses: CourseIndex[];
 }
 
+interface TransferDestination {
+    code: string;
+    name: string;
+}
+
+interface TransferDestinationsResponse {
+    transfers: TransferDestination[];
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // Fetch all courses
-    const response = await fetch('https://api.langaracourses.ca/v1/index/courses');
-    if (!response.ok) {
+    const coursesResponse = await fetch('https://api.langaracourses.ca/v1/index/courses');
+    if (!coursesResponse.ok) {
       console.error('Failed to fetch courses for sitemap');
       return [];
     }
     
-    const data: CourseIndexList = await response.json();
-    
+    const coursesData: CourseIndexList = await coursesResponse.json();
+
     // Generate sitemap entries for courses
-    const courseUrls: MetadataRoute.Sitemap = data.courses.map((course) => ({
+    const courseUrls: MetadataRoute.Sitemap = coursesData.courses.map((course) => ({
       url: `${BASE_URL}/courses/${course.subject.toLowerCase()}-${course.course_code.toLowerCase()}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     }));
+    
+    
+    // Fetch transfer destinations
+    const transfersResponse = await fetch('https://api.langaracourses.ca/v1/index/transfer_destinations');
+    let transferUrls: MetadataRoute.Sitemap = [];
+    
+    if (transfersResponse.ok) {
+      const transfersData: TransferDestinationsResponse = await transfersResponse.json();
+      
+      // Generate sitemap entries for transfer institution pages
+      transferUrls = transfersData.transfers.map((institution) => ({
+        url: `${BASE_URL}/transfers/${institution.code.toLowerCase()}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.5,
+      }));
+    } else {
+      console.error('Failed to fetch transfer destinations for sitemap');
+    }
+    
     
     // Add main pages
     const mainPages: MetadataRoute.Sitemap = [
@@ -65,15 +94,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'weekly',
         priority: 0.7,
       },
-      // {
-      //   url: `${BASE_URL}/transfers`,
-      //   lastModified: new Date(),
-      //   changeFrequency: 'monthly',
-      //   priority: 0.6,
-      // },
+      {
+        url: `${BASE_URL}/transfers`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      },
     ];
     
-    return [...mainPages, ...courseUrls];
+    return [...mainPages, ...transferUrls, ...courseUrls];
   } catch (error) {
     console.error('Error generating sitemap:', error);
     return [];
