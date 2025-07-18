@@ -230,9 +230,13 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                                 <td>
                                     {course.outlines.length > 0 ? (
                                         course.outlines.map((outline) => (
-                                            <a key={outline.id} href={outline.url} className="text-blue-600 hover:text-blue-800 underline">
+                                            // unfortunately langara evaporated all of the example outlines, so we have to use the wayback machine
+                                            <Link 
+                                                key={outline.id} 
+                                                href={`https://web.archive.org/web/*/${outline.url}`} className="text-blue-600 hover:text-blue-800 underline"
+                                                target="_blank">
                                                 <p>{outline.file_name}</p>
-                                            </a>
+                                            </Link>
                                         ))
                                     ) : (
                                         "No outline found."
