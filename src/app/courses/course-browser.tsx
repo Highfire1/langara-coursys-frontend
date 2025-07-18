@@ -32,7 +32,7 @@ interface SearchParams {
     transfer_destinations?: string[];
 }
 
-export default function CourseBrowser({ transfers, subjects, initialCourses }: CourseBrowserProps) {
+export default function CourseBrowser({ transfers, subjects, initialCourses, validCourses }: CourseBrowserProps) {
     const searchParams = useSearchParams();
 
     // const [transfer_destinations, setDestinations] = useState<TransfersResponse>(transfers);
@@ -378,7 +378,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses }: C
                 </div>
             </div>
 
-            <CourseList loading={loading} courses={courses || []} />
+            <CourseList loading={loading} courses={courses || []} validCourses={validCourses} />
 
             
 

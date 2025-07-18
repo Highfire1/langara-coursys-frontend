@@ -7,25 +7,6 @@ import { notFound } from "next/navigation";
 // coursecode is the url slug / path parameter
 // course_code is returned by the api
 
-export const revalidate = 1800; // regeneate every 30 minutes
-// export const dynamicParams/ = true;
-
-// const courses: {
-//     course_count: number;
-//     courses: {
-//         course_code: string;
-//         on_langara_website: boolean;
-//         subject: string;
-//         title: string;
-//     }[];
-//     subject_count: number;
-// } = await fetch('https://api.langaracourses.ca/v1/index/courses', { next: {revalidate: 1800}}).then((res) => res.json());
-
-// const courseList = courses.courses.map(
-//     (course) => `${course.subject}-${course.course_code}`.toLowerCase()
-// );
-
-
 type expectedParams = Promise<{ course: string }>;
 
 export async function generateMetadata({ params }: { params: expectedParams }) {

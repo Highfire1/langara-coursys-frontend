@@ -11,7 +11,26 @@ import { v1IndexSubjectsResponse, v1IndexTransfersResponse, v2SearchCoursesRespo
 
 export const revalidate = 3600 // revalidate every hour
 
+const _courses: {
+    course_count: number;
+    courses: {
+        course_code: string;
+        on_langara_website: boolean;
+        subject: string;
+        title: string;
+    }[];
+    subject_count: number;
+} = await fetch(
+    'https://api.langaracourses.ca/v1/index/courses',
+    {
+        cache: 'force-cache',
+        next: { revalidate: 1800 } // 30 minutes
+    }
+).then((res) => res.json());
 
+const courseList = _courses.courses.map(
+    (c) => `${c.subject}-${c.course_code}`.toLowerCase()
+);
 
 
 export default async function Page() {
@@ -42,7 +61,7 @@ export default async function Page() {
 
       <div className="md:px-10">
         <Suspense fallback={<div>Loading...</div>}>
-          <CourseBrowser transfers={transfers} subjects={subjects} initialCourses={courses}/>
+          <CourseBrowser transfers={transfers} subjects={subjects} initialCourses={courses} validCourses={courseList}/>
         </Suspense>
       </div>
     </div>

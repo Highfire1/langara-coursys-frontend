@@ -17,9 +17,10 @@ const termToSeason = (term: number): string => {
 interface CourseListProps {
     loading: boolean;
     courses: CourseMax[];
+    validCourses: string[];
 }
 
-export default function CourseList({ loading, courses }: CourseListProps): JSX.Element {
+export default function CourseList({ loading, courses, validCourses }: CourseListProps): JSX.Element {
     const [visibleCourses, setVisibleCourses] = useState<CourseMax[]>([]);
     const [showAll, setShowAll] = useState<boolean>(false);
 
@@ -105,10 +106,10 @@ export default function CourseList({ loading, courses }: CourseListProps): JSX.E
                                 </td>
                                 <td className="p-2 break-words flex flex-col gap-2 text-sm">
                                     {course.desc_registration_restriction && <span>{course.desc_registration_restriction}</span>}
-                                    <span>{course.description ? addLinksToCourseDescription(course.description) : "No description available."}</span>
-                                    {course.desc_prerequisite && <span>{addLinksToCourseDescription(course.desc_prerequisite)}</span>}
-                                    {course.desc_duplicate_credit && <span>{addLinksToCourseDescription(course.desc_duplicate_credit)}</span>}
-                                    {course.desc_replacement_course && <span>{addLinksToCourseDescription(course.desc_replacement_course)}</span>}
+                                    <span>{course.description ? addLinksToCourseDescription(course.description, validCourses) : "No description available."}</span>
+                                    {course.desc_prerequisite && <span>{addLinksToCourseDescription(course.desc_prerequisite, validCourses)}</span>}
+                                    {course.desc_duplicate_credit && <span>{addLinksToCourseDescription(course.desc_duplicate_credit, validCourses)}</span>}
+                                    {course.desc_replacement_course && <span>{addLinksToCourseDescription(course.desc_replacement_course, validCourses)}</span>}
                                 </td>
                                 <td className="p-2 break-words text-sm">
                                     {course.transfer_destinations ? course.transfer_destinations.slice(1, -1).replaceAll(",", ", ") : ""}

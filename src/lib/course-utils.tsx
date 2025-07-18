@@ -1,56 +1,86 @@
+import Link from 'next/link';
 import React, { JSX } from 'react';
+
+function isCourseInList(subject: string, courseCode: string, courseList: string[]): boolean {
+    const courseKey = `${subject}-${courseCode}`.toLowerCase();
+    return courseList.includes(courseKey);
+}
+
+
 
 // yes i am aware that this function is kind of cursed
 // (because it was translated from python by chatgpt)
 // BUT IT WORKS OK. AND THAT IS THE MOST IMPORTANT THING.
-export function addLinksToCourseDescription(text: string): JSX.Element {
+export function addLinksToCourseDescription(text: string, courseList: string[]): JSX.Element {
     const SUS_SEPARATOR = "🏺";
-    const replacementValues = " .,;/()[]";
+    const replacementValues = " .,;/()[]\n";
     let textSplit = text;
+    // console.log(text)
+    // console.log(courseList)
 
     for (const char of replacementValues) {
         textSplit = textSplit.split(char).join(`${SUS_SEPARATOR}${char}${SUS_SEPARATOR}`);
     }
 
     const words = textSplit.split(SUS_SEPARATOR);
-    const ARBITRARY_BIG_NUMBER = 1000000;
-    let currentSubject = "";
-    let distanceSinceSubjectUpdate = ARBITRARY_BIG_NUMBER;
+    let currentSubject: string | null = null;
+    let indexOfCurrentSubject = -1;
 
     const parts: (string | JSX.Element | null)[] = [];
 
     words.forEach((word, index) => {
+        // console.log(index, word)
         if (/^[A-Z]{4,8}$/.test(word)) {
             currentSubject = word;
-            distanceSinceSubjectUpdate = -1;
+            // so we can remove the subject from the parts array
+            // and readd it inside the link
+            indexOfCurrentSubject = index;
+            parts.push(word);
+            return
+        }
+        
+        // bandaid fix for "Discontinued Fall 2014"
+        if (word == "Fall" || word == "Spring" || word == "Summer") {
+            currentSubject = null;
+            indexOfCurrentSubject = -1;
         }
 
-        distanceSinceSubjectUpdate += 1;
 
-        if (/^\d{4}$/.test(word) && currentSubject) {
-            if (distanceSinceSubjectUpdate < ARBITRARY_BIG_NUMBER) {
-                parts[parts.length - distanceSinceSubjectUpdate] = null;
+        if (currentSubject && /^\d{4}$/.test(word)) {
+            // console.log("course code found", word);
+
+            if (!isCourseInList(currentSubject, word, courseList)) {
+                
                 parts.push(
-                    <a
-                        key={`${index}-${word}`}
-                        href={`/courses/${currentSubject.toLowerCase()}-${word.toLowerCase()}`}
-                        className="text-black hover:text-[#f15a22] underline transition-colors duration-200 ease-in"
+                    <span
+                        key={index}
+                        className=' hover:text-gray-500 transition-colors duration-200 ease-in text-red'
+                        title={`${currentSubject} ${word} does not exist.`}
                     >
-                        {currentSubject} {word}
-                    </a>
+                        {indexOfCurrentSubject != -1 ? `${currentSubject} ${word}` : word}
+                    </span>
                 );
-                distanceSinceSubjectUpdate = ARBITRARY_BIG_NUMBER;
+
             } else {
+
                 parts.push(
-                    <a
-                        key={`${index}-${word}`}
+                    <Link
+                        key={index}
                         href={`/courses/${currentSubject.toLowerCase()}-${word.toLowerCase()}`}
-                        className="text-black hover:text-[#f15a22] underline transition-colors duration-200 ease-in"
+                        className="hover:text-[#f15a22] underline transition-colors duration-200 ease-in"
+                        title=''
                     >
-                        {word}
-                    </a>
+                        {indexOfCurrentSubject != -1 ? `${currentSubject} ${word}` : word}
+                    </Link>
                 );
+
             }
+
+            parts[indexOfCurrentSubject] = null;
+            indexOfCurrentSubject = -1
+
+        } else if (word == "\n") {
+            parts.push(<br key={`${index}`} />);
         } else {
             parts.push(word);
         }

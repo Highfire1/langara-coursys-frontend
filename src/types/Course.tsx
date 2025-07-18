@@ -131,6 +131,7 @@ export interface CourseBrowserProps {
   transfers: TransferDestination[];
   subjects: string[];
   initialCourses: CourseMax[];
+  validCourses: string[];
 }
 export interface v1IndexTransfersResponse {
   transfers: {

@@ -2,6 +2,26 @@ import { addLinksToCourseDescription } from '@/lib/course-utils';
 import { Course, Transfer } from '@/types/Course';
 import Link from 'next/link';
 
+const _courses: {
+    course_count: number;
+    courses: {
+        course_code: string;
+        on_langara_website: boolean;
+        subject: string;
+        title: string;
+    }[];
+    subject_count: number;
+} = await fetch(
+    'https://api.langaracourses.ca/v1/index/courses',
+    {
+        cache: 'force-cache',
+        next: { revalidate: 1800 } // 30 minutes
+    }
+).then((res) => res.json());
+
+const courseList = _courses.courses.map(
+    (c) => `${c.subject}-${c.course_code}`.toLowerCase()
+);
 
 const mapTerm = (term: number): string => {
     switch (term) {
@@ -105,22 +125,22 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                 {/* <h2 className="text-xl pt-2 pb-1">Course Description</h2> */}
                 <div className='flex flex-col gap-2'>
                     {course.attributes.description ? (
-                        <p>{addLinksToCourseDescription(course.attributes.description)}</p>
+                        <p>{addLinksToCourseDescription(course.attributes.description, courseList)}</p>
                     ) : (
                         <p>No description available for this course</p>
                     )}
 
 
                     {course.attributes.desc_duplicate_credit && (
-                        <p>{addLinksToCourseDescription(course.attributes.desc_duplicate_credit)}</p>
+                        <p>{addLinksToCourseDescription(course.attributes.desc_duplicate_credit, courseList)}</p>
                     )}
 
                     {course.attributes.desc_registration_restriction && (
-                        <p>{addLinksToCourseDescription(course.attributes.desc_registration_restriction)}</p>
+                        <p>{addLinksToCourseDescription(course.attributes.desc_registration_restriction, courseList)}</p>
                     )}
 
                     {course.attributes.desc_prerequisite && (
-                        <p>{addLinksToCourseDescription(course.attributes.desc_prerequisite)}</p>
+                        <p>{addLinksToCourseDescription(course.attributes.desc_prerequisite, courseList )}</p>
                     )}
                 </div>
 
