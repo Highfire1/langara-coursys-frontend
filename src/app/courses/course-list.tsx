@@ -60,8 +60,8 @@ export default function CourseList({ loading, courses, validCourses }: CourseLis
                         <th className="sticky bg-gray-100 top-0 text-center w-[3%]">SOC</th>
                         <th className="sticky bg-gray-100 top-0 text-center w-[3%]">UT</th>
                         <th className="sticky bg-gray-100 top-0 p-2 w-[5%] text-sm">Offered Online</th>
-                        <th className="sticky bg-gray-100 top-0 p-2 w-[6%] text-sm">First Offered</th>
-                        <th className="sticky bg-gray-100 top-0 p-2 w-[6%] text-sm">Last Offered</th>
+                        <th className="sticky bg-gray-100 top-0 p-2 w-[8%] text-sm">First Offered</th>
+                        <th className="sticky bg-gray-100 top-0 p-2 w-[8%] text-sm">Last Offered</th>
                         <th className="sticky bg-gray-100 top-0 p-2 w-[50%]">Description</th>
                         <th className="sticky bg-gray-100 top-0 p-2 w-[10%]">Transfers to</th>
                     </tr>

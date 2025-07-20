@@ -59,7 +59,7 @@ export default async function Page() {
     <div className="w-full h-full">
       <Header title="Langara Course Search" color="#F1B5CB" />
 
-      <div className="md:px-10">
+      <div className="lg:px-10">
         <Suspense fallback={<div>Loading...</div>}>
           <CourseBrowser transfers={transfers} subjects={subjects} initialCourses={courses} validCourses={courseList}/>
         </Suspense>

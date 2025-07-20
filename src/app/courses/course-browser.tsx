@@ -132,7 +132,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses, val
 
 
     return (
-        <div className="p-4">
+        <div className="p-0 sm:p-2 md:p-4">
             <div className="bg-white shadow-md rounded-lg p-4 mb-4">
                 <form className="flex flex-col gap-4" onSubmit={e => e.preventDefault()}>
 
@@ -295,7 +295,10 @@ export default function CourseBrowser({ transfers, subjects, initialCourses, val
                                 {/* See https://github.com/radix-ui/primitives/issues/1634 for info. */}
                                 <DropdownMenu modal={false}>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline">Select Transfer Destinations</Button>
+                                        <Button 
+                                        variant="outline"
+                                        className='p-2 gap-1'>
+                                            <span className='hidden sm:block'>Select</span><span>Transfer Destinations</span></Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-56 bg-white overflow-y-scroll h-64" >
                                         {/* <DropdownMenuLabel>Appearance</DropdownMenuLabel>
