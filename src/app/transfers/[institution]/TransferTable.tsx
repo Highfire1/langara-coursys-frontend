@@ -97,6 +97,7 @@ export default function TransferTable({ transfers, title, isInactive = false, op
                           href={`/courses/${transfer.subject.toLowerCase()}-${transfer.course_code.toLowerCase()}`}
                           className="text-black hover:text-[#f15a22] underline"
                           target="_blank"
+                          prefetch={false}
                         >
                           <span className="font-medium">{`${transfer.subject} ${transfer.course_code}`}</span>
                           {transfer.source_title && (

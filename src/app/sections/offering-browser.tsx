@@ -461,7 +461,7 @@ export default function CourseBrowser() {
                             sections?.sections.map(section => (
                                 <tr key={section.id} className={` even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors`}>
                                     <td className="p-2">{`${termToSeason(section.term)} ${section.year}`}</td>
-                                    <td className="p-2 text-blue-700"><Link target='_blank' href={`/courses/${section.subject.toLowerCase()}-${section.course_code.toLowerCase()}`}>{section.subject} {section.course_code}</Link></td>
+                                    <td className="p-2 text-blue-700"><Link prefetch={false} target='_blank' href={`/courses/${section.subject.toLowerCase()}-${section.course_code.toLowerCase()}`}>{section.subject} {section.course_code}</Link></td>
                                     <td className="p-2">{section.section}</td>
                                     <td className="p-2">{section.crn}</td>
                                     <td className="p-2">{section.abbreviated_title}</td>

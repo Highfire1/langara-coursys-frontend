@@ -69,6 +69,7 @@ export function addLinksToCourseDescription(text: string, courseList: string[]):
                         href={`/courses/${currentSubject.toLowerCase()}-${word.toLowerCase()}`}
                         className="hover:text-[#f15a22] underline transition-colors duration-200 ease-in"
                         title=''
+                        prefetch={false}
                     >
                         {indexOfCurrentSubject != -1 ? `${currentSubject} ${word}` : word}
                     </Link>

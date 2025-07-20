@@ -1151,6 +1151,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
               href={`/courses/${section.subject.toLowerCase()}-${section.course_code.toLowerCase()}`}
               target='_blank'
               className="hover:text-blue-700 hover:underline w-fit"
+              prefetch={false}
             >
               {section.subject} {section.course_code} {section.section}: {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || ''}
             </Link>
