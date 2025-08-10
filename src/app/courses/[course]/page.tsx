@@ -36,6 +36,9 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
     return {
         title: `${subject.toUpperCase()} ${coursecode}${titleText}`,
         description: `${description}`,
+        alternates: {
+            canonical: `https://langaracourses.ca/courses/${subject.toLowerCase()}-${coursecode.toLowerCase()}`
+        }
     };
 }
 
