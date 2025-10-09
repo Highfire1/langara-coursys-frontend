@@ -15,13 +15,18 @@ export default function Home() {
 
       <div className="px-4 py-6 flex flex-col gap-4">
 
-        <div className="p-4 bg-blue-100 rounded-lg border-4 border-blue-400">
-          <strong>Welcome to v4 of the Langara Course Planner!</strong>
+        <strong>Welcome to the Langara Course Planner. New here? Try the <Link href="/planner" className="text-blue-800 hover:text-blue-600 underline">course planner</Link> or <Link href="/courses" className="text-blue-800 hover:text-blue-600 underline">search for a course</Link>.</strong>
+
+        <Link href="https://discord.gg/CVaDpjkfHx" className="p-4 bg-blue-100 rounded-lg border-4 border-blue-400">
+          <strong>Join the Discord!</strong>
+          <p>Say hi to the creator and other Langara students and alumni.</p>
+          
+          {/* <strong>Welcome to v4 of the Langara Course Planner!</strong>
           <p>We are now on a new domain! bookmark langaracourses.ca and share it with your friends!</p>
           <p>The course planner has been updated to a new framework and should now work more seamlessly with the rest of the website.</p>
           <p>As always, please report bugs or feedback, or leave a testimonial at our <Link href={"https://forms.gle/CYKP7xsp2an6gNEK9"} className="text-blue-800 hover:text-blue-600 underline">feedback form!</Link></p>
-          <p>If you find this page useful, share it with your friends to help them save time with course planning!</p>
-        </div>
+          <p>If you find this page useful, share it with your friends to help them save time with course planning!</p> */}
+        </Link>
 
         {/* <p>This is a free website that helps you effectively plan and look for courses at Langara College. Check out the <Link href="/about" className="text-blue-800 hover:text-blue-600 underline">about page</Link> for more information.</p> */}
 
