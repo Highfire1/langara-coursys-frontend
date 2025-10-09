@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
 
     // Build the URL for the planner page with screenshot mode
     const baseUrl = isVercel 
-      ? `https://${request.headers.get('host')}`
+      ? `https://langaracourses.ca`
       : 'http://localhost:3000';
     
     let plannerUrl = `${baseUrl}/planner?view=screenshot`;
