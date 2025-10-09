@@ -2,6 +2,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
+declare global {
+  // allow storing the browser on the global object in server environment
+  var __screenshotBrowser: any | undefined;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   
@@ -47,8 +52,35 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    browser = await puppeteer.launch(launchOptions);
+    // Try to reuse an existing browser instance to avoid cold launches
+    if (global.__screenshotBrowser && global.__screenshotBrowser.process && !global.__screenshotBrowser.isClosed) {
+      browser = global.__screenshotBrowser;
+    } else {
+      browser = await puppeteer.launch(launchOptions);
+      // store globally for reuse in subsequent requests (serverless warm functions)
+      try { global.__screenshotBrowser = browser; } catch {}
+    }
+
     const page = await browser.newPage();
+
+    // Block images, fonts, and common third-party analytics to speed up rendering
+    try {
+      await page.setRequestInterception?.(true);
+      page.on('request', (req: any) => {
+        const resourceType = req.resourceType && req.resourceType();
+        const url = req.url();
+        if (resourceType === 'image') {
+          return req.abort();
+        }
+        // Block common analytics/cdn domains
+        if (/googlesyndication|doubleclick|google-analytics|analytics|segment|hotjar|sentry|umami/i.test(url)) {
+          return req.abort();
+        }
+        return req.continue();
+      });
+    } catch {
+      // some puppeteer versions may not support interception on certain environments
+    }
     
     // Set viewport size
     await page.setViewport({ width, height });
@@ -98,7 +130,8 @@ export async function GET(request: NextRequest) {
       headers: {
         "Content-Type": "image/png",
         "Content-Disposition": 'inline; filename="planner-screenshot.png"',
-        "Cache-Control": "public, max-age=60, s-maxage=60",
+        // increase s-maxage to 10 minutes to cache at CDN/edge
+        "Cache-Control": "public, max-age=60, s-maxage=600",
       },
     });
   } catch (error) {
@@ -108,8 +141,12 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    if (browser) {
-      await browser.close();
-    }
+    // Don't always close the browser: keep it alive for reuse in warm server instances
+    // Only close if it's not the shared browser
+    try {
+      if (browser && browser !== global.__screenshotBrowser) {
+        await browser.close();
+      }
+  } catch {}
   }
 }
