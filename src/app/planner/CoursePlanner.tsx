@@ -1409,7 +1409,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         {/* Calendar and Online Courses */}
         <div className={`flex-1 p-2 flex flex-col ${isScreenshotMode ? 'w-full' : ''}`}>
 
-          <div className="min-h-36 sm:h-fit flex-1 bg-white rounded-lg shadow mb-2 sm:mb-4">
+          <div className="h-fit flex-1 bg-white rounded-lg shadow mb-2 sm:mb-4">
             <FullCalendar
               ref={calendarRef}
               {...calendarOptions}
@@ -1424,104 +1424,109 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           
           */}
           {/* im very good at coding */}
-          <div className={`h-fit min-h-42 max-h-50  md:max-h-72 pb-2 bg-white rounded-lg shadow overflow-y-scroll ${
-            // (window && window.outerWidth > 900) || 
-            (getSelectedOnlineSections().length === 0 && (!hoveredSection || !allSections.some(s => s.id === hoveredSection && isOnlineSection(s))))
-            ? 'hidden sm:block' 
-            : 'block'
-          }`}>
+          <div className={
+            // Screenshot mode: if there are no online courses, hide the section entirely.
+            isScreenshotMode
+              ? (getSelectedOnlineSections().length === 0 && (!hoveredSection || !allSections.some(s => s.id === hoveredSection && isOnlineSection(s))))
+                ? 'hidden'
+                // If there are online courses in screenshot mode, keep the section but limit its height to ~20vh and allow content to fit.
+                : 'h-fit max-h-[15vh] pb-2 bg-white rounded-lg shadow overflow-y-auto'
+              // Normal mode: previous behavior (fit height, min/max heights, scroll)
+              : `h-fit min-h-42 max-h-50 md:max-h-72 pb-2 bg-white rounded-lg shadow overflow-y-scroll ${
+                  (getSelectedOnlineSections().length === 0 && (!hoveredSection || !allSections.some(s => s.id === hoveredSection && isOnlineSection(s))))
+                    ? 'hidden sm:block'
+                    : 'block'
+                }`
+          }>
             <div className="pl-3 pt-2 md:pt-3">
               <h3 className="sm:text-lg font-semibold text-gray-800">Online Courses:</h3>
             </div>
 
             <div className="px-3 py-1 md:pb-3 h-fit">
               {/* <div></div> */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 h-fit">
+                <div className={`grid gap-2 h-fit ${isScreenshotMode ? 'grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                 {/* Show online courses (selected and hovered) in alphabetical order */}
                 {(() => {
                   const selectedOnlineSections = getSelectedOnlineSections();
                   const hoveredOnlineSection = hoveredSection && !selectedSections.has(hoveredSection)
-                    ? allSections.find(s => s.id === hoveredSection && isOnlineSection(s))
-                    : null;
+                  ? allSections.find(s => s.id === hoveredSection && isOnlineSection(s))
+                  : null;
 
                   // Combine selected and hovered sections
                   const allOnlineSections = [...selectedOnlineSections];
                   if (hoveredOnlineSection) {
-                    allOnlineSections.push(hoveredOnlineSection);
+                  allOnlineSections.push(hoveredOnlineSection);
                   }
 
                   // Sort alphabetically by subject and course code
                   const sortedSections = allOnlineSections.sort((a, b) => {
-                    const aCode = `${a.subject} ${a.course_code} ${a.section}`;
-                    const bCode = `${b.subject} ${b.course_code} ${b.section}`;
-                    return aCode.localeCompare(bCode);
+                  const aCode = `${a.subject} ${a.course_code} ${a.section}`;
+                  const bCode = `${b.subject} ${b.course_code} ${b.section}`;
+                  return aCode.localeCompare(bCode);
                   });
 
                   return sortedSections.map(section => {
-                    const isSelected = selectedSections.has(section.id);
-                    const isHovered = hoveredSection === section.id;
-                    const isPreview = !isSelected;
+                  const isSelected = selectedSections.has(section.id);
+                  const isHovered = hoveredSection === section.id;
+                  const isPreview = !isSelected;
 
-                    return (
-                      <div
-                        key={isPreview ? `preview-${section.id}` : section.id}
-                        onClick={() => handleOnlineCourseClick(section)}
-                        // onMouseEnter={() => setHoveredSection(section.id)}
-                        // onMouseLeave={() => setHoveredSection(null)}
-                        className={`p-2 rounded border cursor-pointer transition-colors text-sm ${isPreview
-                          ? `opacity-70 border-dashed ${(
-                            section.seats === 'Cancel' ||
-                            section.waitlist === 'Full' ||
-                            (
-                              parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
-                            )
-                          )
-                            ? 'bg-red-50 border-red-300 border-l-4 border-l-red-500'
-                            : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
-                              ? 'bg-yellow-50 border-yellow-300 border-l-4 border-l-yellow-500'
-                              : 'bg-green-50 border-green-300 border-l-4 border-l-green-500'
-                          }`
-                          : `${isHovered
-                            ? 'bg-gray-100 border-gray-300'
-                            : 'bg-blue-100 border-blue-300'
-                          } ${(
-                            section.seats === 'Cancel' ||
-                            section.waitlist === 'Full' ||
-                            (
-                              parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
-                            )
-                          )
-                            ? 'border-l-4 border-l-red-500'
-                            : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
-                              ? 'border-l-4 border-l-yellow-500'
-                              : 'border-l-4 border-l-green-500'
-                          }`
-                          }`}
-                      >
-                        <div className="font-medium">
-                          {section.subject} {section.course_code} {section.section}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          CRN: {section.crn} • Seats: {section.seats}
-                          {section.waitlist && section.waitlist !== " " && ` • Waitlist: ${section.waitlist}`}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || 'Online Course'}
-                        </div>
-                      </div>
-                    );
+                  return (
+                    <div
+                    key={isPreview ? `preview-${section.id}` : section.id}
+                    onClick={() => handleOnlineCourseClick(section)}
+                    className={`p-2 rounded border cursor-pointer transition-colors text-sm ${isPreview
+                      ? `opacity-70 border-dashed ${(
+                      section.seats === 'Cancel' ||
+                      section.waitlist === 'Full' ||
+                      (
+                        parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
+                      )
+                      )
+                      ? 'bg-red-50 border-red-300 border-l-4 border-l-red-500'
+                      : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
+                        ? 'bg-yellow-50 border-yellow-300 border-l-4 border-l-yellow-500'
+                        : 'bg-green-50 border-green-300 border-l-4 border-l-green-500'
+                      }`
+                      : `${isHovered
+                      ? 'bg-gray-100 border-gray-300'
+                      : 'bg-blue-100 border-blue-300'
+                      } ${(
+                      section.seats === 'Cancel' ||
+                      section.waitlist === 'Full' ||
+                      (
+                        parseInt(section.seats) <= 0) && (section.waitlist && parseInt(section.waitlist?.toString()) > 10
+                      )
+                      )
+                      ? 'border-l-4 border-l-red-500'
+                      : (section.waitlist && parseInt(section.waitlist) <= 10) || section.seats == '0'
+                        ? 'border-l-4 border-l-yellow-500'
+                        : 'border-l-4 border-l-green-500'
+                      }`
+                      }`}
+                    >
+                    <div className="font-medium">
+                      {section.subject} {section.course_code} {section.section}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      CRN: {section.crn} • Seats: {section.seats}
+                      {section.waitlist && section.waitlist !== " " && ` • Waitlist: ${section.waitlist}`}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || 'Online Course'}
+                    </div>
+                    </div>
+                  );
                   });
                 })()}
 
                 {getSelectedOnlineSections().length === 0 && 
                 (!hoveredSection || !allSections.some(s => s.id === hoveredSection && isOnlineSection(s))) &&
-                // !hoveredSection && 
                 (
                   <div className="col-span-full text-gray-500">
-                    No online courses selected.
+                  No online courses selected.
                   </div>
                 )}
-              </div>
+                </div>
             </div>
           </div>
         </div>

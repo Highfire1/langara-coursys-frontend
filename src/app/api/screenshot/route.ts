@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   
   // Optional parameters for customization
   const width = parseInt(searchParams.get("width") || "720");
-  const height = parseInt(searchParams.get("height") || "480");
+  const height = parseInt(searchParams.get("height") || "800");
   
   // Support planner-specific parameters
   const year = searchParams.get("y");
