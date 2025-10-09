@@ -25,6 +25,7 @@ import EventDetailsPopup from '@/app/planner/EventDetailsPopup';
 interface PlannerProps {
   initialYear?: number;
   initialTerm?: number;
+  isScreenshotMode?: boolean;
 }
 
 // Save bar component
@@ -318,7 +319,8 @@ const SaveBar = ({
 
 const CoursePlanner: React.FC<PlannerProps> = ({
   initialYear = 2025,
-  initialTerm = 10
+  initialTerm = 10,
+  isScreenshotMode = false
 }) => {
   // URL handling
   const searchParams = useSearchParams();
@@ -441,8 +443,10 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           setCurrentScheduleId(newSchedule.id);
           setCurrentScheduleInStorage(newSchedule.id);
 
-          // Clean up URL parameters
-          router.replace('/planner', { scroll: false });
+          // Clean up URL parameters (but preserve view=screenshot if present)
+          const viewParam = searchParams.get('view');
+          const cleanUrl = viewParam ? `/planner?view=${viewParam}` : '/planner';
+          router.replace(cleanUrl, { scroll: false });
 
           console.log('Shared schedule processed successfully with', foundSections.size, 'sections');
 
@@ -1247,10 +1251,10 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     <div className=" h-screen bg-gray-50 max-h-screen block min-w-2xl">
 
       {/* Header */}
-      <Header title={'Langara Course Planner'} />
+      {!isScreenshotMode && <Header title={'Langara Course Planner'} />}
 
       {/* Save Bar */}
-      {hasInitialized && !isProcessingUrl ? (
+      {!isScreenshotMode && (hasInitialized && !isProcessingUrl ? (
         <SaveBar
           className="block max-h-12"
           currentYear={currentYear}
@@ -1264,12 +1268,12 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         />
       ) : (
         <div className="h-12 bg-white border-b shadow-sm px-4 py-2 "></div>
-      )}
+      ))}
 
-      <div className="flex flex-1 flex-grow h-[calc(100vh-48px-40px)]">
+      <div className={`flex flex-1 flex-grow ${isScreenshotMode ? 'h-screen' : 'h-[calc(100vh-48px-40px)]'}`}>
 
         {/* Sidebar */}
-        <div className="max-w-full md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
+        {!isScreenshotMode && <div className="max-w-full md:max-w-[30rem]  bg-white shadow-lg flex flex-col flex-1 h-full">
 
           <div className="px-4 py-2 border-b">
 
@@ -1400,10 +1404,10 @@ const CoursePlanner: React.FC<PlannerProps> = ({
               />
             )}
           </div>
-        </div>
+        </div>}
 
         {/* Calendar and Online Courses */}
-        <div className="flex-1 p-2 flex flex-col">
+        <div className={`flex-1 p-2 flex flex-col ${isScreenshotMode ? 'w-full' : ''}`}>
 
           <div className="min-h-36 sm:h-fit flex-1 bg-white rounded-lg shadow mb-2 sm:mb-4">
             <FullCalendar
