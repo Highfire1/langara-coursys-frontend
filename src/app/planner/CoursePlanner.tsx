@@ -26,6 +26,10 @@ interface PlannerProps {
   initialYear?: number;
   initialTerm?: number;
   isScreenshotMode?: boolean;
+  initialSemesters?: import('@/types/Planner2').SemestersResponse | null;
+  initialLatestSemester?: import('@/types/Planner2').LatestSemesterResponse | null;
+  initialCourses?: import('@/types/Planner2').PlannerCourse[] | null;
+  initialFilteredSections?: string[] | null;
 }
 
 // Save bar component
@@ -320,19 +324,23 @@ const SaveBar = ({
 const CoursePlanner: React.FC<PlannerProps> = ({
   initialYear = 2025,
   initialTerm = 10,
-  isScreenshotMode = false
+  isScreenshotMode = false,
+  initialSemesters = null,
+  initialLatestSemester = null,
+  initialCourses = null,
+  initialFilteredSections = null
 }) => {
   // URL handling
   const searchParams = useSearchParams();
   const router = useRouter();
 
   // State
-  const [courses, setCourses] = useState<PlannerCourse[]>([]);
-  const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [currentYear, setCurrentYear] = useState(initialYear);
-  const [currentTerm, setCurrentTerm] = useState(initialTerm);
+  const [courses, setCourses] = useState<PlannerCourse[]>(initialCourses ?? []);
+  const [semesters, setSemesters] = useState<Semester[]>(initialSemesters?.semesters ?? []);
+  const [currentYear, setCurrentYear] = useState(initialLatestSemester?.year ?? initialYear);
+  const [currentTerm, setCurrentTerm] = useState(initialLatestSemester?.term ?? initialTerm);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredSections, setFilteredSections] = useState<string[]>([]);
+  const [filteredSections, setFilteredSections] = useState<string[]>(initialFilteredSections ?? []);
   const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set());
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -477,6 +485,9 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       let targetYear = currentYear;
       let targetTerm = currentTerm;
       let targetScheduleId: string | null = null;
+
+      // Initialization logic uses local storage and the planner API; initial server data
+      // is already applied via useState initializers above, so no seeding is necessary here.
 
       // Check for existing schedules first
       const existingSchedules = loadSchedulesFromStorage();

@@ -1,6 +1,11 @@
 import { Suspense } from 'react';
 import CoursePlanner from "./CoursePlanner";
+import { plannerApi } from '@/lib/planner-api';
 import type { Metadata } from 'next';
+import type { LatestSemesterResponse, PlannerCourse, SemestersResponse } from '@/types/Planner2';
+
+// Revalidate this page every hour (seconds) so server fetches are rebuilt on ISR schedule
+export const revalidate = 3600;
 
 export async function generateMetadata({ 
   searchParams 
@@ -47,13 +52,41 @@ const PlannerPage = async ({ searchParams }: { searchParams: Promise<{ view?: st
   const params = await searchParams;
   const isScreenshotMode = params.view === 'screenshot';
 
+  // Fetch planner data at build / server time so it can be embedded into the page (ISR via planner-api)
+  // We prefer to fetch the latest semester, semesters list, courses for that semester, and an initial search result.
+  let initialSemesters: SemestersResponse | null = null;
+  let initialLatestSemester: LatestSemesterResponse | null = null;
+  let initialCourses: PlannerCourse[] | null = null;
+  let initialFilteredSections: string[] | null = null;
+
+  try {
+    initialSemesters = await plannerApi.getSemesters();
+    initialLatestSemester = await plannerApi.getLatestSemester();
+    if (initialLatestSemester && typeof (initialLatestSemester as LatestSemesterResponse).year === 'number') {
+      const { year, term } = initialLatestSemester as LatestSemesterResponse;
+      const coursesData = await plannerApi.getCoursesForSemester(year, term);
+      initialCourses = coursesData.courses as PlannerCourse[];
+  const searchResults = await plannerApi.searchSections('', year, term);
+  initialFilteredSections = searchResults.sections;
+    }
+  } catch (err) {
+    // If server fetches fail, we still render the page and CoursePlanner will fall back to client fetches
+    console.error('Server-side planner fetch failed:', err);
+  }
+
   return (
     <Suspense fallback={
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-lg">Loading...</div>
       </div>
     }>
-      <CoursePlanner isScreenshotMode={isScreenshotMode} />
+      <CoursePlanner
+        isScreenshotMode={isScreenshotMode}
+        initialSemesters={initialSemesters ?? undefined}
+        initialLatestSemester={initialLatestSemester ?? undefined}
+        initialCourses={initialCourses ?? undefined}
+        initialFilteredSections={initialFilteredSections ?? undefined}
+      />
     </Suspense>
   );
 };
