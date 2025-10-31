@@ -1181,7 +1181,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                 <tbody>
                   {section.schedule.map((schedule: Schedule, idx: number) => (
                     <React.Fragment key={idx}>
-                      { 
+                      {/* { 
                       (schedule.start || schedule.end) && (
                         <tr className="text-gray-500 align-top">
                           <td colSpan={4} className="w-full align-top text-left">
@@ -1195,7 +1195,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                           </td>
                         </tr>
                       )
-                      }
+                      } */}
                       <tr className="text-gray-500 align-top">
                         <td className="min-w-14 font-mono align-top">
                           {schedule.days}
