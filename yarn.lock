@@ -4204,7 +4204,7 @@ netmask@^2.0.2:
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-2.0.2.tgz#8b01a07644065d536383835823bc52004ebac5e7"
   integrity sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==
 
-next-plausible@^3.12.4:
+next-plausible@^3.12.5:
   version "3.12.5"
   resolved "https://registry.yarnpkg.com/next-plausible/-/next-plausible-3.12.5.tgz#e8776b59c014b52d4238d4cb72ca88c8c3115cf4"
   integrity sha512-l1YMuTI9akb2u7z4hyTuxXpudy8KfSteRNXCYpWpnhAoBjaWQlv6sITai1TwcR7wWvVW8DFbLubvMQAsirAjcA==
