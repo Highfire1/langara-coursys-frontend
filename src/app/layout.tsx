@@ -37,7 +37,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <PlausibleProvider domain="langaracourses.ca" customDomain="https://a.andersontseng.ca" selfHosted>
+        <PlausibleProvider domain="langaracourses.ca" customDomain="https://a.langaracourses.ca" selfHosted>
           {children}
         </PlausibleProvider>
         <GoogleAnalytics gaId="G-HV5V79FQ82" />
