@@ -1168,7 +1168,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
               className="hover:text-blue-700 hover:underline w-fit"
               prefetch={false}
             >
-              {section.subject} {section.course_code} {section.section}: {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || ''}
+              {section.subject} {section.course_code} {section.section}: {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.title || ''}
             </Link>
           </div>
           <div className="text-sm text-gray-600">
@@ -1323,7 +1323,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
               >
                 {semesters.map(semester => (
                   <option
-                    key={semester.id}
+                    key={`${semester.year}-${semester.term}`}
                     value={`${semester.year}-${semester.term}`}
                   >
                     {semester.year} {termToSeason(semester.term)}
@@ -1523,7 +1523,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                       {section.waitlist && section.waitlist !== " " && ` • Waitlist: ${section.waitlist}`}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.attributes?.title || 'Online Course'}
+                      {courses.find(c => c.subject === section.subject && c.course_code === section.course_code)?.title || 'Online Course'}
                     </div>
                     </div>
                   );

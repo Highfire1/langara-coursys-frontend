@@ -1,53 +1,20 @@
 // src/types/Course.ts
 import { Section } from "./Section";
 
-export interface CourseAttributes {
-    credits: number;
-    title: string;
-    desc_replacement_course: string;
-    description: string;
-    desc_duplicate_credit: string;
-    desc_registration_restriction: string;
-    desc_prerequisite: string;
-    hours_lecture: number;
-    hours_seminar: number;
-    hours_lab: number;
-    offered_online: boolean;
-    preparatory_course: boolean;
-    RP: string;
-    abbreviated_title: string;
-    add_fees: number;
-    rpt_limit: number;
-    attr_ar: boolean;
-    attr_sc: boolean;
-    attr_hum: boolean;
-    attr_lsc: boolean;
-    attr_sci: boolean;
-    attr_soc: boolean;
-    attr_ut: boolean;
-    first_offered_year: number;
-    first_offered_term: number;
-    last_offered_year: number;
-    last_offered_term: number;
-    active: boolean;
-    discontinued: boolean;
-    transfer_destinations: string;
-    on_langara_website: boolean;
-  }
-  
-  export interface Transfer {
-    id: string;
+export interface Transfer {
+    id: number;
+    sourceId?: number;
     source: string;
-    source_credits: number;
-    source_title: string;
+    sourceCredits: number;
+    sourceTitle: string;
     destination: string;
-    destination_name: string;
+    destinationName: string | null;
     credit: string;
-    condition: string;
-    effective_start: string;
-    effective_end: string;
+    condition: string | null;
+    effectiveStart: string;
+    effectiveEnd: string | null;
     subject: string;
-    course_code: string;
+    courseNumber: string;
   }
 
   export interface Outline {
@@ -60,7 +27,32 @@ export interface CourseAttributes {
     subject: string;
     course_code: string;
     id: string;
-    attributes: CourseAttributes;
+    title: string | null;
+    on_langara_website: boolean;
+    study_type: string | null;
+    credits: number;
+    lecture_hours: number;
+    seminar_hours: number;
+    lab_hours: number;
+    description: string | null;
+    desc_prerequisites: string | null;
+    desc_corequisites: string | null;
+    desc_degree_requirements: string | null;
+    desc_requisites_catalogue: string | null;
+    desc_replacement_course: string | null;
+    offered_online: boolean;
+    first_offered_year: number | null;
+    first_offered_term: number | null;
+    last_offered_year: number | null;
+    last_offered_term: number | null;
+    transfer_destinations: string | null;
+    // Fields that may be absent on some endpoints
+    abbreviated_title?: string | null;
+    preparatory_course?: boolean | null;
+    desc_duplicate_credit?: string | null;
+    desc_registration_restriction?: string | null;
+    // Nested course category attributes
+    attributes: V3CourseAttributes;
     sections: Section[];
     transfers: Transfer[];
     outlines: Outline[];
@@ -81,41 +73,39 @@ export interface CourseAttributes {
   }
 
   
-export interface CourseMax {
-  credits: number;
-  title: string;
-  desc_replacement_course: string;
-  description: string;
-  desc_duplicate_credit: string;
-  desc_registration_restriction: string;
-  desc_prerequisite: string;
-  hours_lecture: number;
-  hours_seminar: number;
-  hours_lab: number;
-  offered_online: boolean;
-  preparatory_course: boolean;
-  RP: string;
-  abbreviated_title: string;
-  add_fees: number;
-  rpt_limit: number;
-  attr_ar: boolean;
-  attr_sc: boolean;
+export interface V3CourseAttributes {
+  attr_2ar: boolean;
+  attr_2sc: boolean;
   attr_hum: boolean;
   attr_lsc: boolean;
   attr_sci: boolean;
   attr_soc: boolean;
   attr_ut: boolean;
-  first_offered_year: number;
-  first_offered_term: number;
-  last_offered_year: number;
-  last_offered_term: number;
-  on_langara_website: boolean;
-  discontinued: boolean;
-  transfer_destinations: string;
-  id: string;
+}
+
+export interface CourseMax {
   subject: string;
   course_code: string;
-  id_course: string;
+  title: string | null;
+  on_langara_website: boolean;
+  study_type: string | null;
+  credits: number;
+  lecture_hours: number;
+  seminar_hours: number;
+  lab_hours: number;
+  description: string | null;
+  desc_prerequisites: string | null;
+  desc_corequisites: string | null;
+  desc_degree_requirements: string | null;
+  desc_requisites_catalogue: string | null;
+  desc_replacement_course: string | null;
+  offered_online: boolean;
+  first_offered_year: number | null;
+  first_offered_term: number | null;
+  last_offered_year: number | null;
+  last_offered_term: number | null;
+  transfer_destinations: string | null;
+  attributes: V3CourseAttributes;
 }
 
 export interface CoursesResponse {
@@ -131,6 +121,7 @@ export interface CourseBrowserProps {
   transfers: TransferDestination[];
   subjects: string[];
   initialCourses: CourseMax[];
+  initialTotalCount: number;
   validCourses: string[];
 }
 export interface v1IndexTransfersResponse {
@@ -146,6 +137,10 @@ export interface v1IndexSubjectsResponse {
 }
 
 export interface v2SearchCoursesResponse {
+  page: number;
+  limit: number;
+  total_count: number;
+  total_pages: number;
   courses: CourseMax[];
 }
 

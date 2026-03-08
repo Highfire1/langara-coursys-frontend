@@ -8,7 +8,7 @@ import {
   Section
 } from '@/types/Planner2';
 
-const API_BASE = 'https://api.langaracourses.ca';
+const API_BASE = 'https://api2.langaracourses.ca/api/v3';
 
 // Revalidation time for ISR (in seconds). Adjust as needed.
 // Setting to 3600 (1 hour) by default.
@@ -17,8 +17,8 @@ const REVALIDATE_SECONDS = 3600;
 export const plannerApi = {
   // Get courses and sections for a specific semester
   getCoursesForSemester: async (year: number, term: number): Promise<PlannerApiResponse> => {
-  const coursesRes = await fetch(`${API_BASE}/v1/semester/${year}/${term}/courses`, { next: { revalidate: REVALIDATE_SECONDS } });
-  const sectionsRes = await fetch(`${API_BASE}/v1/semester/${year}/${term}/sections`, { next: { revalidate: REVALIDATE_SECONDS } });
+  const coursesRes = await fetch(`${API_BASE}/semester/${year}/${term}/courses`, { next: { revalidate: REVALIDATE_SECONDS } });
+  const sectionsRes = await fetch(`${API_BASE}/semester/${year}/${term}/sections`, { next: { revalidate: REVALIDATE_SECONDS } });
 
     const [coursesData, sectionsData]: [CoursesApiResponse, SectionsApiResponse] = await Promise.all([
       coursesRes.json(),
@@ -33,7 +33,7 @@ export const plannerApi = {
       if (!sectionsDict[key]) {
         sectionsDict[key] = [];
       }
-      sectionsDict[key].push(section);
+      sectionsDict[key].push({ ...section, id: section.crn.toString() });
     }
 
     // Add sections to courses
@@ -47,20 +47,23 @@ export const plannerApi = {
 
   // Get available semesters
   getSemesters: async (): Promise<SemestersResponse> => {
-    const response = await fetch(`${API_BASE}/v1/index/semesters`, { next: { revalidate: REVALIDATE_SECONDS } });
+    const response = await fetch(`${API_BASE}/index/semesters`, { next: { revalidate: REVALIDATE_SECONDS } });
     return response.json();
   },
 
   // Get latest semester
   getLatestSemester: async (): Promise<LatestSemesterResponse> => {
-    const response = await fetch(`${API_BASE}/v1/index/latest_semester`, { next: { revalidate: REVALIDATE_SECONDS } });
+    const response = await fetch(`${API_BASE}/index/latest_semester`, { next: { revalidate: REVALIDATE_SECONDS } });
     return response.json();
   },
 
   // Search sections
   searchSections: async (query: string, year: number, term: number): Promise<SectionsSearchResponse> => {
-    const response = await fetch(`${API_BASE}/v1/search/sections?query=${encodeURIComponent(query)}&year=${year}&term=${term}`, { next: { revalidate: REVALIDATE_SECONDS } });
-    return response.json();
+    const response = await fetch(`${API_BASE}/search/sections?query=${encodeURIComponent(query)}&year=${year}&term=${term}`, { next: { revalidate: REVALIDATE_SECONDS } });
+    const data = await response.json();
+    // v3 returns full section objects; map to crn strings used as IDs
+    const sections: string[] = (data.sections ?? []).map((s: { crn: number }) => s.crn.toString());
+    return { sections };
   }
 };
 

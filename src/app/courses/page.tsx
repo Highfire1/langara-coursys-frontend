@@ -21,7 +21,7 @@ const _courses: {
     }[];
     subject_count: number;
 } = await fetch(
-    'https://api.langaracourses.ca/v1/index/courses',
+    'https://api2.langaracourses.ca/api/v3/index/courses',
     {
         cache: 'force-cache',
         next: { revalidate: 1800 } // 30 minutes
@@ -35,17 +35,31 @@ const courseList = _courses.courses.map(
 
 export default async function Page() {
 
-  const [transfersRes, subjectsRes, coursesRes] = await Promise.all([
-    fetch('https://api.langaracourses.ca/v1/index/transfer_destinations'),
-    fetch('https://api.langaracourses.ca/v1/index/subjects'),
-    fetch('https://api.langaracourses.ca/v2/search/courses?on_langara_website=true'),
+  const [transfersRes, subjectsRes, firstPageRes] = await Promise.all([
+    fetch('https://api2.langaracourses.ca/api/v3/index/transfer_destinations'),
+    fetch('https://api2.langaracourses.ca/api/v3/index/subjects'),
+    fetch('https://api2.langaracourses.ca/api/v3/search/courses?on_langara_website=true&limit=200&page=1'),
   ]);
 
-  const [transfersData, subjectsData, coursesData] : [v1IndexTransfersResponse, v1IndexSubjectsResponse, v2SearchCoursesResponse] = await Promise.all([
+  const [transfersData, subjectsData, firstPageData] : [v1IndexTransfersResponse, v1IndexSubjectsResponse, v2SearchCoursesResponse] = await Promise.all([
     transfersRes.json(),
     subjectsRes.json(),
-    coursesRes.json(),
+    firstPageRes.json(),
   ]);
+
+  // Fetch remaining pages in parallel
+  const remainingPages = Array.from({ length: firstPageData.total_pages - 1 }, (_, i) => i + 2);
+  const remainingResults = await Promise.all(
+    remainingPages.map(page =>
+      fetch(`https://api2.langaracourses.ca/api/v3/search/courses?on_langara_website=true&limit=200&page=${page}`)
+        .then(r => r.json() as Promise<v2SearchCoursesResponse>)
+    )
+  );
+  const allCourses = [
+    ...firstPageData.courses,
+    ...remainingResults.flatMap(r => r.courses),
+  ];
+  const initialTotalCount = firstPageData.total_count;
 
   // always put ubc, sfu, uvic, and tru at the top of the list
   const transfers = [
@@ -53,7 +67,7 @@ export default async function Page() {
     ...transfersData.transfers.filter(t => !['UBCV', 'SFU', 'UVIC', 'TRU'].includes(t.code))
   ];
   const subjects = subjectsData.subjects;
-  const courses = coursesData.courses;
+  const courses = allCourses;
   
   return (
     <div className="w-full h-full">
@@ -61,7 +75,7 @@ export default async function Page() {
 
       <div className="lg:px-10">
         <Suspense fallback={<div>Loading...</div>}>
-          <CourseBrowser transfers={transfers} subjects={subjects} initialCourses={courses} validCourses={courseList}/>
+          <CourseBrowser transfers={transfers} subjects={subjects} initialCourses={courses} initialTotalCount={initialTotalCount} validCourses={courseList}/>
         </Suspense>
       </div>
     </div>

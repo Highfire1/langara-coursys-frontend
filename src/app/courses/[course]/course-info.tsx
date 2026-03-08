@@ -12,7 +12,7 @@ const _courses: {
     }[];
     subject_count: number;
 } = await fetch(
-    'https://api.langaracourses.ca/v1/index/courses',
+    'https://api2.langaracourses.ca/api/v3/index/courses',
     {
         cache: 'force-cache',
         next: { revalidate: 1800 } // 30 minutes
@@ -45,19 +45,19 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
     const validTransfers: Transfer[] = [];
     const oldTransfers: Transfer[] = [];
 
-    // show agreements that expired up to two years ago
-    const transferDateCutoff = new Date();
-    transferDateCutoff.setMonth(transferDateCutoff.getMonth() + 24);
+    const now = new Date();
+    const currentDateString = now.getFullYear().toString() +
+        (now.getMonth() + 1).toString().padStart(2, '0') +
+        now.getDate().toString().padStart(2, '0');
 
     course.transfers.forEach((transfer_agreement: Transfer) => {
-        if (transfer_agreement.effective_end == null || new Date(transfer_agreement.effective_end) > transferDateCutoff) {
+        if (!transfer_agreement.effectiveEnd || transfer_agreement.effectiveEnd >= currentDateString) {
             validTransfers.push(transfer_agreement);
         } else {
             oldTransfers.push(transfer_agreement);
         }
     });
 
-    course.sections = course.sections.reverse();
 
 
     if (!course) return <div>No course data found.</div>;
@@ -65,20 +65,20 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
     return (
         <div className="flex flex-col gap-2">
 
-            {!course.attributes.on_langara_website && (
+            {!course.on_langara_website && (
                 <div className='border-2 border-gray-200 rounded p-2 flex gap-2 flex-col bg-red-200'>
                     <p><strong>Warning: This course is not listed on the Langara website and is almost certainly discontinued.
 
-                        {course.attributes.last_offered_term ?
-                            ` It was last offered in the term of ${mapTerm(course.attributes.last_offered_term)} ${course.attributes.last_offered_year}` :
+                        {course.last_offered_term ?
+                            ` It was last offered in the term of ${mapTerm(course.last_offered_term!)} ${course.last_offered_year}` :
                             ' It was likely last offered before 1999'}</strong>.</p>
                 </div>
             )}
 
-            {course.attributes.on_langara_website && course.attributes.last_offered_year < new Date().getFullYear() - 5 &&
-                (course.attributes.last_offered_term !== null ? (
+            {course.on_langara_website && course.last_offered_year != null && course.last_offered_year < new Date().getFullYear() - 5 &&
+                (course.last_offered_term != null ? (
                     <div className='border-2 border-gray-200 rounded p-2 flex gap-2 flex-col bg-yellow-200'>
-                        <p>Warning: This course is listed on the Langara website, but it was last offered in the term of <strong>{mapTerm(course.attributes.last_offered_term)} {course.attributes.last_offered_year}</strong>.</p>
+                        <p>Warning: This course is listed on the Langara website, but it was last offered in the term of <strong>{mapTerm(course.last_offered_term)} {course.last_offered_year}</strong>.</p>
                     </div>
                 ) : (
                     <div className='border-2 border-gray-200 rounded p-2 flex gap-2 flex-col bg-yellow-200'>
@@ -90,13 +90,13 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
             {/* COURSE INFORMATION */}
             <div className='border-2 border-gray-200 rounded p-2 flex gap-2 flex-col'>
                 <h1 className="text-2xl font-bold">
-                    {course.attributes.on_langara_website ? (
+                    {course.on_langara_website ? (
                         <Link href={`https://langara.ca/programs-courses/${course.subject.toLowerCase()}-${course.course_code.toLowerCase()}`} className="text-[#f15a22] transition-colors duration-200 ease-in hover:text-black hover:underline">
-                            <p>{course.subject} {course.course_code}{course.attributes.title ? `: ${course.attributes.title}` : course.attributes.abbreviated_title ? `: ${course.attributes.abbreviated_title}` : ''}</p>
+                            <p>{course.subject} {course.course_code}{course.title ? `: ${course.title}` : course.abbreviated_title ? `: ${course.abbreviated_title}` : ''}</p>
 
                         </Link>
                     ) : (
-                        <p>{course.subject} {course.course_code}{course.attributes.title ? `: ${course.attributes.title}` : course.attributes.abbreviated_title ? `: ${course.attributes.abbreviated_title}` : ''}</p>
+                        <p>{course.subject} {course.course_code}{course.title ? `: ${course.title}` : course.abbreviated_title ? `: ${course.abbreviated_title}` : ''}</p>
                     )}
                 </h1>
 
@@ -105,11 +105,11 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                         <tr>
                             <th className='pr-4'>Course Format</th>
                             <td>
-                                {course.attributes.hours_lecture !== null && course.attributes.hours_seminar !== null && course.attributes.hours_lab !== null ? (
+                                {course.lecture_hours != null && course.seminar_hours != null && course.lab_hours != null ? (
                                     <>
-                                        Lecture {course.attributes.hours_lecture.toFixed(1)} h +
-                                        Seminar {course.attributes.hours_seminar.toFixed(1)} h +
-                                        Lab {course.attributes.hours_lab.toFixed(1)} h
+                                        Lecture {course.lecture_hours.toFixed(1)} h +
+                                        Seminar {course.seminar_hours.toFixed(1)} h +
+                                        Lab {course.lab_hours.toFixed(1)} h
                                     </>
                                 ) : 'N/A'}
                             </td>
@@ -117,30 +117,30 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
 
                         <tr>
                             <th>Credits</th>
-                            <td>{course.attributes.credits !== null ? course.attributes.credits.toFixed(1) : 'N/A'}</td>
+                            <td>{course.credits != null ? course.credits.toFixed(1) : 'N/A'}</td>
                         </tr>
                     </tbody>
                 </table>
 
                 {/* <h2 className="text-xl pt-2 pb-1">Course Description</h2> */}
                 <div className='flex flex-col gap-2'>
-                    {course.attributes.description ? (
-                        <p>{addLinksToCourseDescription(course.attributes.description, courseList)}</p>
+                    {course.description ? (
+                        <p>{addLinksToCourseDescription(course.description, courseList)}</p>
                     ) : (
                         <p>No description available for this course</p>
                     )}
 
 
-                    {course.attributes.desc_duplicate_credit && (
-                        <p>{addLinksToCourseDescription(course.attributes.desc_duplicate_credit, courseList)}</p>
+                    {course.desc_duplicate_credit && (
+                        <p>{addLinksToCourseDescription(course.desc_duplicate_credit, courseList)}</p>
                     )}
 
-                    {course.attributes.desc_registration_restriction && (
-                        <p>{addLinksToCourseDescription(course.attributes.desc_registration_restriction, courseList)}</p>
+                    {course.desc_registration_restriction && (
+                        <p>{addLinksToCourseDescription(course.desc_registration_restriction, courseList)}</p>
                     )}
 
-                    {course.attributes.desc_prerequisite && (
-                        <p>{addLinksToCourseDescription(course.attributes.desc_prerequisite, courseList )}</p>
+                    {course.desc_prerequisites && (
+                        <p>{addLinksToCourseDescription(course.desc_prerequisites, courseList)}</p>
                     )}
                 </div>
 
@@ -155,11 +155,11 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
 
                             <tr>
                                 <th>2nd Year Arts</th>
-                                <td className={`min-w-[50px] ${course.attributes.attr_ar ? 'bg-green-500' : ''}`}>{course.attributes.attr_ar === null ? '' : course.attributes.attr_ar ? 'Yes' : 'No'}</td>
+                                <td className={`min-w-[50px] ${course.attributes.attr_2ar ? 'bg-green-500' : ''}`}>{course.attributes.attr_2ar === null ? '' : course.attributes.attr_2ar ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr>
                                 <th>2nd Year Science</th>
-                                <td className={course.attributes.attr_sc ? 'bg-green-500' : ''}>{course.attributes.attr_sc === null ? '' : course.attributes.attr_sc ? 'Yes' : 'No'}</td>
+                                <td className={course.attributes.attr_2sc ? 'bg-green-500' : ''}>{course.attributes.attr_2sc === null ? '' : course.attributes.attr_2sc ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr>
                                 <th>Humanities</th>
@@ -193,15 +193,15 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
 
                             <tr className="align-top">
                                 <th>Offered online:</th>
-                                <td className="min-w-[200px]">{course.attributes.offered_online === null ? 'Unknown' : course.attributes.offered_online ? 'Yes' : 'No'}</td>
+                                <td className="min-w-[200px]">{course.offered_online == null ? 'Unknown' : course.offered_online ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr className="align-top">
                                 <th>Preparatory course:</th>
-                                <td className="min-w-[200px]">{course.attributes.preparatory_course === null ? 'Unknown' : course.attributes.preparatory_course ? 'Yes' : 'No'}</td>
+                                <td className="min-w-[200px]">{course.preparatory_course == null ? 'Unknown' : course.preparatory_course ? 'Yes' : 'No'}</td>
                             </tr>
                             <tr className="align-top">
                                 <th>Repeat limit</th>
-                                <td className="min-w-[200px]">{course.attributes.rpt_limit}</td>
+                                <td className="min-w-[200px]">{course.sections[0]?.rpt_limit ?? 'N/A'}</td>
                             </tr>
                             {/* <tr className="align-top">
                                 <th className='pr-4'>Also known as:</th>
@@ -209,30 +209,30 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                             </tr> */}
                             <tr className="align-top">
                                 <th className='pr-4'>Additional fees:</th>
-                                <td className="min-w-[200px]">{course.attributes.add_fees ? `$${course.attributes.add_fees}` : ''}</td>
+                                <td className="min-w-[200px]">{course.sections[0]?.add_fees ? `$${course.sections[0]?.add_fees}` : ''}</td>
                             </tr>
                             <tr className="align-top">
                                 <th>First offered:</th>
-                                <td>{mapTerm(course.attributes.first_offered_term)} {course.attributes.first_offered_year}</td>
+                                <td>{course.first_offered_term != null ? mapTerm(course.first_offered_term) : ''} {course.first_offered_year ?? ''}</td>
                             </tr>
-                            <tr className={`align-top ${course.attributes.last_offered_year < new Date().getFullYear() - 5 ? 'bg-red-200' : ''}`}>
+                            <tr className={`align-top ${course.last_offered_year != null && course.last_offered_year < new Date().getFullYear() - 5 ? 'bg-red-200' : ''}`}>
                                 <th>Last offered:</th>
-                                <td>{mapTerm(course.attributes.last_offered_term)} {course.attributes.last_offered_year}</td>
+                                <td>{course.last_offered_term != null ? mapTerm(course.last_offered_term) : ''} {course.last_offered_year ?? ''}</td>
                             </tr>
 
                             <tr className="align-top">
                                 <th className='pr-4'>Registration<br></br>restrictions:</th>
-                                <td className="min-w-[200px]">{course.attributes.RP ? course.attributes.RP : ""}</td>
+                                <td className="min-w-[200px]">{course.sections[0]?.rp ?? course.sections[0]?.RP ?? ''}</td>
                             </tr>
 
                             <tr className="align-top">
                                 <th>Outline(s):</th>
                                 <td>
                                     {course.outlines.length > 0 ? (
-                                        course.outlines.map((outline) => (
+                                        course.outlines.map((outline, i) => (
                                             // unfortunately langara evaporated all of the example outlines, so we have to use the wayback machine
                                             <Link 
-                                                key={outline.id} 
+                                                key={outline.id ?? i} 
                                                 href={`https://web.archive.org/web/*/${outline.url}`} className="text-blue-600 hover:text-blue-800 underline"
                                                 target="_blank">
                                                 <p>{outline.file_name}</p>
@@ -285,14 +285,14 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                                                     // Handle cases like "UBCV CPSC_V 1st (3)"
                                                     const creditMatch = transfer.credit.match(/\((\d+)\)/);
                                                     const destinationCredits = creditMatch ? parseInt(creditMatch[1]) : 0;
-                                                    return destinationCredits < transfer.source_credits ? 'bg-yellow-200' : '';
+                                                    return destinationCredits < transfer.sourceCredits ? 'bg-yellow-200' : '';
                                                 }
                                             })()
                                             }`}>
-                                            <td>{transfer.subject} {transfer.course_code}</td>
-                                            <td>{transfer.destination_name.length > 35 ? transfer.destination : transfer.destination_name}</td>
+                                            <td>{transfer.subject} {transfer.courseNumber}</td>
+                                            <td>{(transfer.destinationName?.length ?? 0) > 35 ? transfer.destination : (transfer.destinationName ?? transfer.destination)}</td>
                                             <td>{transfer.credit} {transfer.condition}</td>
-                                            <td>{transfer.effective_start}{transfer.effective_end ? ` to ${transfer.effective_end}` : ' to present'}</td>
+                                            <td>{transfer.effectiveStart}{transfer.effectiveEnd ? ` to ${transfer.effectiveEnd}` : ' to present'}</td>
                                         </tr>
                                     ))
                                 )}
@@ -325,12 +325,12 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                                 ) : (
                                     oldTransfers.map((transfer) => (
                                         <tr key={transfer.id} className='align-top bg-red-200'>
-                                            <td>{transfer.subject} {transfer.course_code}</td>
-                                            <td>{transfer.destination_name.length > 35 ? transfer.destination : transfer.destination_name}</td>
+                                            <td>{transfer.subject} {transfer.courseNumber}</td>
+                                            <td>{(transfer.destinationName?.length ?? 0) > 35 ? transfer.destination : (transfer.destinationName ?? transfer.destination)}</td>
 
                                             <td>{transfer.credit} {transfer.condition}</td>
 
-                                            <td>{transfer.effective_start}{transfer.effective_end ? ` to ${transfer.effective_end}` : ' to present'}</td>
+                                            <td>{transfer.effectiveStart}{transfer.effectiveEnd ? ` to ${transfer.effectiveEnd}` : ' to present'}</td>
                                         </tr>
                                     ))
                                 )}
@@ -363,9 +363,9 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
                                 <td colSpan={10} className="text-center">No offerings found.</td>
                             </tr>
                         ) : (
-                            course.sections.map((section) => (
+                            course.sections.flatMap((section) => (
                                 section.schedule.map((schedule, index) => (
-                                    <tr key={`${section.id}-${index}`} className={`
+                                    <tr key={`${section.crn}-${section.year}-${section.term}-${index}`} className={`
                                         ${section.term === 10 ? 'bg-green-100' : ''}
                                         ${section.term === 20 ? 'bg-yellow-100' : ''}
                                         ${section.term === 30 ? 'bg-orange-100' : ''}

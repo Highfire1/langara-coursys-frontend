@@ -31,7 +31,7 @@ export default function Composer() {
         } else {
             const fetchLatestSemester = async () => {
                 try {
-                    const latestSemesterResponse = await fetch(`https://api.langaracourses.ca/v1/index/latest_semester`);
+                    const latestSemesterResponse = await fetch(`https://api2.langaracourses.ca/api/v3/index/latest_semester`);
                     const latestSemesterData: LatestSemesterResponse = await latestSemesterResponse.json();
 
                     setYear(String(latestSemesterData.year));
@@ -51,8 +51,8 @@ export default function Composer() {
         const fetchData = async () => {
             try {
                 const [coursesResponse, sectionsResponse] = await Promise.all([
-                    fetch(`https://api.langaracourses.ca/v1/semester/${year}/${term}/courses`),
-                    fetch(`https://api.langaracourses.ca/v1/semester/${year}/${term}/sections`)
+                    fetch(`https://api2.langaracourses.ca/api/v3/semester/${year}/${term}/courses`),
+                    fetch(`https://api2.langaracourses.ca/api/v3/semester/${year}/${term}/sections`)
                 ]);
 
                 if (coursesResponse.status !== 200 || sectionsResponse.status !== 200) {
@@ -65,10 +65,13 @@ export default function Composer() {
                 const sectionsData: SectionsResponse = await sectionsResponse.json();
 
                 coursesData.courses.forEach(course => {
-                    course.sections = sectionsData.sections.filter(
-                        section =>
-                            section.subject === course.subject && section.course_code === course.course_code
-                    );
+                    course.id = `${course.subject}-${course.course_code}`;
+                    course.sections = sectionsData.sections
+                        .filter(
+                            section =>
+                                section.subject === course.subject && section.course_code === course.course_code
+                        )
+                        .map(section => ({ ...section, id: section.crn.toString() }));
                 });
 
                 if (!searchParams.get('year') || !searchParams.get('term')) {

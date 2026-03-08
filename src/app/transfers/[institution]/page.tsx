@@ -3,18 +3,19 @@ import Header from "@/components/shared/header";
 import TransferTable from "@/app/transfers/[institution]/TransferTable";
 
 interface Transfer {
-  id: string;
+  id: number;
+  sourceId?: number;
   source: string;
-  source_credits: string;
-  source_title: string;
+  sourceCredits: number;
+  sourceTitle: string;
   destination: string;
-  destination_name: string;
+  destinationName: string | null;
   credit: string;
   condition: string | null;
-  effective_start: string;
-  effective_end: string | null;
+  effectiveStart: string;
+  effectiveEnd: string | null;
   subject: string;
-  course_code: string;
+  courseNumber: string;
 }
 
 interface TransferResponse {
@@ -36,7 +37,7 @@ export default async function InstitutionTransfersPage({ params }: { params: Exp
   const { institution } = await params;
   
   // Fetch transfer data
-  const response = await fetch(`https://api.langaracourses.ca/v1/transfers/${institution.toUpperCase()}`, {
+  const response = await fetch(`https://api2.langaracourses.ca/api/v3/transfers/${institution.toUpperCase()}`, {
     next: { revalidate: 3600 } // Cache for 1 hour
   });
 
@@ -68,35 +69,35 @@ export default async function InstitutionTransfersPage({ params }: { params: Exp
     fiveYearsAgo.getDate().toString().padStart(2, '0');
 
   const activeTransfers = data.transfers.filter(transfer => 
-    !transfer.effective_end || transfer.effective_end >= currentDateString
+    !transfer.effectiveEnd || transfer.effectiveEnd >= currentDateString
   );
   
   const recentlyEndedTransfers = data.transfers.filter(transfer => 
-    transfer.effective_end && 
-    transfer.effective_end < currentDateString && 
-    transfer.effective_end >= fiveYearsAgoString
+    transfer.effectiveEnd && 
+    transfer.effectiveEnd < currentDateString && 
+    transfer.effectiveEnd >= fiveYearsAgoString
   );
 
   const oldEndedTransfers = data.transfers.filter(transfer => 
-    transfer.effective_end && transfer.effective_end < fiveYearsAgoString
+    transfer.effectiveEnd && transfer.effectiveEnd < fiveYearsAgoString
   );
 
   // Sort transfers by subject and course code
   const sortedActiveTransfers = activeTransfers.sort((a, b) => {
-    const aKey = `${a.subject} ${a.course_code}`;
-    const bKey = `${b.subject} ${b.course_code}`;
+    const aKey = `${a.subject} ${a.courseNumber}`;
+    const bKey = `${b.subject} ${b.courseNumber}`;
     return aKey.localeCompare(bKey);
   });
 
   const sortedRecentlyEndedTransfers = recentlyEndedTransfers.sort((a, b) => {
-    const aKey = `${a.subject} ${a.course_code}`;
-    const bKey = `${b.subject} ${b.course_code}`;
+    const aKey = `${a.subject} ${a.courseNumber}`;
+    const bKey = `${b.subject} ${b.courseNumber}`;
     return aKey.localeCompare(bKey);
   });
 
   const sortedOldEndedTransfers = oldEndedTransfers.sort((a, b) => {
-    const aKey = `${a.subject} ${a.course_code}`;
-    const bKey = `${b.subject} ${b.course_code}`;
+    const aKey = `${a.subject} ${a.courseNumber}`;
+    const bKey = `${b.subject} ${b.courseNumber}`;
     return aKey.localeCompare(bKey);
   });
 
@@ -107,7 +108,7 @@ export default async function InstitutionTransfersPage({ params }: { params: Exp
       <div className="px-4 md:px-10 py-4">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Transfer Credits to {data.transfers[0]?.destination_name || institution.toUpperCase()}
+            Transfer Credits to {data.transfers[0]?.destinationName || institution.toUpperCase()}
           </h1>
           <p className="text-gray-600">
             Found {data.transfers.length} transfer agreement{data.transfers.length !== 1 ? 's ' : ' '} 

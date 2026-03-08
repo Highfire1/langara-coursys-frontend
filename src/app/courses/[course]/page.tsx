@@ -13,23 +13,23 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
     const { course: courseParam } = await params;
 
     const [subject, coursecode] = courseParam.toUpperCase().split("-");
-    const courseRes = await fetch(`https://api.langaracourses.ca/v1/courses/${subject}/${coursecode}`);
+    const courseRes = await fetch(`https://api2.langaracourses.ca/api/v3/courses/${subject}/${coursecode}`);
 
     if (!courseRes.ok) { return { title: `Error ${courseRes.status}`}}
 
     const course: Course = await courseRes.json();
 
     let titleText;
-    if (course.attributes.title)
-        titleText = `: ${course.attributes.title}`;
-    else if (course.attributes.abbreviated_title)
-        titleText = `: ${course.attributes.abbreviated_title}`;
+    if (course.title)
+        titleText = `: ${course.title}`;
+    else if (course.abbreviated_title)
+        titleText = `: ${course.abbreviated_title}`;
     else 
         titleText = "";
 
     let description;
-    if (course.attributes.description)
-        description = course.attributes.description;
+    if (course.description)
+        description = course.description;
     else
         description = "No description available.";
 
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
 // }
 
 // export async function generateStaticParams() {
-//     const courses: CourseIndexList = await fetch('https://api.langaracourses.ca/v1/index/courses').then((res) =>
+//     const courses: CourseIndexList = await fetch('https://api2.langaracourses.ca/api/v3/index/courses').then((res) =>
 //       res.json()
 //     )
 
@@ -88,7 +88,7 @@ export default async function Page( {params}: {params: expectedParams} ) {
     }
 
     const [subject, coursecode] = course.toUpperCase().split("-");
-    const response = await fetch(`https://api.langaracourses.ca/v1/courses/${subject}/${coursecode}`);
+    const response = await fetch(`https://api2.langaracourses.ca/api/v3/courses/${subject}/${coursecode}`);
     
     if (!response.ok) {
         notFound();

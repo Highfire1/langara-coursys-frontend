@@ -17,7 +17,7 @@ export default async function RedirectPage({ params }: { params: ExpectedParams 
     const { course: subject, redirect: code } = await params;
     
     // Fetch courses at runtime instead of build time
-    const res = await fetch('https://api.langaracourses.ca/v1/index/courses', { 
+    const res = await fetch('https://api2.langaracourses.ca/api/v3/index/courses', { 
         next: { revalidate: 86400 }
     });
     const data: { courses: c_index[] } = await res.json();

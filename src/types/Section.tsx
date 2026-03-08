@@ -13,12 +13,15 @@ export interface Schedule {
 
 export interface Section {
     RP: string;
+    rp?: string;
     abbreviated_title: string;
     course_code: string;
     credits: number;
     crn: number;
     id: string;
     rpt_limit: number;
+    add_fees?: number | null;
+    notes?: string | null;
     schedule: Schedule[]; // Adjust type if you have a specific structure for schedule
     seats: string;
     waitlist: string;

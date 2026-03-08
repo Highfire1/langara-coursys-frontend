@@ -80,12 +80,12 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
               <CommandGroup>
                 {courses.map((course) => (
                   <CommandItem
-                    key={course.id}
-                    value={`${course.id} ${course.attributes.title}`}
+                    key={`${course.subject}-${course.course_code}`}
+                    value={`${course.subject}-${course.course_code} ${course.title}`}
                     onSelect={onCourseSelect}
-                    className={!selectedCourses.some(selectedCourse => selectedCourse.id === course.id) ? "" : "hidden"}
+                    className={!selectedCourses.some(selectedCourse => selectedCourse.id === `${course.subject}-${course.course_code}`) ? "" : "hidden"}
                   >
-                    {`${course.subject} ${course.course_code} - ${course.attributes.title}`}
+                    {`${course.subject} ${course.course_code} - ${course.title}`}
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -119,9 +119,9 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
 
                 <Link href={`/courses/${course.subject.toLowerCase()}-${course.course_code.toLowerCase()}`} className='font-semibold hover:text-orange-700 hover:underline' target='_blank'>
-                  {`${course.subject} ${course.course_code}: ${course.attributes.abbreviated_title}`}
+                  {`${course.subject} ${course.course_code}: ${course.abbreviated_title}`}
                 </Link>
-                <p className='text-sm'>{course.attributes.title} ({course.attributes.credits} credits)</p>
+                <p className='text-sm'>{course.title} ({course.credits} credits)</p>
 
                 <div className='sm:grid sm:grid-cols-[1fr_2fr_1fr] sm:text-base flex flex-col text-sm'>
                   <button

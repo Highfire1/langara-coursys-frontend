@@ -5,20 +5,20 @@ import { CourseMax } from '@/types/Course'
 import Link from 'next/link'
 import { JSX, useState, useEffect } from 'react';
 
-const termToSeason = (term: number): string => {
-    switch (term) {
-        case 10: return 'Spring';
-        case 20: return 'Summer';
-        case 30: return 'Fall';
-        default: return 'Unknown';
-    }
-};
-
 interface CourseListProps {
     loading: boolean;
     courses: CourseMax[];
     validCourses: string[];
 }
+
+const mapTerm = (term: number): string => {
+    switch (term) {
+        case 10: return 'Spring';
+        case 20: return 'Summer';
+        case 30: return 'Fall';
+        default: return term.toString();
+    }
+};
 
 export default function CourseList({ loading, courses, validCourses }: CourseListProps): JSX.Element {
     const [visibleCourses, setVisibleCourses] = useState<CourseMax[]>([]);
@@ -82,7 +82,7 @@ export default function CourseList({ loading, courses, validCourses }: CourseLis
                         </tr>
                     ) : (
                         visibleCourses.map(course => (
-                            <tr key={course.id} className={`border-b align-top ${course.on_langara_website ? '' : 'bg-red-200'}`}>
+                            <tr key={`${course.subject}-${course.course_code}`} className={`border-b align-top ${course.on_langara_website ? '' : 'bg-red-200'}`}>
                                 <td className={`p-2 break-words text-white text-center ${course.on_langara_website ? 'bg-green-800' : 'bg-red-600'}`}></td>
                                 <td className="p-2 break-words">
                                     <Link className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={`/courses/${course.subject.toLowerCase()}-${course.course_code.toLowerCase()}`}
@@ -91,33 +91,25 @@ export default function CourseList({ loading, courses, validCourses }: CourseLis
                                     >
                                         {course.subject} {course.course_code}
                                     </Link>
-                                    <p>{course.title ? course.title : course.abbreviated_title}</p>
+                                    <p>{course.title}</p>
                                 </td>
                                 <td className="p-2 break-words">{course.credits ? course.credits.toFixed(1) : ""}</td>
-                                <td className={`p-2 break-words ${course.attr_ar ? 'bg-green-800 text-white text-center' : ''}`}>{course.attr_ar ? '✓' : ''}</td>
-                                <td className={`p-2 break-words ${course.attr_sc ? 'bg-green-800 text-white text-center' : ''}`}>{course.attr_sc ? '✓' : ''}</td>
-                                <td className={`p-2 break-words ${course.attr_hum ? 'bg-green-800 text-white text-center' : ''}`}>{course.attr_hum ? '✓' : ''}</td>
-                                <td className={`p-2 break-words ${course.attr_lsc ? 'bg-green-800 text-white text-center' : ''}`}>{course.attr_lsc ? '✓' : ''}</td>
-                                <td className={`p-2 break-words ${course.attr_sci ? 'bg-green-800 text-white text-center' : ''}`}>{course.attr_sci ? '✓' : ''}</td>
-                                <td className={`p-2 break-words ${course.attr_soc ? 'bg-green-800 text-white text-center' : ''}`}>{course.attr_soc ? '✓' : ''}</td>
-                                <td className={`p-2 break-words ${course.attr_ut ? 'bg-green-800 text-white text-center' : ''}`}>{course.attr_ut ? '✓' : ''}</td>
-                                <td className={`p-2 break-words ${course.offered_online ? 'bg-green-800 text-white text-center' : ''}`}>{course.offered_online ? '✓' : ''}</td>
-                                <td className="p-2 break-words text-sm">
-                                    {course.first_offered_year ? `${termToSeason(course.first_offered_term)} ${course.first_offered_year}` : "???"}
-                                </td>
-                                <td className={`p-2 break-words text-sm ${course.last_offered_year < 2021 ? 'bg-red-200' : ''}`}>
-                                    {course.first_offered_year ? `${termToSeason(course.last_offered_term)} ${course.last_offered_year}` : "???"}
-                                </td>
+                                <td className={`p-2 break-words ${course.attributes?.attr_2ar ? 'bg-green-800 text-white text-center' : ''}`}>{course.attributes?.attr_2ar ? '✓' : ''}</td>
+                                <td className={`p-2 break-words ${course.attributes?.attr_2sc ? 'bg-green-800 text-white text-center' : ''}`}>{course.attributes?.attr_2sc ? '✓' : ''}</td>
+                                <td className={`p-2 break-words ${course.attributes?.attr_hum ? 'bg-green-800 text-white text-center' : ''}`}>{course.attributes?.attr_hum ? '✓' : ''}</td>
+                                <td className={`p-2 break-words ${course.attributes?.attr_lsc ? 'bg-green-800 text-white text-center' : ''}`}>{course.attributes?.attr_lsc ? '✓' : ''}</td>
+                                <td className={`p-2 break-words ${course.attributes?.attr_sci ? 'bg-green-800 text-white text-center' : ''}`}>{course.attributes?.attr_sci ? '✓' : ''}</td>
+                                <td className={`p-2 break-words ${course.attributes?.attr_soc ? 'bg-green-800 text-white text-center' : ''}`}>{course.attributes?.attr_soc ? '✓' : ''}</td>
+                                <td className={`p-2 break-words ${course.attributes?.attr_ut ? 'bg-green-800 text-white text-center' : ''}`}>{course.attributes?.attr_ut ? '✓' : ''}</td>
+                                <td className={`p-2 break-words text-center ${course.offered_online ? 'bg-green-800 text-white' : ''}`}>{course.offered_online ? '✓' : ''}</td>
+                                <td className="p-2 break-words text-sm">{course.first_offered_term != null ? `${mapTerm(course.first_offered_term)} ${course.first_offered_year}` : ''}</td>
+                                <td className="p-2 break-words text-sm">{course.last_offered_term != null ? `${mapTerm(course.last_offered_term)} ${course.last_offered_year}` : ''}</td>
                                 <td className="p-2 break-words flex flex-col gap-2 text-sm">
-                                    {course.desc_registration_restriction && <span>{course.desc_registration_restriction}</span>}
                                     <span>{course.description ? addLinksToCourseDescription(course.description, validCourses) : "No description available."}</span>
-                                    {course.desc_prerequisite && <span>{addLinksToCourseDescription(course.desc_prerequisite, validCourses)}</span>}
-                                    {course.desc_duplicate_credit && <span>{addLinksToCourseDescription(course.desc_duplicate_credit, validCourses)}</span>}
+                                    {course.desc_prerequisites && <span>{addLinksToCourseDescription(course.desc_prerequisites, validCourses)}</span>}
                                     {course.desc_replacement_course && <span>{addLinksToCourseDescription(course.desc_replacement_course, validCourses)}</span>}
                                 </td>
-                                <td className="p-2 break-words text-sm">
-                                    {course.transfer_destinations ? course.transfer_destinations.slice(1, -1).replaceAll(",", ", ") : ""}
-                                </td>
+                                <td className="p-2 break-words text-sm">{course.transfer_destinations ?? ''}</td>
                             </tr>
                         ))
                     )}

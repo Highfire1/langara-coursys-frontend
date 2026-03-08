@@ -7,7 +7,6 @@ import Link from 'next/link';
 interface Semester {
     term: number;
     year: number;
-    id: string;
 }
 
 interface SemestersResponse {
@@ -39,13 +38,13 @@ interface Section {
     year: number;
     seats: string;
     waitlist: string;
-    schedule: Schedule[];
+    schedule?: Schedule[];
 }
 
 interface SectionsResponse {
     page: number;
     sections_per_page: number;
-    total_sections: number;
+    total_count: number;
     total_pages: number;
     sections: Section[];
 }
@@ -104,8 +103,8 @@ export default function CourseBrowser() {
     useEffect(() => {
         const fetchInitialData = async () => {
             const [semestersRes, subjectsRes] = await Promise.all([
-                fetch('https://api.langaracourses.ca/v1/index/semesters'),
-                fetch('https://api.langaracourses.ca/v1/index/subjects')
+                fetch('https://api2.langaracourses.ca/api/v3/index/semesters'),
+                fetch('https://api2.langaracourses.ca/api/v3/index/subjects')
             ]);
 
             const semestersData = await semestersRes.json();
@@ -134,7 +133,7 @@ export default function CourseBrowser() {
 
                 const start = performance.now();
                 const response = await fetch(
-                    `https://api.langaracourses.ca/v2/search/sections?${queryParams}`
+                    `https://api2.langaracourses.ca/api/v3/search/sections/advanced?${queryParams}`
                 );
                 const data = await response.json();
 
@@ -419,8 +418,8 @@ export default function CourseBrowser() {
                         <div className="flex-1 text-right md:text-center">
                             <span className='md:text-nowrap'>
                                 Showing {((Number(searchParams.page) || 1) - 1) * Number(searchParams.sections_per_page) + 1} to{' '}
-                                {Math.min((Number(searchParams.page) || 1) * Number(searchParams.sections_per_page), sections.total_sections)}{' '}
-                                of <span className='font-semibold'>{sections.total_sections.toLocaleString()}</span> course sections
+                                {Math.min((Number(searchParams.page) || 1) * Number(searchParams.sections_per_page), sections.total_count)}{' '}
+                                of <span className='font-semibold'>{sections.total_count.toLocaleString()}</span> course sections
                             </span>
                         </div>
 
@@ -458,15 +457,16 @@ export default function CourseBrowser() {
                                 </tr>
                             ))
                         ) : (
-                            sections?.sections.map(section => (
-                                <tr key={section.id} className={` even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors`}>
+                            sections?.sections
+                                .map(section => (
+                                <tr key={`${section.crn}-${section.year}-${section.term}`} className={` even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors`}>
                                     <td className="p-2">{`${termToSeason(section.term)} ${section.year}`}</td>
                                     <td className="p-2 text-blue-700"><Link prefetch={false} target='_blank' href={`/courses/${section.subject.toLowerCase()}-${section.course_code.toLowerCase()}`}>{section.subject} {section.course_code}</Link></td>
                                     <td className="p-2">{section.section}</td>
                                     <td className="p-2">{section.crn}</td>
                                     <td className="p-2">{section.abbreviated_title}</td>
                                     <td className="p-2">
-                                        {section.schedule
+                                        {(section.schedule ?? [])
                                             .filter(schedule => schedule.type !== "Exam")
                                             .map(schedule => schedule.instructor)
                                             .filter((instructor, index, self) => self.indexOf(instructor) === index) // Remove duplicates
@@ -475,7 +475,7 @@ export default function CourseBrowser() {
                                     <td className="p-2 w-1/12">{section.seats}</td>
                                     <td className="p-2 w-1/12">{section.waitlist}</td>
                                     <td className="p-2 w-1/12">
-                                        {section.schedule
+                                        {(section.schedule ?? [])
                                             .filter(schedule => schedule.type !== "Exam")
                                             .map(schedule => schedule.room)
                                             .filter((room, index, self) => self.indexOf(room) === index) // Remove duplicates

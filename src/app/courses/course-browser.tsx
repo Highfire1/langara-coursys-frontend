@@ -19,8 +19,8 @@ interface SearchParams {
     subject?: string;
     course_code?: string;
     title_search?: string;
-    attr_ar?: boolean;
-    attr_sc?: boolean;
+    attr_2ar?: boolean;
+    attr_2sc?: boolean;
     attr_hum?: boolean;
     attr_lsc?: boolean;
     attr_sci?: boolean;
@@ -32,20 +32,20 @@ interface SearchParams {
     transfer_destinations?: string[];
 }
 
-export default function CourseBrowser({ transfers, subjects, initialCourses, validCourses }: CourseBrowserProps) {
+export default function CourseBrowser({ transfers, subjects, initialCourses, initialTotalCount, validCourses }: CourseBrowserProps) {
     const searchParams = useSearchParams();
 
     // const [transfer_destinations, setDestinations] = useState<TransfersResponse>(transfers);
     const [courses, setCourses] = useState<CourseMax[] | null>(null);
     const [loading, setLoading] = useState(true);
-    const [requestInfo, setRequestInfo] = useState<{ time?: number; cached?: boolean }>({});
+    const [requestInfo, setRequestInfo] = useState<{ time?: number; cached?: boolean; totalCount?: number }>({});
 
     const initialSearchParams: SearchParams = {
         subject: searchParams.get('subject') || '',
         course_code: searchParams.get('course_code') || '',
         title_search: searchParams.get('title_search') || '',
-        attr_ar: searchParams.get('attr_ar') === 'true',
-        attr_sc: searchParams.get('attr_sc') === 'true',
+        attr_2ar: searchParams.get('attr_2ar') === 'true',
+        attr_2sc: searchParams.get('attr_2sc') === 'true',
         attr_hum: searchParams.get('attr_hum') === 'true',
         attr_lsc: searchParams.get('attr_lsc') === 'true',
         attr_sci: searchParams.get('attr_sci') === 'true',
@@ -79,21 +79,27 @@ export default function CourseBrowser({ transfers, subjects, initialCourses, val
                         const data = initialCourses
                         setCourses(data);
                         setLoading(false);
-                        setRequestInfo({ });
+                        setRequestInfo({ totalCount: initialTotalCount });
                         return
                     }
 
                     console.log("CALLED API")
 
+                    queryParams.append('limit', '2000');
+
                     const start = performance.now();
                     const response = await fetch(
-                        `https://api.langaracourses.ca/v2/search/courses?${queryParams}`
+                        `https://api2.langaracourses.ca/api/v3/search/courses?${queryParams}`
                     );
                     const dataRes: v2SearchCoursesResponse = await response.json();
                     const cached = response.headers.get('x-fastapi-cache') === 'HIT';
                     const time = Math.round(performance.now() - start);
 
-                    setRequestInfo({ time, cached });
+                    if (!dataRes.courses) {
+                        console.error('courses field missing from API response:', dataRes);
+                    }
+
+                    setRequestInfo({ time, cached, totalCount: dataRes.total_count });
                     setCourses(dataRes.courses);
                     setLoading(false);
                 },
@@ -221,8 +227,8 @@ export default function CourseBrowser({ transfers, subjects, initialCourses, val
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
-                                    checked={currentSearchParams.attr_ar || false}
-                                    onChange={e => handleInputChange('attr_ar', e.target.checked)}
+                                    checked={currentSearchParams.attr_2ar || false}
+                                    onChange={e => handleInputChange('attr_2ar', e.target.checked)}
                                     className="rounded"
                                 />
                                 <span>2nd Year Arts (2AR)</span>
@@ -230,8 +236,8 @@ export default function CourseBrowser({ transfers, subjects, initialCourses, val
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
-                                    checked={currentSearchParams.attr_sc || false}
-                                    onChange={e => handleInputChange('attr_sc', e.target.checked)}
+                                    checked={currentSearchParams.attr_2sc || false}
+                                    onChange={e => handleInputChange('attr_2sc', e.target.checked)}
                                     className="rounded"
                                 />
                                 <span>2nd Year Science (2SC)</span>
@@ -363,7 +369,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses, val
                     <span className='md:text-nowrap'>
                         {!loading ? (
                             <>
-                                Showing <span className='font-semibold'>{courses?.length || 'ERROR'}</span> courses.
+                                Showing <span className='font-semibold'>{requestInfo.totalCount ?? courses?.length ?? 'ERROR'}</span> courses.
                             </>
                         ) : "Loading..."}
                     </span>

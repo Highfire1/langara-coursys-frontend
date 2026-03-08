@@ -41,17 +41,14 @@ export interface SavedSchedule {
 export interface PlannerCourse {
   subject: string;
   course_code: string;
+  title?: string;
+  credits?: number;
+  description?: string;
+  abbreviated_title?: string;
   sections: Section[];
-  attributes?: {
-    title?: string;
-    credits?: number;
-    description?: string;
-    abbreviated_title?: string;
-  };
 }
 
 export interface Semester {
-  id: string;
   year: number;
   term: number;
 }
@@ -77,10 +74,11 @@ export interface CoursesApiResponse {
   courses: Array<{
     subject: string;
     course_code: string;
+    title?: string;
+    credits?: number;
+    description?: string;
+    abbreviated_title?: string;
     [key: string]: unknown;
-    attributes?: {
-      title: string;
-    }
   }>;
 }
 

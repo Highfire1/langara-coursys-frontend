@@ -8,11 +8,11 @@ import {
   Section 
 } from '@/types/Planner';
 
-const API_BASE_URL = 'https://api.langaracourses.ca';
+const API_BASE_URL = 'https://api2.langaracourses.ca/api/v3';
 
 export class CourseAPI {
   static async getLatestSemester(): Promise<Semester> {
-    const response = await fetch(`${API_BASE_URL}/v1/index/latest_semester`);
+    const response = await fetch(`${API_BASE_URL}/index/latest_semester`);
     if (!response.ok) {
       throw new Error('Failed to fetch latest semester');
     }
@@ -20,7 +20,7 @@ export class CourseAPI {
   }
 
   static async getAllSemesters(): Promise<Semester[]> {
-    const response = await fetch(`${API_BASE_URL}/v1/index/semesters`);
+    const response = await fetch(`${API_BASE_URL}/index/semesters`);
     if (!response.ok) {
       throw new Error('Failed to fetch semesters');
     }
@@ -29,7 +29,7 @@ export class CourseAPI {
   }
 
   static async getSections(year: number, term: number): Promise<Section[]> {
-    const response = await fetch(`${API_BASE_URL}/v1/semester/${year}/${term}/sections`);
+    const response = await fetch(`${API_BASE_URL}/semester/${year}/${term}/sections`);
     if (!response.ok) {
       throw new Error('Failed to fetch sections');
     }
@@ -47,7 +47,7 @@ export class CourseAPI {
     if (year) params.append('year', year.toString());
     if (term) params.append('term', term.toString());
 
-    const response = await fetch(`${API_BASE_URL}/v1/search/sections?${params.toString()}`);
+    const response = await fetch(`${API_BASE_URL}/search/sections?${params.toString()}`);
     if (!response.ok) {
       throw new Error('Failed to search sections');
     }

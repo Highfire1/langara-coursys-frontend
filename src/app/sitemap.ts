@@ -26,7 +26,7 @@ interface TransferDestinationsResponse {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // Fetch all courses
-    const coursesResponse = await fetch('https://api.langaracourses.ca/v1/index/courses');
+    const coursesResponse = await fetch('https://api2.langaracourses.ca/api/v3/index/courses');
     if (!coursesResponse.ok) {
       console.error('Failed to fetch courses for sitemap');
       return [];
@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     
     
     // Fetch transfer destinations
-    const transfersResponse = await fetch('https://api.langaracourses.ca/v1/index/transfer_destinations');
+    const transfersResponse = await fetch('https://api2.langaracourses.ca/api/v3/index/transfer_destinations');
     let transferUrls: MetadataRoute.Sitemap = [];
     
     if (transfersResponse.ok) {

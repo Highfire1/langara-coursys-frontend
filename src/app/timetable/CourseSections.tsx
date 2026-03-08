@@ -11,7 +11,7 @@ const CourseSections = ({ courses, index }: { courses: Course[]; index: number }
             
 
 
-            <p>{courses[index].attributes.desc_prerequisite}</p>
+            <p>{courses[index].desc_prerequisites}</p>
 
             <p className="mt-4">
                 {courses[index].sections.length} sections available.

@@ -17,7 +17,7 @@ export const metadata = {
 
 export default async function TransfersPage() {
   // Fetch transfer destinations
-  const response = await fetch('https://api.langaracourses.ca/v1/index/transfer_destinations', {
+  const response = await fetch('https://api2.langaracourses.ca/api/v3/index/transfer_destinations', {
     next: { revalidate: 3600 } // Cache for 1 hour
   });
 
