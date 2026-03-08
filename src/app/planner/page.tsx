@@ -24,12 +24,18 @@ export async function generateMetadata({
     ? `/api/screenshot?${screenshotParams.toString()}`
     : '/api/screenshot';
 
+  // Build a term description if y/t params are present
+  const termName = params.t === '10' ? 'Spring' : params.t === '20' ? 'Summer' : params.t === '30' ? 'Fall' : null;
+  const termDescription = (termName && params.y)
+    ? `${termName} ${params.y} schedule — shared via Langara Course Planner.`
+    : "Plan your Langara course schedule efficiently with an intuitive and visual planner.";
+
   return {
     title: "Langara Course Planner",
-    description: "Plan your Langara course schedule efficiently with an intuitive and visual planner.",
+    description: termDescription,
     openGraph: {
       title: "Langara Course Planner",
-      description: "Plan your Langara course schedule efficiently with an intuitive and visual planner.",
+      description: termDescription,
       images: [
         {
           url: screenshotUrl,
@@ -42,7 +48,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: "Langara Course Planner",
-      description: "Plan your Langara course schedule efficiently with an intuitive and visual planner.",
+      description: termDescription,
       images: [screenshotUrl],
     },
   };
