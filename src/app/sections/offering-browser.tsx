@@ -69,6 +69,7 @@ interface SearchParams {
     filter_not_cancelled?: boolean;
     page?: number;
     sections_per_page?: number;
+    sort?: string;
 }
 
 interface SubjectsResponse {
@@ -93,7 +94,8 @@ export default function CourseBrowser() {
     const [sections, setSections] = useState<SectionsResponse | null>(null);
     const [searchParams, setSearchParams] = useState<SearchParams>({
         page: 1,
-        sections_per_page: initial_sections_per_page
+        sections_per_page: initial_sections_per_page,
+        sort: 'newest'
     });
     const [loading, setLoading] = useState(false);
     const [requestInfo, setRequestInfo] = useState<{ time?: number, cached?: boolean }>({});
@@ -159,6 +161,17 @@ export default function CourseBrowser() {
 
         if (key === 'page') return;
         setSearchParams(prev => ({ ...prev, [key]: value, page: 1 }));
+    };
+
+    const handleSort = (column: 'semester' | 'course') => {
+        const current = searchParams.sort ?? 'newest';
+        let next: string;
+        if (column === 'semester') {
+            next = current === 'newest' ? 'oldest' : 'newest';
+        } else {
+            next = current === 'course_asc' ? 'course_desc' : 'course_asc';
+        }
+        setSearchParams(prev => ({ ...prev, sort: next, page: 1 }));
     };
 
     // Transform semesters for dropdown
@@ -438,8 +451,12 @@ export default function CourseBrowser() {
                 <table className="min-w-full">
                     <thead>
                         <tr className="bg-gray-100 text-left">
-                            <th className="p-2 w-1/12">Semester</th>
-                            <th className="p-2 w-1/12">Course</th>
+                            <th className="p-2 w-1/12 cursor-pointer select-none hover:bg-gray-200 whitespace-nowrap" onClick={() => handleSort('semester')}>
+                                Semester {searchParams.sort === 'newest' ? '↓' : searchParams.sort === 'oldest' ? '↑' : ''}
+                            </th>
+                            <th className="p-2 w-1/12 cursor-pointer select-none hover:bg-gray-200 whitespace-nowrap" onClick={() => handleSort('course')}>
+                                Course {searchParams.sort === 'course_asc' ? '↑' : searchParams.sort === 'course_desc' ? '↓' : ''}
+                            </th>
                             <th className="p-2 w-1/12">Section</th>
                             <th className="p-2 w-1/12">crn</th>
                             <th className="p-2 w-2/12">Title</th>
