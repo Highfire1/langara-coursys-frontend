@@ -785,7 +785,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
       const section = allSections.find(s => s.id === sectionId);
       if (!section) return;
 
-      section.schedule.forEach((schedule: Schedule) => {
+      section.schedule.forEach((schedule: Schedule, idx: number) => {
         if (schedule.days === '-------' || schedule.days.trim() === '') return;
         if (schedule.type === 'Exam') return; // Skip exam schedules
 
@@ -802,7 +802,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
         const eventEnd = schedule.end ? new Date(schedule.end) : semesterEnd;
 
         events.push({
-          id: `${section.id}-${schedule.id}`,
+          id: `${section.id}-${idx}`,
           title: `${section.subject} ${section.course_code} ${section.section} ${schedule.type}`,
           startRecur: eventStart,
           endRecur: eventEnd,
@@ -828,7 +828,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     if (hoveredSection && !selectedSections.has(hoveredSection)) {
       const section = allSections.find(s => s.id === hoveredSection);
       if (section && !isOnlineSection(section)) {
-        section.schedule.forEach((schedule: Schedule) => {
+        section.schedule.forEach((schedule: Schedule, idx: number) => {
           if (schedule.days === '-------' || schedule.days.trim() === '') return;
 
           const days = parseDays(schedule.days);
@@ -844,7 +844,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           const eventEnd = schedule.end ? new Date(schedule.end) : semesterEnd;
 
           events.push({
-            id: `preview-${section.id}-${schedule.id}`,
+            id: `preview-${section.id}-${idx}`,
             title: `${section.subject} ${section.course_code} ${section.section} ${schedule.type}`,
             startRecur: eventStart,
             endRecur: eventEnd,
