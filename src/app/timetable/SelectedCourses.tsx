@@ -56,7 +56,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
   return (
     <div className='flex flex-col gap-2 h-full w-full p-2 rounded overflow-hidden'>
-      <h2 className='font-bold text-lg'>Selected Courses ({term === "10" ? "Spring" : term === "20" ? "Summer" : term === "30" ? "Fall" : ""} {year})</h2>
+      {/* <h2 className='font-bold text-lg'>Selected Courses ({term === "10" ? "Spring" : term === "20" ? "Summer" : term === "30" ? "Fall" : ""} {year})</h2> */}
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -119,7 +119,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
 
 
                 <Link href={`/courses/${course.subject.toLowerCase()}-${course.course_code.toLowerCase()}`} className='font-semibold hover:text-orange-700 hover:underline' target='_blank'>
-                  {`${course.subject} ${course.course_code}: ${course.abbreviated_title}`}
+                  {`${course.subject} ${course.course_code}: ${course.abbreviated_title ?? course.title ?? ''}`}
                 </Link>
                 <p className='text-sm'>{course.title} ({course.credits} credits)</p>
 
@@ -171,9 +171,9 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                     <div key={sectionIndex} className={`border-2 border-gray-700 text-sm rounded-sm 
                       ${section.hidden || section.hidden_by_pin || course.hidden
                       ? 'bg-gray-200'
-                      : (section.waitlist !== " " && Number(section.waitlist) > 10) || section.seats === "Cancel"
+                      : (section.waitlist != null && section.waitlist !== " " && Number(section.waitlist) > 10) || section.seats === "Cancel"
                         ? 'bg-red-200'
-                        : section.waitlist !== " " && Number(section.waitlist) > 0
+                        : section.waitlist != null && section.waitlist !== " " && Number(section.waitlist) > 0
                           ? 'bg-yellow-200'
                           : 'bg-green-200'
                       }`}>
@@ -246,7 +246,7 @@ export default function SelectedCourses({ courses, selectedCourses, setSelectedC
                           <div>
                             <p>
                               {section.seats} seat{Number(section.seats) == 1 ? '' : 's'} open
-                              {section.waitlist === " " ? "." : ` / ${section.waitlist} on waitlist.`}
+                              {(!section.waitlist || section.waitlist === " ") ? "." : ` / ${section.waitlist} on waitlist.`}
                             </p>
 
                             <table>

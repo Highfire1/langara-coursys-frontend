@@ -88,7 +88,7 @@ export default function TimetableSections({ courses, setCurrentTimetable }: Cour
             <h3 className="font-semibold">{section.subject} {section.course_code} - Section {section.section}</h3>
             <p className="text-sm">
               {section.seats} seat{Number(section.seats) == 1 ? '' : 's'} open
-              {section.waitlist === " " ? "." : ` / ${section.waitlist} on waitlist.`}
+              {(!section.waitlist || section.waitlist === " ") ? "." : ` / ${section.waitlist} on waitlist.`}
             </p>
 
             <div className="text-sm">

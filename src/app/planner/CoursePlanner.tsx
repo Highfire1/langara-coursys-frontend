@@ -1309,7 +1309,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                 Select Term:
               </label>
               <select
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className={`w-full p-2 border border-gray-300 rounded-md ${currentTerm === 10 ? 'bg-green-100' : currentTerm === 20 ? 'bg-yellow-100' : currentTerm === 30 ? 'bg-orange-100' : ''}`}
                 value={`${currentYear}-${currentTerm}`}
                 onChange={(e) => {
                   const [year, term] = e.target.value.split('-');
@@ -1340,6 +1340,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                   <option
                     key={`${semester.year}-${semester.term}`}
                     value={`${semester.year}-${semester.term}`}
+                    className="bg-white"
                   >
                     {semester.year} {termToSeason(semester.term)}
                   </option>

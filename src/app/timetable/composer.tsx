@@ -8,18 +8,38 @@ import Calendar from './Calendar';
 import { Course, CourseInternal, CoursesResponse, LatestSemesterResponse } from '../../types/Course';
 import { SectionsResponse, Section } from '../../types/Section';
 
+interface Semester { year: number; term: number; }
+
+function termToSeason(term: number | string): string {
+    switch (Number(term)) {
+        case 10: return 'Spring';
+        case 20: return 'Summer';
+        case 30: return 'Fall';
+        default: return '';
+    }
+}
+
 export default function Composer() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const [year, setYear] = useState<string>('');
     const [term, setTerm] = useState<string>('');
+    const [semesters, setSemesters] = useState<Semester[]>([]);
 
     const [selectedCourses, setSelectedCourses] = useState<CourseInternal[]>([]);
     const [currentTimetable, setCurrentTimetable] = useState<Section[]>([]);
     const [courses, setCourses] = useState<Course[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Fetch semesters list once
+    useEffect(() => {
+        fetch(`https://api2.langaracourses.ca/api/v3/index/semesters`)
+            .then(r => r.json())
+            .then((data: { semesters: Semester[] }) => setSemesters(data.semesters))
+            .catch(() => {});
+    }, []);
 
     useEffect(() => {
         const yearParam = searchParams.get('year');
@@ -96,6 +116,32 @@ export default function Composer() {
     return (
         <div className="flex gap-2 bg-gray-100 flex-grow overflow-hidden min-w-[800px]">
             <div className="w-1/4 overflow-y-auto h-full">
+                <div className="px-2 pt-2">
+                    <select
+                        className={`w-full p-2 border border-gray-300 rounded-md mb-2 ${term === '10' ? 'bg-green-100' : term === '20' ? 'bg-yellow-100' : term === '30' ? 'bg-orange-100' : 'bg-white'}`}
+                        value={`${year}-${term}`}
+                        onChange={(e) => {
+                            const [newYear, newTerm] = e.target.value.split('-');
+                            if (selectedCourses.length > 0) {
+                                const confirmed = confirm(
+                                    `You have ${selectedCourses.length} course${selectedCourses.length !== 1 ? 's' : ''} selected. Changing terms will clear your selections. Continue?`
+                                );
+                                if (!confirmed) return;
+                                setSelectedCourses([]);
+                                setCurrentTimetable([]);
+                            }
+                            setYear(newYear);
+                            setTerm(newTerm);
+                            router.replace(`/timetable?year=${newYear}&term=${newTerm}`, { scroll: false });
+                        }}
+                    >
+                        {semesters.map(s => (
+                            <option key={`${s.year}-${s.term}`} value={`${s.year}-${s.term}`} className="bg-white">
+                                {s.year} {termToSeason(s.term)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                 <SelectedCourses
                     courses={courses}
                     selectedCourses={selectedCourses}

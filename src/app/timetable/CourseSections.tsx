@@ -25,7 +25,7 @@ const CourseSections = ({ courses, index }: { courses: Course[]; index: number }
                     >
                         <div>Section {section.section} ({section.crn})</div>
                         <div>
-                            {section.seats} seats available - {section.waitlist} waitlisted
+                            {section.seats} seats available{section.waitlist && section.waitlist !== " " ? ` - ${section.waitlist} waitlisted` : ""}
                         </div>
                     </div>
                 ))}
