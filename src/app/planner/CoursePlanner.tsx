@@ -413,15 +413,20 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
           console.log('Processing shared link:', { year, term, crns });
 
-          // Load courses for the specified semester
-          const coursesData = await plannerApi.getCoursesForSemester(year, term);
+          setLoading(true);
+
+          // Load courses and search results for the specified semester
+          const [coursesData, semestersData, searchResults] = await Promise.all([
+            plannerApi.getCoursesForSemester(year, term),
+            plannerApi.getSemesters(),
+            plannerApi.searchSections('', year, term),
+          ]);
 
           // Find sections by CRN
           const foundSections = new Set<string>();
           coursesData.courses.forEach(course => {
             course.sections.forEach(section => {
               if (crns.includes(section.crn.toString())) {
-                console.log('Found matching section:', section.crn, section.id);
                 foundSections.add(section.id);
               }
             });
@@ -444,12 +449,17 @@ const CoursePlanner: React.FC<PlannerProps> = ({
           const updatedSchedules = [...existingSchedules, newSchedule];
           saveSchedulesToStorage(updatedSchedules);
 
-          // Set the state for the shared schedule
+          // Set ALL state at once so nothing races
+          setSemesters(semestersData.semesters);
+          setCourses(coursesData.courses);
+          setFilteredSections(searchResults.sections);
           setCurrentYear(year);
           setCurrentTerm(term);
           setSelectedSections(foundSections);
           setCurrentScheduleId(newSchedule.id);
           setCurrentScheduleInStorage(newSchedule.id);
+          // Mark initialized so SaveBar/other effects don't re-fetch
+          setHasInitialized(true);
 
           // Clean up URL parameters (but preserve view=screenshot if present)
           const viewParam = searchParams.get('view');
@@ -460,6 +470,8 @@ const CoursePlanner: React.FC<PlannerProps> = ({
 
         } catch (error) {
           console.error('Failed to process shared schedule:', error);
+        } finally {
+          setLoading(false);
         }
       }
 
@@ -481,6 +493,9 @@ const CoursePlanner: React.FC<PlannerProps> = ({
   useEffect(() => {
     const initialize = async () => {
       if (hasInitialized) return;
+
+      // If URL has shared-link params, processUrlParams handles everything - don't race it
+      if (searchParams.get('y') && searchParams.get('t') && searchParams.get('crns')) return;
 
       let targetYear = currentYear;
       let targetTerm = currentTerm;
@@ -535,7 +550,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
     };
 
     initialize();
-  }, [hasInitialized, currentYear, currentTerm]);
+  }, [hasInitialized, currentYear, currentTerm, searchParams]);
 
   // Load a saved schedule
   const loadSavedSchedule = useCallback(async (year: number, term: number, crns: string[]) => {
