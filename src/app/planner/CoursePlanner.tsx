@@ -1218,7 +1218,7 @@ const CoursePlanner: React.FC<PlannerProps> = ({
                         <td className="min-w-14 pr-1 font-mono align-top">
                           {schedule.time}
                         </td>
-                        <td className="min-w-12 w-min align-top">
+                        <td className="min-w-12 w-min pr-1 align-top">
                           {schedule.type}
                         </td>
                         <td className="w-full font-mono align-top">
