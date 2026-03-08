@@ -345,10 +345,7 @@ export default function CourseBrowser({ transfers, subjects, initialCourses, ini
                                 <input
                                     type="checkbox"
                                     checked={currentSearchParams.offered_online || false}
-                                    onChange={(e) => setCurrentSearchParams({
-                                        ...currentSearchParams,
-                                        offered_online: e.target.checked
-                                    })}
+                                    onChange={e => handleInputChange('offered_online', e.target.checked)}
                                     className="form-checkbox h-4 w-4 text-blue-600"
                                 />
                                 <span>Offered online.</span>
