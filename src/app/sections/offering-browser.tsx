@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import debounce from 'lodash/debounce';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface Semester {
     term: number;
@@ -89,14 +90,33 @@ const termToSeason = (term: number): string => {
 export default function CourseBrowser() {
     const initial_sections_per_page = 50;
 
+    const urlSearchParams = useSearchParams();
+
     const [semesters, setSemesters] = useState<SemestersResponse | null>(null);
     const [subjects, setSubjects] = useState<string[]>([]);
     const [sections, setSections] = useState<SectionsResponse | null>(null);
-    const [searchParams, setSearchParams] = useState<SearchParams>({
-        page: 1,
-        sections_per_page: initial_sections_per_page,
-        sort: 'newest'
-    });
+    const [searchParams, setSearchParams] = useState<SearchParams>(() => ({
+        subject: urlSearchParams.get('subject') || undefined,
+        course_code: urlSearchParams.get('course_code') || undefined,
+        instructor_search: urlSearchParams.get('instructor_search') || undefined,
+        title_search: urlSearchParams.get('title_search') || undefined,
+        year: urlSearchParams.get('year') ? Number(urlSearchParams.get('year')) : undefined,
+        term: urlSearchParams.get('term') ? Number(urlSearchParams.get('term')) : undefined,
+        attr_ar: urlSearchParams.get('attr_ar') === 'true' || undefined,
+        attr_sc: urlSearchParams.get('attr_sc') === 'true' || undefined,
+        attr_hum: urlSearchParams.get('attr_hum') === 'true' || undefined,
+        attr_lsc: urlSearchParams.get('attr_lsc') === 'true' || undefined,
+        attr_sci: urlSearchParams.get('attr_sci') === 'true' || undefined,
+        attr_soc: urlSearchParams.get('attr_soc') === 'true' || undefined,
+        attr_ut: urlSearchParams.get('attr_ut') === 'true' || undefined,
+        online: urlSearchParams.get('online') === 'true' || undefined,
+        filter_no_waitlist: urlSearchParams.get('filter_no_waitlist') === 'true' || undefined,
+        filter_open_seats: urlSearchParams.get('filter_open_seats') === 'true' || undefined,
+        filter_not_cancelled: urlSearchParams.get('filter_not_cancelled') === 'true' || undefined,
+        page: urlSearchParams.get('page') ? Number(urlSearchParams.get('page')) : 1,
+        sections_per_page: urlSearchParams.get('sections_per_page') ? Number(urlSearchParams.get('sections_per_page')) : initial_sections_per_page,
+        sort: urlSearchParams.get('sort') || 'newest',
+    }));
     const [loading, setLoading] = useState(false);
     const [requestInfo, setRequestInfo] = useState<{ time?: number, cached?: boolean }>({});
 
@@ -151,9 +171,19 @@ export default function CourseBrowser() {
         []
     );
 
-    // Trigger search when params change
+    // Trigger search when params change, and sync to URL
     useEffect(() => {
         debouncedSearch(searchParams);
+
+        const urlParams = new URLSearchParams();
+        Object.entries(searchParams).forEach(([key, value]) => {
+            if (value === undefined || value === '' || value === false) return;
+            if (key === 'page' && Number(value) === 1) return;
+            if (key === 'sections_per_page' && Number(value) === initial_sections_per_page) return;
+            if (key === 'sort' && value === 'newest') return;
+            urlParams.append(key, value.toString());
+        });
+        window.history.replaceState(null, '', urlParams.toString() ? `?${urlParams.toString()}` : window.location.pathname);
     }, [searchParams, debouncedSearch]);
 
     const handleInputChange = (key: keyof SearchParams, value: string | boolean) => {
@@ -197,6 +227,7 @@ export default function CourseBrowser() {
                                 <label htmlFor="semester" className="mb-1 text-sm font-medium w-fit">Semester</label>
                                 <select
                                     id="semester"
+                                    value={searchParams.year && searchParams.term ? `${searchParams.year}-${searchParams.term}` : ''}
                                     className="border rounded p-[0.68rem] w-fit"
                                     onChange={e => {
                                         const [year, term] = e.target.value.split('-');
@@ -219,6 +250,7 @@ export default function CourseBrowser() {
                                     <label htmlFor="subject" className="mb-1 text-sm font-medium w-fit">Subject</label>
                                     <select
                                         id="subject"
+                                        value={searchParams.subject || ''}
                                         className="border rounded p-[0.68rem] sm:w-fit w-[150px]"
                                         onChange={e => handleInputChange('subject', e.target.value)}
                                     >
@@ -260,6 +292,7 @@ export default function CourseBrowser() {
                                             }
                                             e.preventDefault();
                                         }}
+                                        value={searchParams.course_code || ''}
                                         onChange={e => {
                                             const value = e.target.value.replace(/\D/g, '');
                                             handleInputChange('course_code', value);
@@ -276,6 +309,7 @@ export default function CourseBrowser() {
                                     <input
                                         type="text"
                                         id="title"
+                                        value={searchParams.title_search || ''}
                                         className="border rounded p-2 sm:w-fit w-[150px]"
                                         onChange={e => handleInputChange('title_search', e.target.value)}
                                         placeholder="Introduction to..."
@@ -288,6 +322,7 @@ export default function CourseBrowser() {
                                     <input
                                         type="text"
                                         id="instructor"
+                                        value={searchParams.instructor_search || ''}
                                         className="border rounded p-2 sm:w-fit w-[170px]"
                                         onChange={e => handleInputChange('instructor_search', e.target.value)}
                                         placeholder="Search by instructor..."
@@ -304,6 +339,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.attr_ar || false}
                                     onChange={e => handleInputChange('attr_ar', e.target.checked)}
                                     className="rounded"
                                 />
@@ -312,6 +348,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.attr_sc || false}
                                     onChange={e => handleInputChange('attr_sc', e.target.checked)}
                                     className="rounded"
                                 />
@@ -320,6 +357,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.attr_hum || false}
                                     onChange={e => handleInputChange('attr_hum', e.target.checked)}
                                     className="rounded"
                                 />
@@ -328,6 +366,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.attr_lsc || false}
                                     onChange={e => handleInputChange('attr_lsc', e.target.checked)}
                                     className="rounded"
                                 />
@@ -336,6 +375,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.attr_sci || false}
                                     onChange={e => handleInputChange('attr_sci', e.target.checked)}
                                     className="rounded"
                                 />
@@ -344,6 +384,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.attr_soc || false}
                                     onChange={e => handleInputChange('attr_soc', e.target.checked)}
                                     className="rounded"
                                 />
@@ -352,6 +393,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.attr_ut || false}
                                     onChange={e => handleInputChange('attr_ut', e.target.checked)}
                                     className="rounded"
                                 />
@@ -368,10 +410,7 @@ export default function CourseBrowser() {
                                 <input
                                     type="checkbox"
                                     checked={searchParams.online || false}
-                                    onChange={(e) => setSearchParams({
-                                        ...searchParams,
-                                        online: e.target.checked
-                                    })}
+                                    onChange={e => handleInputChange('online', e.target.checked)}
                                     className="form-checkbox h-4 w-4 text-blue-600"
                                 />
                                 <span>Online.</span>
@@ -380,6 +419,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.filter_open_seats || false}
                                     onChange={e => handleInputChange('filter_open_seats', e.target.checked)}
                                     className="rounded"
                                 />
@@ -389,6 +429,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.filter_no_waitlist || false}
                                     onChange={e => handleInputChange('filter_no_waitlist', e.target.checked)}
                                     className="rounded"
                                 />
@@ -398,6 +439,7 @@ export default function CourseBrowser() {
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
+                                    checked={searchParams.filter_not_cancelled || false}
                                     onChange={e => handleInputChange('filter_not_cancelled', e.target.checked)}
                                     className="rounded"
                                 />
@@ -415,7 +457,8 @@ export default function CourseBrowser() {
                         <div className="flex items-center gap-1 font-medium flex-1">
                             <span>Show</span>
                             <select
-                                id="subject"
+                                id="sections_per_page"
+                                value={searchParams.sections_per_page?.toString() || '50'}
                                 className="border rounded p-[1px] w-min"
                                 onChange={e => handleInputChange('sections_per_page', e.target.value)}
                             >
@@ -447,7 +490,12 @@ export default function CourseBrowser() {
             )}
 
             {/* Results Table */}
-            <div className="mt-4 overflow-x-scroll">
+            <div className="relative mt-4 overflow-x-scroll">
+                {loading && (
+                    <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 rounded">
+                        <span className="text-gray-500 text-sm font-medium animate-pulse">Loading...</span>
+                    </div>
+                )}
                 <table className="min-w-full">
                     <thead>
                         <tr className="bg-gray-100 text-left">

@@ -5,6 +5,7 @@ export const metadata = {
 
 import CourseBrowser from "./offering-browser";
 import Header from "@/components/shared/header";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -12,7 +13,9 @@ export default function Home() {
       <Header title="Langara Course Offerings Search" color="#FEB95F"></Header>
 
       <div className="md:px-10">
-        <CourseBrowser/>
+        <Suspense fallback={<div className="p-4">Loading...</div>}>
+          <CourseBrowser/>
+        </Suspense>
       </div>
       
     </div>
