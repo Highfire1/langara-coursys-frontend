@@ -12,7 +12,7 @@ const API_BASE_URL = 'https://api2.langaracourses.ca/api/v3';
 
 export class CourseAPI {
   static async getLatestSemester(): Promise<Semester> {
-    const response = await fetch(`${API_BASE_URL}/index/latest_semester`);
+    const response = await fetch(`${API_BASE_URL}/index/registration_semester`);
     if (!response.ok) {
       throw new Error('Failed to fetch latest semester');
     }

@@ -51,7 +51,7 @@ export default function Composer() {
         } else {
             const fetchLatestSemester = async () => {
                 try {
-                    const latestSemesterResponse = await fetch(`https://api2.langaracourses.ca/api/v3/index/latest_semester`);
+                    const latestSemesterResponse = await fetch(`https://api2.langaracourses.ca/api/v3/index/registration_semester`);
                     const latestSemesterData: LatestSemesterResponse = await latestSemesterResponse.json();
 
                     setYear(String(latestSemesterData.year));

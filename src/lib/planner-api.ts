@@ -53,7 +53,7 @@ export const plannerApi = {
 
   // Get latest semester
   getLatestSemester: async (): Promise<LatestSemesterResponse> => {
-    const response = await fetch(`${API_BASE}/index/latest_semester`, { next: { revalidate: REVALIDATE_SECONDS } });
+    const response = await fetch(`${API_BASE}/index/registration_semester`, { next: { revalidate: REVALIDATE_SECONDS } });
     return response.json();
   },
 
