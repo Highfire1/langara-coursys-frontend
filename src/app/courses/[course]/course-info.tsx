@@ -44,13 +44,33 @@ export default async function CourseInfo({ course }: CourseInfoProps) {
 
     const validTransfers: Transfer[] = [];
     const oldTransfers: Transfer[] = [];
+    const uniqueTransfers = new Map<string, Transfer>();
+
+    course.transfers.forEach((transfer) => {
+        const transferKey = [
+            transfer.sourceId,
+            transfer.source,
+            transfer.sourceCredits,
+            transfer.sourceTitle,
+            transfer.destination,
+            transfer.destinationName,
+            transfer.credit,
+            transfer.condition,
+            transfer.effectiveStart,
+            transfer.effectiveEnd,
+            transfer.subject,
+            transfer.courseNumber,
+        ].join('|');
+
+        uniqueTransfers.set(transferKey, transfer);
+    });
 
     const now = new Date();
     const currentDateString = now.getFullYear().toString() +
         (now.getMonth() + 1).toString().padStart(2, '0') +
         now.getDate().toString().padStart(2, '0');
 
-    course.transfers.forEach((transfer_agreement: Transfer) => {
+    uniqueTransfers.forEach((transfer_agreement: Transfer) => {
         if (!transfer_agreement.effectiveEnd || transfer_agreement.effectiveEnd >= currentDateString) {
             validTransfers.push(transfer_agreement);
         } else {
