@@ -4,12 +4,7 @@ import Header from "@/components/shared/header";
 import { notFound } from "next/navigation";
 
 export const revalidate = 1800;
-export const dynamicParams = true;
-
-// Generate and cache each course page on its first request instead of at build time.
-export function generateStaticParams() {
-    return [];
-}
+export const dynamic = "force-dynamic";
 
 // warning: note the difference between course_code and coursecode
 // coursecode is the url slug / path parameter
