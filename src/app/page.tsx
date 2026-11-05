@@ -88,6 +88,7 @@ export default function Home() {
             <span>The Langara Course Planner is a fantastic kit of software that is better than SFU&apos;s. It is up, its running, its FOSS, it&apos;s Boss! - J. Marcato</span>
             <span>It&apos;s an awesome tool, super easy to use and way freakin&apos; better than trying to get this info from the Langara website! - Brian M.</span>
             <span>I just wanted to say that this is an actual lifesaver and the school should adopt this as an official tool for students! I was going crazy trying to make a schedule with all the course options I had and this made it so easy! Thank you times a million!! - Tanya</span>
+            <span>This is an incredible project, I am so thankful I found this resource. Thanks to whoever created this! - Eliana K.</span>
           </div>
         </div>
       </div>
