@@ -87,6 +87,7 @@ export default function Home() {
             <span>One of the most stressful parts of being a Langarian (besides exams) is course planning and registration. Langara Course Planner makes it a breeze! The planner allows me to efficiently and elegantly plan my semester, compare two different schedules together, look at course transfers, and more! - Karnbir R.</span>
             <span>The Langara Course Planner is a fantastic kit of software that is better than SFU&apos;s. It is up, its running, its FOSS, it&apos;s Boss! - J. Marcato</span>
             <span>It&apos;s an awesome tool, super easy to use and way freakin&apos; better than trying to get this info from the Langara website! - Brian M.</span>
+            <span>I just wanted to say that this is an actual lifesaver and the school should adopt this as an official tool for students! I was going crazy trying to make a schedule with all the course options I had and this made it so easy! Thank you times a million!! - Tanya</span>
           </div>
         </div>
       </div>
