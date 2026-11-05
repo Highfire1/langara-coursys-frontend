@@ -10,8 +10,9 @@ import { v1IndexSubjectsResponse, v1IndexTransfersResponse, v2SearchCoursesRespo
 
 
 export const revalidate = 3600 // revalidate every hour
+export const dynamic = "force-dynamic";
 
-const _courses: {
+interface CourseIndexResponse {
     course_count: number;
     courses: {
         course_code: string;
@@ -20,39 +21,51 @@ const _courses: {
         title: string;
     }[];
     subject_count: number;
-} = await fetch(
-    'https://api2.langaracourses.ca/api/v3/index/courses',
-    {
-        cache: 'force-cache',
-        next: { revalidate: 1800 } // 30 minutes
-    }
-).then((res) => res.json());
+}
 
-const courseList = _courses.courses.map(
-    (c) => `${c.subject}-${c.course_code}`.toLowerCase()
-);
+async function fetchJson<T>(url: string, revalidate: number): Promise<T> {
+  const response = await fetch(url, {
+    cache: "force-cache",
+    next: { revalidate },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json() as Promise<T>;
+}
 
 
 export default async function Page() {
 
-  const [transfersRes, subjectsRes, firstPageRes] = await Promise.all([
-    fetch('https://api2.langaracourses.ca/api/v3/index/transfer_destinations'),
-    fetch('https://api2.langaracourses.ca/api/v3/index/subjects'),
-    fetch('https://api2.langaracourses.ca/api/v3/search/courses?on_langara_website=true&limit=200&page=1'),
-  ]);
-
-  const [transfersData, subjectsData, firstPageData] : [v1IndexTransfersResponse, v1IndexSubjectsResponse, v2SearchCoursesResponse] = await Promise.all([
-    transfersRes.json(),
-    subjectsRes.json(),
-    firstPageRes.json(),
+  const [courseIndex, transfersData, subjectsData, firstPageData] = await Promise.all([
+    fetchJson<CourseIndexResponse>(
+      'https://api2.langaracourses.ca/api/v3/index/courses',
+      1800
+    ),
+    fetchJson<v1IndexTransfersResponse>(
+      'https://api2.langaracourses.ca/api/v3/index/transfer_destinations',
+      3600
+    ),
+    fetchJson<v1IndexSubjectsResponse>(
+      'https://api2.langaracourses.ca/api/v3/index/subjects',
+      3600
+    ),
+    fetchJson<v2SearchCoursesResponse>(
+      'https://api2.langaracourses.ca/api/v3/search/courses?on_langara_website=true&limit=200&page=1',
+      1800
+    ),
   ]);
 
   // Fetch remaining pages in parallel
   const remainingPages = Array.from({ length: firstPageData.total_pages - 1 }, (_, i) => i + 2);
   const remainingResults = await Promise.all(
     remainingPages.map(page =>
-      fetch(`https://api2.langaracourses.ca/api/v3/search/courses?on_langara_website=true&limit=200&page=${page}`)
-        .then(r => r.json() as Promise<v2SearchCoursesResponse>)
+      fetchJson<v2SearchCoursesResponse>(
+        `https://api2.langaracourses.ca/api/v3/search/courses?on_langara_website=true&limit=200&page=${page}`,
+        1800
+      )
     )
   );
   const allCourses = [
@@ -60,6 +73,9 @@ export default async function Page() {
     ...remainingResults.flatMap(r => r.courses),
   ];
   const initialTotalCount = firstPageData.total_count;
+  const courseList = courseIndex.courses.map(
+    (course) => `${course.subject}-${course.course_code}`.toLowerCase()
+  );
 
   // always put ubc, sfu, uvic, and tru at the top of the list
   const transfers = [
