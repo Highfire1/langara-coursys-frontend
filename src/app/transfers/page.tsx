@@ -15,6 +15,8 @@ export const metadata = {
   description: "View transfer credit agreements from Langara College to other institutions",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function TransfersPage() {
   // Fetch transfer destinations
   const response = await fetch('https://api2.langaracourses.ca/api/v3/index/transfer_destinations', {
