@@ -3,6 +3,14 @@ import CourseInfo from "./course-info";
 import Header from "@/components/shared/header";
 import { notFound } from "next/navigation";
 
+export const revalidate = 1800;
+export const dynamicParams = true;
+
+// Generate and cache each course page on its first request instead of at build time.
+export function generateStaticParams() {
+    return [];
+}
+
 // warning: note the difference between course_code and coursecode
 // coursecode is the url slug / path parameter
 // course_code is returned by the api
@@ -13,7 +21,9 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
     const { course: courseParam } = await params;
 
     const [subject, coursecode] = courseParam.toUpperCase().split("-");
-    const courseRes = await fetch(`https://api2.langaracourses.ca/api/v3/courses/${subject}/${coursecode}`);
+    const courseRes = await fetch(`https://api2.langaracourses.ca/api/v3/courses/${subject}/${coursecode}`, {
+        next: { revalidate: 1800 }
+    });
 
     if (!courseRes.ok) { return { title: `Error ${courseRes.status}`}}
 
@@ -88,7 +98,9 @@ export default async function Page( {params}: {params: expectedParams} ) {
     }
 
     const [subject, coursecode] = course.toUpperCase().split("-");
-    const response = await fetch(`https://api2.langaracourses.ca/api/v3/courses/${subject}/${coursecode}`);
+    const response = await fetch(`https://api2.langaracourses.ca/api/v3/courses/${subject}/${coursecode}`, {
+        next: { revalidate: 1800 }
+    });
     
     if (!response.ok) {
         notFound();
