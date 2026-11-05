@@ -27,6 +27,17 @@ export default function NotFound() {
             <Header title="Langara Course Information" color="#A7C7E7"></Header>
 
             <div className="md:px-10 py-2">404: this course does not exist.</div>
+            <div className="md:px-10 py-2">
+                Think this is incorrect? Please make a bug report:{" "}
+                <a
+                    href="https://forms.gle/CYKP7xsp2an6gNEK9"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                >
+                    Google Form
+                </a>
+            </div>
         </div>
     )
 }
