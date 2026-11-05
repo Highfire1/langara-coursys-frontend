@@ -2,7 +2,7 @@ import { addLinksToCourseDescription } from '@/lib/course-utils';
 import { Course, Transfer } from '@/types/Course';
 import Link from 'next/link';
 
-const _courses: {
+interface CourseIndexResponse {
     course_count: number;
     courses: {
         course_code: string;
@@ -11,17 +11,7 @@ const _courses: {
         title: string;
     }[];
     subject_count: number;
-} = await fetch(
-    'https://api2.langaracourses.ca/api/v3/index/courses',
-    {
-        cache: 'force-cache',
-        next: { revalidate: 1800 } // 30 minutes
-    }
-).then((res) => res.json());
-
-const courseList = _courses.courses.map(
-    (c) => `${c.subject}-${c.course_code}`.toLowerCase()
-);
+}
 
 const mapTerm = (term: number): string => {
     switch (term) {
@@ -41,6 +31,22 @@ interface CourseInfoProps {
 }
 
 export default async function CourseInfo({ course }: CourseInfoProps) {
+    const coursesResponse = await fetch(
+        'https://api2.langaracourses.ca/api/v3/index/courses',
+        {
+            cache: 'force-cache',
+            next: { revalidate: 1800 }
+        }
+    );
+
+    if (!coursesResponse.ok) {
+        throw new Error(`Failed to fetch course index: ${coursesResponse.status} ${coursesResponse.statusText}`);
+    }
+
+    const courses: CourseIndexResponse = await coursesResponse.json();
+    const courseList = courses.courses.map(
+        (courseIndex) => `${courseIndex.subject}-${courseIndex.course_code}`.toLowerCase()
+    );
 
     const validTransfers: Transfer[] = [];
     const oldTransfers: Transfer[] = [];
