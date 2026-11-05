@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: expectedParams }) {
 
     const [subject, coursecode] = courseParam.toUpperCase().split("-");
     const courseRes = await fetch(`https://api2.langaracourses.ca/api/v3/courses/${subject}/${coursecode}`, {
-        next: { revalidate: 1800 }
+        cache: "no-store"
     });
 
     if (!courseRes.ok) { return { title: `Error ${courseRes.status}`}}
@@ -94,11 +94,15 @@ export default async function Page( {params}: {params: expectedParams} ) {
 
     const [subject, coursecode] = course.toUpperCase().split("-");
     const response = await fetch(`https://api2.langaracourses.ca/api/v3/courses/${subject}/${coursecode}`, {
-        next: { revalidate: 1800 }
+        cache: "no-store"
     });
     
     if (!response.ok) {
-        notFound();
+        if (response.status === 404) {
+            notFound();
+        }
+
+        throw new Error(`Failed to fetch course ${subject} ${coursecode}: ${response.status} ${response.statusText}`);
         // return (
         //     <div className="w-full h-full">
         //         <Header title="Langara Course Information" color="#A7C7E7"></Header>
