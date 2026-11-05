@@ -20,6 +20,11 @@ export default async function RedirectPage({ params }: { params: ExpectedParams 
     const res = await fetch('https://api2.langaracourses.ca/api/v3/index/courses', { 
         next: { revalidate: 86400 }
     });
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch course index: ${res.status} ${res.statusText}`);
+    }
+
     const data: { courses: c_index[] } = await res.json();
     const courses = data.courses.map(
         (course) => `${course.subject}-${course.course_code}`.toLowerCase()
